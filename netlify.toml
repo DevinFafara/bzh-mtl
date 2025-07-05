@@ -1,0 +1,12 @@
+# netlify.toml
+[build]
+  # Commande explicite pour la génération statique
+  command = "npx nuxi generate"
+  # Le dossier de sortie de 'nuxi generate'
+  publish = "dist"
+
+# Redirection pour gérer les routes dynamiques en mode statique (SPA fallback)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
