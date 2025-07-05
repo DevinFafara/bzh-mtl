@@ -2,6 +2,7 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   compatibilityDate: '2025-06-30',
+  ssr: false,
   modules: [
     '@nuxt/eslint',
     '@nuxt/icon',
