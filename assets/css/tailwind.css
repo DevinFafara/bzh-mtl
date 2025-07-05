@@ -1,0 +1,7 @@
+/* Fichier : assets/css/tailwind.css */
+
+/* Les 3 directives de base de Tailwind, présentes UNE SEULE FOIS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+

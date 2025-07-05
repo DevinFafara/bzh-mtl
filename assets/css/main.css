@@ -1,0 +1,10 @@
+/* assets/css/main.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.menu-link-hover {
+  @apply relative font-medium text-white px-2 py-2;
+  @apply after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-yellow-400;
+  @apply after:transition-all after:duration-300 hover:after:w-full;
+}
