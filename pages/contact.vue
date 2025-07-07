@@ -8,7 +8,7 @@ useHead({
 });
 
 // L'unique adresse email de contact, facile à modifier ici
-const contactEmail = 'contact@breizh-metal.mag';
+const contactEmail = 'breizh.webzine@gmail.com';
 </script>
 
 <template>
