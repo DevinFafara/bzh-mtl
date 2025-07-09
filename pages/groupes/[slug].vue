@@ -60,6 +60,8 @@ interface Band {
     bandcamp?: string
     spotify?: string
     facebook?: string
+    youtube?: string
+    linktree?: string
   }
   author?: {
     name: string
@@ -195,6 +197,12 @@ const isDevelopment = process.env.NODE_ENV === 'development';
               </a>
               <a v-if="band.links.facebook" :href="band.links.facebook" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-black">
                 <Icon name="simple-icons:facebook" class="h-6 w-6" />
+              </a>
+              <a v-if="band.links.youtube" :href="band.links.youtube" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-black">
+                <Icon name="simple-icons:youtube" class="h-6 w-6" />
+              </a>
+              <a v-if="band.links.linktree" :href="band.links.linktree" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-black">
+                <LinkIcon class="h-6 w-6" />
               </a>
             </div>
           </div>
