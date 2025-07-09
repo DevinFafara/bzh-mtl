@@ -10,6 +10,7 @@ const query = groq`*[_type == "band" && slug.current == $slug][0] {
   logoImage,
   bio,
   cityOfOrigin,
+  departmentOfOrigin,
   "styles": styles[]->{ _id, title, "slug": slug.current },
   links,
   "author": author->{ name, "slug": slug.current, image, bio, citation }
@@ -52,6 +53,7 @@ interface Band {
   logoImage?: { asset: { _ref: string } }
   bio?: any
   cityOfOrigin?: string
+  departmentOfOrigin?: string
   styles?: Array<{ _id: string; title: string; slug: string }>
   links?: {
     website?: string
@@ -169,6 +171,14 @@ const isDevelopment = process.env.NODE_ENV === 'development';
               </NuxtLink>
             </div>
           </div>
+          <!-- Origines -->
+          <div v-if="band.departmentOfOrigin" class="mb-4">
+            <p><span class="font-bold">Département d'origine :</span> {{ band.departmentOfOrigin }}</p>
+          </div>
+          <div v-if="band.cityOfOrigin" class="mb-4">
+            <p><span class="font-bold">Ville d'origine :</span> {{ band.cityOfOrigin }}</p>
+          </div>
+          
           
           <!-- Liens externes -->
           <div v-if="band.links">

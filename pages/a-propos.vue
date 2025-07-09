@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// On va chercher TOUS les auteurs et les champs dont nous avons besoin.
 const query = groq`*[_type == "author"] | order(name desc) {
   _id,
   name,
@@ -9,7 +8,6 @@ const query = groq`*[_type == "author"] | order(name desc) {
   bio
 }`;
 
-// Définir le type Author pour typer correctement les données
 type Author = {
   _id: string;
   name: string;
@@ -19,7 +17,6 @@ type Author = {
   bio?: any;
 };
 
-// On exécute la requête pour récupérer les auteurs
 const { data: authors, pending, error } = await useSanityQuery<Author[]>(query);
 
 // Pour le SEO de la page
@@ -33,7 +30,6 @@ useHead({
 
 <template>
   <div class="bg-white">
-    <!-- 1. Section Principale : Notre histoire (contenu statique, inchangé) -->
     <div class="container mx-auto px-4 py-16 md:py-24">
       <div class="max-w-3xl mx-auto text-center">
         <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900">Notre Histoire</h1>
@@ -54,7 +50,6 @@ useHead({
       </div>
     </div>
 
-    <!-- 2. Section Équipe (maintenant dynamique) -->
     <div class="bg-gray-50">
       <div class="container mx-auto px-4 py-16 md:py-24">
         <div class="text-center mb-12">
@@ -62,11 +57,9 @@ useHead({
           <p class="mt-2 text-lg text-gray-500">Ceux qui font tourner la machine.</p>
         </div>
         
-        <!-- On affiche le chargement ou une erreur si besoin -->
         <div v-if="pending" class="text-center">Chargement de l'équipe...</div>
         <div v-else-if="error" class="text-center text-red-500">Erreur lors du chargement de l'équipe.</div>
         
-        <!-- Grille des membres de l'équipe, qui boucle sur les données de Sanity -->
         <div v-else-if="authors && authors.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <NuxtLink 
             v-for="author in authors" 
@@ -82,9 +75,7 @@ useHead({
               :alt="`Photo de ${author.name}`"
             />
             <h3 class="text-xl font-bold text-gray-900">{{ author.name }}</h3>
-            <!-- On utilise la citation de l'auteur ici -->
             <p v-if="author.citation" class="text-yellow-600 font-semibold text-sm italic">{{ author.citation }}</p>
-            <!-- On affiche un extrait de la bio pour la description -->
             <div v-if="author.bio" class="text-gray-500 mt-2 text-sm">
                <CustomSanityContent :blocks="author.bio.slice(0, 1)" />
             </div>
