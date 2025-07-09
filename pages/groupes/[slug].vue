@@ -53,7 +53,7 @@ interface Band {
   logoImage?: { asset: { _ref: string } }
   bio?: any
   cityOfOrigin?: string
-  departmentOfOrigin?: string
+  departmentOfOrigin?: string[]
   styles?: Array<{ _id: string; title: string; slug: string }>
   links?: {
     website?: string
@@ -174,8 +174,8 @@ const isDevelopment = process.env.NODE_ENV === 'development';
             </div>
           </div>
           <!-- Origines -->
-          <div v-if="band.departmentOfOrigin" class="mb-4">
-            <p><span class="font-bold">Département d'origine :</span> {{ band.departmentOfOrigin }}</p>
+          <div v-if="band.departmentOfOrigin && band.departmentOfOrigin.length > 0" class="mb-4">
+            <p><span class="font-bold">Département{{ band.departmentOfOrigin.length > 1 ? 's' : '' }} d'origine :</span> {{ band.departmentOfOrigin.join(', ') }}</p>
           </div>
           <div v-if="band.cityOfOrigin" class="mb-4">
             <p><span class="font-bold">Ville d'origine :</span> {{ band.cityOfOrigin }}</p>
