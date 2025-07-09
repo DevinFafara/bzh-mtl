@@ -202,7 +202,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
                 <Icon name="simple-icons:youtube" class="h-6 w-6" />
               </a>
               <a v-if="band.links.linktree" :href="band.links.linktree" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-black">
-                <LinkIcon class="h-6 w-6" />
+                <Icon name="simple-icons:linktree" class="h-6 w-6" />
               </a>
             </div>
           </div>
