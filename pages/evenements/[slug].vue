@@ -5,6 +5,7 @@ const route = useRoute();
 // Interface pour typer l'événement
 interface Event {
   title: string;
+  description?: any; // Pour le contenu riche blockContent
   date?: string; // Pour rétrocompatibilité
   dateInfo?: {
     eventDuration: 'single' | 'multiple';
@@ -47,6 +48,7 @@ interface Event {
 // La requête GROQ pour UN seul événement, avec toutes ses données liées
 const query = groq`*[_type == "event" && slug.current == $slug][0] {
   title,
+  description,
   date, // Pour rétrocompatibilité
   dateInfo,
   poster,
@@ -146,7 +148,19 @@ const formattedEventDate = computed(() => {
       </div>
     </div>
 
-    <!-- 3. CORPS DE LA PAGE (Layout à 2 colonnes) -->
+    <!-- 3. DESCRIPTION DE L'ÉVÉNEMENT (si elle existe) -->
+    <div v-if="event.description" class="container mx-auto px-4 mt-8 md:mt-12">
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold mb-6 border-b pb-3">À propos de cet événement</h2>
+          <div class="prose prose-lg max-w-none">
+            <CustomSanityContent :blocks="event.description" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. CORPS DE LA PAGE (Layout à 2 colonnes) -->
     <div class="container mx-auto px-4 mt-8 md:mt-12">
       <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
         
