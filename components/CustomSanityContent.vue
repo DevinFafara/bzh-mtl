@@ -2,22 +2,31 @@
 interface SanityBlock {
   _key: string;
   _type: string;
-  children: Array<{
+  children?: Array<{
     _key: string;
     _type: string;
     marks: string[];
     text: string;
   }>;
-  markDefs: any[];
-  style: string;
+  markDefs?: any[];
+  style?: string;
+  listItem?: string;
+  level?: number;
+  // Propriétés pour les images
+  asset?: {
+    _ref: string;
+    _type: string;
+  };
+  alt?: string;
+  caption?: string;
 }
 
 defineProps<{
   blocks: SanityBlock[];
 }>();
 
-// Fonction pour appliquer les marques (gras, italique, etc.)
-const applyMarks = (text: string, marks: string[]) => {
+// Fonction pour appliquer les marques (gras, italique, liens, etc.)
+const applyMarks = (text: string, marks: string[], markDefs: any[]) => {
   let result = text;
   
   // On applique les marques dans un ordre spécifique
@@ -26,6 +35,87 @@ const applyMarks = (text: string, marks: string[]) => {
   }
   if (marks.includes('em')) {
     result = `<em>${result}</em>`;
+  }
+  
+  // Gestion des liens
+  marks.forEach(mark => {
+    const markDef = markDefs.find(def => def._key === mark);
+    if (markDef && markDef._type === 'link') {
+      const href = markDef.href;
+      const target = href.startsWith('http') ? ' target="_blank" rel="noopener noreferrer"' : '';
+      result = `<a href="${href}"${target} class="text-blue-600 hover:text-blue-800 underline">${result}</a>`;
+    }
+  });
+  
+  return result;
+};
+
+// Fonction pour regrouper et rendre les éléments
+const processBlocks = (blocks: SanityBlock[]) => {
+  const result: Array<string | { type: 'image'; asset: any; alt: string; caption?: string; _key: string }> = [];
+  let currentListHtml = '';
+  let currentList: { type: string; level: number } | null = null;
+  
+  for (const block of blocks) {
+    if (block._type === 'image') {
+      // Fermer la liste courante si on a une image
+      if (currentList) {
+        currentListHtml += `</${currentList.type}>`;
+        result.push(currentListHtml);
+        currentListHtml = '';
+        currentList = null;
+      }
+      
+      // Ajouter l'image comme objet
+      if (block.asset?._ref) {
+        result.push({
+          type: 'image',
+          asset: block.asset,
+          alt: block.alt || 'Image',
+          caption: block.caption,
+          _key: block._key
+        });
+      }
+    } else if (block._type === 'block' && block.listItem) {
+      // C'est un élément de liste
+      const listType = block.listItem === 'bullet' ? 'ul' : 'ol';
+      const level = block.level || 1;
+      const content = block.children
+        ?.map(child => applyMarks(child.text, child.marks, block.markDefs || []))
+        .join('') || '';
+      
+      if (!currentList || currentList.type !== listType || currentList.level !== level) {
+        // Fermer la liste précédente si elle existe
+        if (currentList) {
+          currentListHtml += `</${currentList.type}>`;
+          result.push(currentListHtml);
+          currentListHtml = '';
+        }
+        // Commencer une nouvelle liste
+        const listClass = listType === 'ul' ? 'list-disc ml-8 mb-4' : 'list-decimal ml-8 mb-4';
+        currentListHtml = `<${listType} class="${listClass}">`;
+        currentList = { type: listType, level };
+      }
+      
+      currentListHtml += `<li class="mb-1">${content}</li>`;
+    } else {
+      // Fermer la liste courante si on sort des éléments de liste
+      if (currentList) {
+        currentListHtml += `</${currentList.type}>`;
+        result.push(currentListHtml);
+        currentListHtml = '';
+        currentList = null;
+      }
+      
+      // Traiter le bloc normal
+      result.push(renderBlock(block));
+    }
+  }
+  
+  // Fermer la dernière liste si nécessaire
+  if (currentList) {
+    currentListHtml += `</${currentList.type}>`;
+    result.push(currentListHtml);
   }
   
   return result;
@@ -37,8 +127,8 @@ const renderBlock = (block: SanityBlock) => {
   
   // Construire le contenu du bloc en assemblant tous les spans
   const content = block.children
-    .map(child => applyMarks(child.text, child.marks))
-    .join('');
+    ?.map(child => applyMarks(child.text, child.marks, block.markDefs || []))
+    .join('') || '';
   
   // Appliquer le style du bloc
   switch (block.style) {
@@ -61,11 +151,23 @@ const renderBlock = (block: SanityBlock) => {
 
 <template>
   <div class="sanity-content">
-    <div 
-      v-for="block in blocks" 
-      :key="block._key" 
-      v-html="renderBlock(block)"
-    />
+    <template v-for="(item, index) in processBlocks(blocks)" :key="index">
+      <!-- Rendu des images avec NuxtImg -->
+      <figure v-if="typeof item === 'object' && item.type === 'image'" class="my-6">
+        <NuxtImg
+          :src="item.asset._ref"
+          :alt="item.alt"
+          provider="sanity"
+          class="w-full h-auto rounded-lg shadow-md"
+          loading="lazy"
+        />
+        <figcaption v-if="item.caption" class="text-sm text-gray-600 italic mt-2 text-center">
+          {{ item.caption }}
+        </figcaption>
+      </figure>
+      <!-- Rendu du HTML pour les autres éléments -->
+      <div v-else v-html="item" />
+    </template>
   </div>
 </template>
 
@@ -116,5 +218,46 @@ const renderBlock = (block: SanityBlock) => {
 
 .sanity-content :deep(em) {
   font-style: italic;
+}
+
+.sanity-content :deep(a) {
+  color: #2563eb;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.sanity-content :deep(a:hover) {
+  color: #1d4ed8;
+}
+
+.sanity-content :deep(ul) {
+  list-style-type: disc;
+  margin-bottom: 1rem;
+}
+
+.sanity-content :deep(ol) {
+  list-style-type: decimal;
+  margin-bottom: 1rem;
+}
+
+.sanity-content :deep(li) {
+  margin-bottom: 0.25rem;
+}
+
+.sanity-content :deep(figure) {
+  margin: 1.5rem 0;
+}
+
+.sanity-content :deep(img) {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.sanity-content :deep(figcaption) {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 0.5rem;
+  text-align: center;
 }
 </style>

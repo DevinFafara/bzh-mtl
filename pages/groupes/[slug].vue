@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { GlobeAltIcon, LinkIcon } from '@heroicons/vue/24/outline'
 
+
 const route = useRoute();
 
 const query = groq`*[_type == "band" && slug.current == $slug][0] {
@@ -62,6 +63,7 @@ interface Band {
     facebook?: string
     youtube?: string
     linktree?: string
+    instagram?: string
   }
   author?: {
     name: string
@@ -198,6 +200,9 @@ const isDevelopment = process.env.NODE_ENV === 'development';
               <a v-if="band.links.facebook" :href="band.links.facebook" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-black">
                 <Icon name="simple-icons:facebook" class="h-6 w-6" />
               </a>
+              <a v-if="band.links.instagram" :href="band.links.instagram" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-black">
+                <Icon name="simple-icons:instagram" class="h-6 w-6" />
+              </a>
               <a v-if="band.links.youtube" :href="band.links.youtube" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-black">
                 <Icon name="simple-icons:youtube" class="h-6 w-6" />
               </a>
@@ -213,7 +218,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
       <div class="bio-section mb-12">
         <div v-if="band.bio" class="max-w-none">
           <h2 class="font-bold text-2xl mb-4">Biographie</h2>
-          <CustomSanityContent :blocks="band.bio" />
+          <CustomSanityContent :blocks="band.bio"/>
         </div>
       </div>
 
