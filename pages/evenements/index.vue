@@ -1,10 +1,17 @@
 <script setup lang="ts">
 // On définit la requête GROQ pour récupérer les événements futurs.
 const query = groq`
-  *[_type == "event" && date > now()] | order(date asc) {
+  *[_type == "event" && (
+    (dateInfo.eventDuration == "single" && dateInfo.singleDate > now()) ||
+    (dateInfo.eventDuration == "multiple" && dateInfo.endDate > now()) ||
+    date > now()
+  )] | order(
+    coalesce(dateInfo.singleDate, dateInfo.startDate, date) asc
+  ) {
     _id,
     title,
-    date,
+    date, // Pour rétrocompatibilité
+    dateInfo,
     "slug": slug.current,
     "eventType": eventType->title,
     venue {
@@ -22,7 +29,13 @@ const query = groq`
 type Event = {
   _id: string;
   title: string;
-  date: string;
+  date?: string; // Pour rétrocompatibilité
+  dateInfo?: {
+    eventDuration: 'single' | 'multiple';
+    singleDate?: string;
+    startDate?: string;
+    endDate?: string;
+  };
   slug: string;
   eventType: string;
   venue?: {
@@ -36,16 +49,30 @@ type Event = {
 };
 const { data: events, error } = await useSanityQuery<Event[]>(query);
 
-// Fonction pour formater la date en français (ex: "samedi 25 décembre 2025")
-// C'est une bonne pratique de mettre ceci dans un composable si vous le réutilisez.
-const formatDate = (dateString: string) => {
+// Fonction pour formater la date en français (nouvelle structure)
+const formatDate = (event: Event) => {
   const options: Intl.DateTimeFormatOptions = {
     weekday: 'long', // 'samedi'
     year: 'numeric', // '2025'
     month: 'long',   // 'décembre'
     day: 'numeric',    // '25'
   };
-  return new Date(dateString).toLocaleDateString('fr-FR', options);
+  
+  // Gestion de la nouvelle structure dateInfo
+  if (event.dateInfo?.eventDuration === 'single' && event.dateInfo?.singleDate) {
+    return new Date(event.dateInfo.singleDate).toLocaleDateString('fr-FR', options);
+  } else if (event.dateInfo?.eventDuration === 'multiple' && event.dateInfo?.startDate && event.dateInfo?.endDate) {
+    const startDate = new Date(event.dateInfo.startDate).toLocaleDateString('fr-FR', options);
+    const endDate = new Date(event.dateInfo.endDate).toLocaleDateString('fr-FR', options);
+    return `${startDate} - ${endDate}`;
+  }
+  
+  // Fallback pour l'ancienne structure (rétrocompatibilité)
+  if (event.date) {
+    return new Date(event.date).toLocaleDateString('fr-FR', options);
+  }
+  
+  return 'Date non définie';
 };
 </script>
 
@@ -67,7 +94,7 @@ const formatDate = (dateString: string) => {
           class="flex flex-col sm:flex-row sm:items-center gap-x-6 gap-y-1 p-4 bg-white border border-transparent rounded-lg hover:bg-yellow-50 hover:border-yellow-400 transition-all duration-200"
         >
             <span class="text-sm font-semibold text-yellow-600 uppercase tracking-wider">
-              {{ formatDate(event.date) }}
+              {{ formatDate(event) }}
             </span>
             <span class="text-xl font-bold text-gray-900">
               {{ event.title }}

@@ -5,7 +5,13 @@ const route = useRoute();
 // Interface pour typer l'événement
 interface Event {
   title: string;
-  date: string;
+  date?: string; // Pour rétrocompatibilité
+  dateInfo?: {
+    eventDuration: 'single' | 'multiple';
+    singleDate?: string;
+    startDate?: string;
+    endDate?: string;
+  };
   poster?: { asset: { _ref: string } };
   ticketUrl?: string;
   eventType?: string;
@@ -21,9 +27,19 @@ interface Event {
   };
   lineup?: Array<{
     _key: string;
-    isReference: boolean;
+    _type: string;
+    // Nouveaux champs pour la nouvelle structure
+    band?: {
+      _id: string;
+      name: string;
+      slug: string;
+    };
+    name?: string; // Pour les groupes externes
+    performanceDay?: string;
+    performanceTime?: string;
+    // Anciens champs pour rétrocompatibilité
+    isReference?: boolean;
     _id?: string;
-    name: string;
     slug?: string;
   }>;
 }
@@ -31,7 +47,8 @@ interface Event {
 // La requête GROQ pour UN seul événement, avec toutes ses données liées
 const query = groq`*[_type == "event" && slug.current == $slug][0] {
   title,
-  date,
+  date, // Pour rétrocompatibilité
+  dateInfo,
   poster,
   ticketUrl,
   "eventType": eventType->title,
@@ -46,16 +63,26 @@ const query = groq`*[_type == "event" && slug.current == $slug][0] {
       "slug": slug.current
     }
   },
-  // On récupère le line-up, en gérant les deux types possibles
+  // On récupère le line-up, en gérant les nouveaux types
   lineup[] {
-    _key, // Toujours bon à avoir pour les listes
+    _key,
+    _type,
+    // Pour les groupes référencés (nouveau format)
+    _type == 'referencedBand' => {
+      "band": band->{ _id, name, "slug": slug.current },
+      performanceDay,
+      performanceTime
+    },
+    // Pour les groupes externes (nouveau format)
+    _type == 'externalBand' => {
+      name,
+      performanceDay,
+      performanceTime
+    },
+    // Rétrocompatibilité avec l'ancien format
     _type == 'reference' => {
       "isReference": true,
       ...@->{ _id, name, "slug": slug.current }
-    },
-    _type == 'externalBand' => {
-      "isReference": false,
-      ...@
     }
   }
 }`;
@@ -63,12 +90,33 @@ const query = groq`*[_type == "event" && slug.current == $slug][0] {
 // On exécute la requête
 const { data: event, pending, error } = await useSanityQuery<Event>(query, { slug: route.params.slug });
 
-// Propriété calculée pour formater la date (sans heure)
+// Propriété calculée pour formater la date (nouvelle structure)
 const formattedEventDate = computed(() => {
-  if (!event.value?.date) return '';
-  return new Date(event.value.date).toLocaleDateString('fr-FR', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-  });
+  if (!event.value) return '';
+  
+  // Gestion de la nouvelle structure dateInfo
+  if (event.value.dateInfo?.eventDuration === 'single' && event.value.dateInfo?.singleDate) {
+    return new Date(event.value.dateInfo.singleDate).toLocaleDateString('fr-FR', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+  } else if (event.value.dateInfo?.eventDuration === 'multiple' && event.value.dateInfo?.startDate && event.value.dateInfo?.endDate) {
+    const startDate = new Date(event.value.dateInfo.startDate).toLocaleDateString('fr-FR', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+    const endDate = new Date(event.value.dateInfo.endDate).toLocaleDateString('fr-FR', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+    return `Du ${startDate} au ${endDate}`;
+  }
+  
+  // Fallback pour l'ancienne structure (rétrocompatibilité)
+  if (event.value.date) {
+    return new Date(event.value.date).toLocaleDateString('fr-FR', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+  }
+  
+  return 'Date non définie';
 });
 </script>
 
@@ -111,19 +159,45 @@ const formattedEventDate = computed(() => {
               <div v-for="band in event.lineup" :key="band._key" class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                 <div class="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></div>
                 <div class="flex-1">
-                  <NuxtLink 
-                    v-if="band.isReference" 
-                    :to="`/groupes/${band.slug}`" 
-                    class="text-xl font-semibold text-gray-900 hover:text-yellow-600 transition-colors"
-                  >
-                    {{ band.name }}
-                  </NuxtLink>
-                  <span v-else class="text-xl font-semibold text-gray-900">
-                    {{ band.name }}
-                  </span>
+                  <!-- Nouveau format : groupe référencé -->
+                  <template v-if="band._type === 'referencedBand' && band.band">
+                    <NuxtLink 
+                      :to="`/groupes/${band.band.slug}`" 
+                      class="text-xl font-semibold text-gray-900 hover:text-yellow-600 transition-colors"
+                    >
+                      {{ band.band.name }}
+                    </NuxtLink>
+                    <div v-if="band.performanceDay || band.performanceTime" class="text-sm text-gray-600 mt-1">
+                      <span v-if="band.performanceDay">{{ new Date(band.performanceDay).toLocaleDateString('fr-FR') }}</span>
+                      <span v-if="band.performanceTime" class="ml-2">{{ band.performanceTime }}</span>
+                    </div>
+                  </template>
+                  
+                  <!-- Nouveau format : groupe externe -->
+                  <template v-else-if="band._type === 'externalBand'">
+                    <span class="text-xl font-semibold text-gray-900">{{ band.name }}</span>
+                    <div v-if="band.performanceDay || band.performanceTime" class="text-sm text-gray-600 mt-1">
+                      <span v-if="band.performanceDay">{{ new Date(band.performanceDay).toLocaleDateString('fr-FR') }}</span>
+                      <span v-if="band.performanceTime" class="ml-2">{{ band.performanceTime }}</span>
+                    </div>
+                  </template>
+                  
+                  <!-- Ancien format : rétrocompatibilité -->
+                  <template v-else>
+                    <NuxtLink 
+                      v-if="band.isReference && band.slug" 
+                      :to="`/groupes/${band.slug}`" 
+                      class="text-xl font-semibold text-gray-900 hover:text-yellow-600 transition-colors"
+                    >
+                      {{ band.name }}
+                    </NuxtLink>
+                    <span v-else class="text-xl font-semibold text-gray-900">
+                      {{ band.name }}
+                    </span>
+                  </template>
                 </div>
                 <Icon 
-                  v-if="band.isReference" 
+                  v-if="(band._type === 'referencedBand' && band.band) || (band.isReference && band.slug)" 
                   name="heroicons:arrow-top-right-on-square" 
                   class="h-5 w-5 text-gray-400" 
                 />

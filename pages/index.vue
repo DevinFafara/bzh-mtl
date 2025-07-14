@@ -14,7 +14,13 @@ interface Event {
   _id: string;
   title: string;
   slug: string;
-  date: string;
+  date?: string; // Pour rétrocompatibilité
+  dateInfo?: {
+    eventDuration: 'single' | 'multiple';
+    singleDate?: string;
+    startDate?: string;
+    endDate?: string;
+  };
   poster?: any;
   eventType?: string;
   venue?: {
@@ -47,11 +53,18 @@ const chroniquesQuery = groq`*[_type == "post"] | order(publishedAt desc) [0...3
 }`;
 
 // Requête pour les 3 prochains événements
-const eventsQuery = groq`*[_type == "event" && date >= now()] | order(date asc) [0...3] {
+const eventsQuery = groq`*[_type == "event" && (
+  (dateInfo.eventDuration == "single" && dateInfo.singleDate >= now()) ||
+  (dateInfo.eventDuration == "multiple" && dateInfo.endDate >= now()) ||
+  date >= now()
+)] | order(
+  coalesce(dateInfo.singleDate, dateInfo.startDate, date) asc
+) [0...3] {
   _id,
   title,
   "slug": slug.current,
-  date,
+  date, // Pour rétrocompatibilité
+  dateInfo,
   poster,
   "eventType": eventType->title,
   venue {

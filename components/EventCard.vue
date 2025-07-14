@@ -7,15 +7,30 @@ defineProps({
   }
 });
 
-// Fonction pour formater la date en français
-const formatDate = (dateString: string) => {
+// Fonction pour formater la date en français (nouvelle structure)
+const formatDate = (event: any) => {
   const options: Intl.DateTimeFormatOptions = {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   };
-  return new Date(dateString).toLocaleDateString('fr-FR', options);
+  
+  // Gestion de la nouvelle structure dateInfo
+  if (event.dateInfo?.eventDuration === 'single' && event.dateInfo?.singleDate) {
+    return new Date(event.dateInfo.singleDate).toLocaleDateString('fr-FR', options);
+  } else if (event.dateInfo?.eventDuration === 'multiple' && event.dateInfo?.startDate && event.dateInfo?.endDate) {
+    const startDate = new Date(event.dateInfo.startDate).toLocaleDateString('fr-FR', options);
+    const endDate = new Date(event.dateInfo.endDate).toLocaleDateString('fr-FR', options);
+    return `${startDate} - ${endDate}`;
+  }
+  
+  // Fallback pour l'ancienne structure (rétrocompatibilité)
+  if (event.date) {
+    return new Date(event.date).toLocaleDateString('fr-FR', options);
+  }
+  
+  return 'Date non définie';
 };
 
 // Fonction pour formater le lieu d'un événement
@@ -38,7 +53,7 @@ const formatVenue = (venue: any) => {
     class="flex flex-col sm:flex-row sm:items-center gap-x-6 gap-y-1 p-4 bg-white border border-transparent rounded-lg hover:bg-yellow-50 hover:border-yellow-400 transition-all duration-200"
   >
     <span class="text-sm font-semibold text-yellow-600 uppercase tracking-wider">
-      {{ formatDate(event.date) }}
+      {{ formatDate(event) }}
     </span>
     <span class="text-xl font-bold text-gray-900">
       {{ event.title }}
