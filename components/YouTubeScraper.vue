@@ -14,8 +14,15 @@ interface Props {
 
 const props = defineProps<Props>()
 
+// URLs d'API à tester en cascade
+const apiEndpoints = [
+  '/api/youtube-scraper',  // API route Nuxt (devrait fonctionner en local et être convertie en fonction Netlify)
+  '/.netlify/functions/youtube-scraper'  // Fonction Netlify native (backup)
+]
+
 // État pour les vidéos et le chargement
-const { data: videoData, pending, error, refresh } = await useLazyFetch<{ 
+const currentEndpointIndex = ref(0)
+const { data: videoData, pending, error, refresh: originalRefresh } = await useLazyFetch<{ 
   videos: YouTubeVideo[]
   totalResults: number
   demo?: boolean
@@ -24,10 +31,60 @@ const { data: videoData, pending, error, refresh } = await useLazyFetch<{
   errorType?: 'network' | 'scraping'
   errorMessage?: string
   errorDetails?: string
-}>('/.netlify/functions/youtube-scraper', {  // Utiliser la fonction Netlify directe
+}>(() => apiEndpoints[currentEndpointIndex.value], {  
   query: { band: props.bandName },
-  server: false
+  server: false,
+  onResponseError({ request, response, options }) {
+    console.error('YouTube Scraper - Erreur HTTP:', {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+      url: request,
+      body: response._data,
+      endpointIndex: currentEndpointIndex.value
+    })
+  },
+  onRequestError({ request, options, error }) {
+    console.error('YouTube Scraper - Erreur de requête:', {
+      url: request,
+      error: error.message,
+      endpointIndex: currentEndpointIndex.value
+    })
+  }
 })
+
+// Fonction pour essayer le prochain endpoint
+const tryNextEndpoint = async () => {
+  if (currentEndpointIndex.value < apiEndpoints.length - 1) {
+    currentEndpointIndex.value++
+    console.log(`Tentative avec l'endpoint ${currentEndpointIndex.value + 1}/${apiEndpoints.length}: ${apiEndpoints[currentEndpointIndex.value]}`)
+    await originalRefresh()
+    return true
+  }
+  return false
+}
+
+// Fonction pour rafraîchir avec fallback automatique
+const refresh = async () => {
+  // Réinitialiser au premier endpoint
+  currentEndpointIndex.value = 0
+  await originalRefresh()
+  
+  // Si erreur et qu'il y a d'autres endpoints à tester
+  if (error.value && currentEndpointIndex.value < apiEndpoints.length - 1) {
+    console.log('Premier endpoint échoué, tentative des alternatives...')
+    let success = false
+    while (!success && currentEndpointIndex.value < apiEndpoints.length - 1) {
+      success = await tryNextEndpoint()
+      if (error.value && !success) {
+        // Continuer à essayer
+        continue
+      } else {
+        break
+      }
+    }
+  }
+}
 
 const videos = computed(() => videoData.value?.videos || [])
 const isDemo = computed(() => videoData.value?.demo || false)
@@ -36,6 +93,39 @@ const hasServiceError = computed(() => videoData.value?.serviceError || false)
 const serviceErrorMessage = computed(() => videoData.value?.errorMessage || 'Service temporairement indisponible')
 const serviceErrorDetails = computed(() => videoData.value?.errorDetails || '')
 const isNetworkError = computed(() => videoData.value?.errorType === 'network')
+
+// Informations détaillées sur l'erreur pour debugging
+const errorDetails = computed(() => {
+  if (!error.value) return null
+  
+  let details: {
+    message: string
+    statusCode: string | number
+    statusMessage: string
+    data: any
+    diagnosis?: string
+    currentEndpoint?: string
+    testedEndpoints?: string[]
+  } = {
+    message: error.value.message || 'Erreur inconnue',
+    statusCode: error.value.statusCode || 'non défini',
+    statusMessage: error.value.statusMessage || 'non défini',
+    data: error.value.data || 'aucune donnée',
+    currentEndpoint: apiEndpoints[currentEndpointIndex.value],
+    testedEndpoints: apiEndpoints.slice(0, currentEndpointIndex.value + 1)
+  }
+  
+  // Si c'est une erreur 404, c'est probablement que l'API route n'existe pas
+  if (error.value.statusCode === 404) {
+    details.diagnosis = 'API route non trouvée - vérifier la configuration Netlify'
+  }
+  // Si c'est du HTML en réponse, c'est que Netlify sert la page d'erreur au lieu de l'API
+  else if (typeof error.value.data === 'string' && error.value.data.includes('<html>')) {
+    details.diagnosis = 'Netlify sert du HTML au lieu de l\'API - configuration incorrecte'
+  }
+  
+  return details
+})
 
 // État pour la vidéo sélectionnée (par défaut la première)
 const selectedVideo = ref<YouTubeVideo | null>(null)
@@ -96,17 +186,50 @@ const refreshVideos = () => {
     </div>
     
     <!-- Erreur HTTP (véritable erreur de connexion) -->
-    <div v-else-if="error" class="text-center py-12">
-      <div class="text-red-600 mb-4">
-        <Icon name="heroicons:exclamation-triangle" class="h-12 w-12 mx-auto mb-2" />
-        <p>Erreur lors du chargement des vidéos</p>
+    <div v-else-if="error" class="py-8">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+        <div class="flex items-start gap-3">
+          <Icon name="heroicons:exclamation-triangle" class="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+          <div class="flex-1">
+            <h3 class="font-medium text-red-800 mb-1">Erreur lors du chargement des vidéos</h3>
+            
+            <div v-if="errorDetails?.diagnosis" class="mb-3">
+              <p class="text-sm font-medium text-red-700">Diagnostic :</p>
+              <p class="text-sm text-red-600">{{ errorDetails.diagnosis }}</p>
+            </div>
+            
+            <details class="text-xs text-red-600 mb-4">
+              <summary class="cursor-pointer hover:text-red-800 mb-2">Détails techniques</summary>
+              <div class="space-y-1 font-mono bg-red-100 p-2 rounded">
+                <p><strong>Message :</strong> {{ errorDetails?.message }}</p>
+                <p><strong>Code :</strong> {{ errorDetails?.statusCode }}</p>
+                <p><strong>Status :</strong> {{ errorDetails?.statusMessage }}</p>
+                <p><strong>Endpoint actuel :</strong> {{ errorDetails?.currentEndpoint }}</p>
+                <p v-if="errorDetails?.testedEndpoints && errorDetails.testedEndpoints.length > 1">
+                  <strong>Endpoints testés :</strong> {{ errorDetails.testedEndpoints.join(', ') }}
+                </p>
+                <p v-if="errorDetails?.data && typeof errorDetails.data === 'string'">
+                  <strong>Réponse :</strong> {{ errorDetails.data.substring(0, 200) }}{{ errorDetails.data.length > 200 ? '...' : '' }}
+                </p>
+              </div>
+            </details>
+            
+            <div class="flex items-center gap-3">
+              <button 
+                @click="refreshVideos"
+                :disabled="pending"
+                class="text-sm px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+              >
+                {{ pending ? 'Chargement...' : 'Réessayer' }}
+              </button>
+              
+              <p v-if="errorDetails?.statusCode === 404" class="text-xs text-red-600">
+                ℹ️ L'API n'est pas accessible en production
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-      <button 
-        @click="refreshVideos"
-        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-      >
-        Réessayer
-      </button>
     </div>
     
     <!-- Erreur de service (YouTube bloqué, mais service fonctionne) -->
