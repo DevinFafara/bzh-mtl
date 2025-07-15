@@ -25,6 +25,48 @@ defineProps<{
   blocks: SanityBlock[];
 }>();
 
+// État pour la modal de l'image
+const selectedImage = ref<{
+  src: string;
+  alt: string;
+  caption?: string;
+} | null>(null);
+
+// Fonctions pour gérer la modal
+const openImageModal = (asset: any, alt: string, caption?: string) => {
+  selectedImage.value = {
+    src: asset._ref,
+    alt,
+    caption
+  };
+  // Empêcher le scroll du body quand la modal est ouverte
+  document.body.style.overflow = 'hidden';
+};
+
+const closeImageModal = () => {
+  selectedImage.value = null;
+  // Rétablir le scroll du body
+  document.body.style.overflow = '';
+};
+
+// Fermer avec la touche Escape
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && selectedImage.value) {
+    closeImageModal();
+  }
+};
+
+// Écouter les événements clavier
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown);
+  // S'assurer que le body retrouve son scroll
+  document.body.style.overflow = '';
+});
+
 // Fonction pour appliquer les marques (gras, italique, liens, etc.)
 const applyMarks = (text: string, marks: string[], markDefs: any[]) => {
   let result = text;
@@ -52,7 +94,9 @@ const applyMarks = (text: string, marks: string[], markDefs: any[]) => {
 
 // Fonction pour regrouper et rendre les éléments
 const processBlocks = (blocks: SanityBlock[]) => {
-  const result: Array<string | { type: 'image'; asset: any; alt: string; caption?: string; _key: string }> = [];
+  const result: Array<string | 
+    { type: 'image'; asset: any; alt: string; caption?: string; _key: string }
+  > = [];
   let currentListHtml = '';
   let currentList: { type: string; level: number } | null = null;
   
@@ -158,16 +202,57 @@ const renderBlock = (block: SanityBlock) => {
           :src="item.asset._ref"
           :alt="item.alt"
           provider="sanity"
-          class="w-full h-auto rounded-lg shadow-md"
+          class="mx-auto max-w-[600px] w-full h-auto rounded-lg shadow-md cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
           loading="lazy"
+          @click="openImageModal(item.asset, item.alt, item.caption)"
         />
         <figcaption v-if="item.caption" class="text-sm text-gray-600 italic mt-2 text-center">
           {{ item.caption }}
         </figcaption>
       </figure>
+      
       <!-- Rendu du HTML pour les autres éléments -->
       <div v-else v-html="item" />
     </template>
+
+    <!-- Modal pour l'agrandissement des images -->
+    <Teleport to="body">
+      <div
+        v-if="selectedImage"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 p-4"
+        @click="closeImageModal"
+      >
+        <div class="relative max-w-[90vw] max-h-[90vh] flex flex-col">
+          <!-- Bouton de fermeture -->
+          <button
+            @click="closeImageModal"
+            class="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors z-10"
+            aria-label="Fermer l'image agrandie"
+          >
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          
+          <!-- Image agrandie -->
+          <NuxtImg
+            :src="selectedImage.src"
+            :alt="selectedImage.alt"
+            provider="sanity"
+            class="max-w-full max-h-full object-contain rounded-lg"
+            @click.stop
+          />
+          
+          <!-- Légende si présente -->
+          <p
+            v-if="selectedImage.caption"
+            class="text-white text-center mt-4 text-sm italic bg-black bg-opacity-50 px-4 py-2 rounded"
+          >
+            {{ selectedImage.caption }}
+          </p>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
