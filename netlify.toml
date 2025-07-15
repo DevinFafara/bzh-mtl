@@ -4,13 +4,24 @@
   command = "npm run build"
   # Le dossier de sortie pour les fichiers statiques
   publish = ".output/public"
-  # Dossier des fonctions Netlify (en plus des fonctions internes Nuxt)
+  # Dossier des fonctions Netlify (priorité sur les fonctions internes Nuxt)
   functions = "netlify/functions"
+
+[build.environment]
+  # Désactiver les fonctions automatiques de Nuxt pour utiliser les nôtres
+  DISABLE_IPX = "true"
 
 [dev]
   # Configuration pour le développement local avec Netlify CLI
   command = "npm run dev"
   targetPort = 3000
+
+# Redirection pour forcer Netlify à utiliser nos fonctions au lieu de Nuxt
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
 
 # Note: Avec Nuxt + preset netlify, les fonctions sont automatiquement dans .netlify/functions-internal/
 # et Netlify les détecte automatiquement, pas besoin de configuration explicite
