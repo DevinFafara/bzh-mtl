@@ -24,7 +24,7 @@ const { data: videoData, pending, error, refresh } = await useLazyFetch<{
   errorType?: 'network' | 'scraping'
   errorMessage?: string
   errorDetails?: string
-}>('/api/youtube-scraper', {
+}>('/.netlify/functions/youtube-scraper', {  // Utiliser la fonction Netlify directe
   query: { band: props.bandName },
   server: false
 })
