@@ -4,6 +4,8 @@
   command = "npm run build"
   # Le dossier de sortie pour les fichiers statiques
   publish = ".output/public"
+  # Dossier des fonctions Netlify (en plus des fonctions internes Nuxt)
+  functions = "netlify/functions"
 
 [dev]
   # Configuration pour le développement local avec Netlify CLI
