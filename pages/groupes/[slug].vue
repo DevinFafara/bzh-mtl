@@ -158,6 +158,26 @@ const formatEventDate = (event: UpcomingEvent) => {
 
 // Variable pour détecter l'environnement de développement
 const isDevelopment = process.env.NODE_ENV === 'development';
+
+// Fonction pour générer l'URL de recherche YouTube (iframe ne fonctionne plus)
+const getYouTubeSearchUrl = (bandName: string) => {
+  // YouTube ne permet plus les iframes de recherche, on utilise une approche différente
+  const cleanBandName = encodeURIComponent(bandName.replace(/[^a-zA-Z0-9\s]/g, '').trim());
+  // Option : afficher la chaîne directement
+  return `https://www.youtube.com/embed/channel/UCvotreChannelId`; // À remplacer par votre channel ID
+};
+
+// Alternative : URL de recherche classique (ouvre dans un nouvel onglet)
+const getYouTubeSearchLink = (bandName: string) => {
+  const cleanBandName = encodeURIComponent(bandName);
+  return `https://www.youtube.com/@ConcertsMetal-BZH/search?query=${cleanBandName}`;
+};
+
+// Meilleure approche : recherche YouTube générale
+const getYouTubeGeneralSearchLink = (bandName: string) => {
+  const cleanBandName = encodeURIComponent(`${bandName} ConcertsMetal-BZH`);
+  return `https://www.youtube.com/results?search_query=${cleanBandName}`;
+};
 </script>
 
 <template>
@@ -287,7 +307,13 @@ const isDevelopment = process.env.NODE_ENV === 'development';
         </ul>
       </div>
 
-      <!-- 5. Articles connexes -->
+      <!-- 5. Section Vidéos YouTube -->
+      <div class="youtube-section mb-12">
+        <!-- Scraper YouTube intégré (n'affiche rien si aucune vidéo trouvée) -->
+        <YouTubeScraper :band-name="band.name" />
+      </div>
+
+      <!-- 6. Articles connexes -->
       <div v-if="relatedPosts && Array.isArray(relatedPosts) && relatedPosts.length > 0" class="related-posts-section mb-12">
         <h2 class="font-bold text-xl mb-6">Articles en lien avec {{ band.name }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -311,7 +337,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
         </details>
       </div> -->
       
-      <!-- 6. Auteur (toujours en pleine largeur en bas) -->
+      <!-- 7. Auteur (toujours en pleine largeur en bas) -->
       <div class="author-section">
         <div v-if="band.author" class="bg-gray-50 p-6 rounded-lg">
           <div class="flex items-start gap-4">
@@ -384,6 +410,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
     grid-template-areas: 
       "sidebar bio"
       "events events"
+      "youtube youtube"
       "related related"
       "author author";
     gap: 2rem;
@@ -397,6 +424,11 @@ const isDevelopment = process.env.NODE_ENV === 'development';
   
   .bio-section { 
     grid-area: bio; 
+    margin-bottom: 0;
+  }
+  
+  .youtube-section { 
+    grid-area: youtube; 
     margin-bottom: 0;
   }
   
