@@ -4,9 +4,9 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-06-30',
   ssr: true, // Activer le SSR pour que les API routes fonctionnent correctement
   
-  // Configuration Nitro pour Netlify - preset réactivé mais avec fonctions externes
+  // Configuration Nitro pour Netlify - temporairement en static pour débugger
   nitro: {
-    preset: 'netlify',
+    preset: 'static',
     // Empêcher Netlify d'intercepter nos routes personnalisées
     experimental: {
       wasm: false
