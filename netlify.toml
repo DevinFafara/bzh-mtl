@@ -31,11 +31,14 @@
   status = 200
   force = true
 
-# PAS de redirection catch-all manuelle
-# Le preset netlify de Nuxt génère automatiquement les redirections nécessaires
-# dans .output/_redirects
+# Redirection catch-all pour toutes les autres routes vers le serveur Nitro
+# IMPORTANT: Cette redirection doit être APRÈS les redirections spécifiques ci-dessus
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions-internal/server"
+  status = 200
 
 # Note: 
 # - Les fonctions Nuxt API routes sont dans .netlify/functions-internal/ (automatique)
 # - Nos fonctions personnalisées sont dans netlify/functions/ (configuré ci-dessus)
-# - Nuxt génère automatiquement les redirections pour le routage SPA/SSR
+# - Le serveur Nitro gère le routage SPA/SSR via /.netlify/functions-internal/server

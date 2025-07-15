@@ -16,10 +16,10 @@ const props = defineProps<Props>()
 
 // URLs d'API à tester en cascade
 const apiEndpoints = [
+  '/api/youtube-scraper',  // API route Nuxt originale (fonctionne en local)
+  '/api/youtube-scraper-server',  // Nouvelle API route côté serveur (fonctionne en local)
   '/api/test',  // Test simple pour voir si les redirections fonctionnent
   '/api/youtube-netlify',  // API avec redirection vers notre fonction
-  '/api/youtube-scraper-server',  // Nouvelle API route côté serveur (devrait fonctionner)
-  '/api/youtube-scraper',  // API route Nuxt originale 
   '/.netlify/functions/youtube-scraper',  // Fonction Netlify native
   '/.netlify/functions/test'  // Fonction test pour diagnostiquer si Netlify fonctionne
 ]
