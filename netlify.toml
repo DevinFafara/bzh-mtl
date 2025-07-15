@@ -2,8 +2,7 @@
 [build]
   # Commande pour build avec preset netlify
   command = "npm run build"
-  # Le dossier de sortie pour les fichiers statiques (preset netlify)
-  publish = ".output/public"
+  # Avec preset netlify, pas besoin de spécifier publish, Nuxt s'en charge
   # Dossier des fonctions Netlify (priorité sur les fonctions internes Nuxt)
   functions = "netlify/functions"
 
