@@ -1,5 +1,5 @@
 // Fonction Netlify directe pour remplacer l'API route Nuxt
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
   // Gérer CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
