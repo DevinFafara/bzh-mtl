@@ -5,6 +5,11 @@
   # Le dossier de sortie pour les fichiers statiques
   publish = ".output/public"
 
+[dev]
+  # Configuration pour le développement local avec Netlify CLI
+  command = "npm run dev"
+  targetPort = 3000
+
 # Note: Avec Nuxt + preset netlify, les fonctions sont automatiquement dans .netlify/functions-internal/
 # et Netlify les détecte automatiquement, pas besoin de configuration explicite
 

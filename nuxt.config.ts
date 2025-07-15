@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   compatibilityDate: '2025-06-30',
-  ssr: false,
+  ssr: true, // Activer le SSR pour que les API routes fonctionnent correctement
   
   // Configuration Nitro pour Netlify
   nitro: {
