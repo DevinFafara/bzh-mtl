@@ -31,14 +31,20 @@
   status = 200
   force = true
 
-# Redirection catch-all pour SPA routing (pour preset static)
+# Redirection pour l'API interne Nitro (preset netlify)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/server"
+  status = 200
+
+# Redirection catch-all pour le routing Nuxt (preset netlify)
 # IMPORTANT: Cette redirection doit être APRÈS les redirections spécifiques ci-dessus
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/server"
   status = 200
 
 # Note: 
 # - Les fonctions personnalisées sont dans netlify/functions/ (configuré ci-dessus)
-# - Avec preset static, Nuxt génère des fichiers statiques dans .output/public
-# - Le routing SPA est géré côté client avec fallback vers index.html
+# - Avec preset netlify, Nuxt génère une fonction server dans .netlify/functions-internal/
+# - Le routing Nuxt est géré par la fonction server Nitro
