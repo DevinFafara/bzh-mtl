@@ -1,0 +1,7 @@
+# Redirections Netlify pour Nuxt
+# Priorité aux fonctions personnalisées d'abord
+/api/test /.netlify/functions/test 200
+/api/youtube-netlify /.netlify/functions/youtube-scraper 200
+
+# Toutes les autres routes vers le serveur Nitro pour le SSR/SPA
+/* /.netlify/functions-internal/server 200
