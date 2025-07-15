@@ -1,8 +1,8 @@
 # netlify.toml
 [build]
-  # Commande pour build avec support des fonctions séparées
+  # Commande pour build avec preset netlify
   command = "npm run build"
-  # Le dossier de sortie pour les fichiers statiques (avec node-server preset)
+  # Le dossier de sortie pour les fichiers statiques (preset netlify)
   publish = ".output/public"
   # Dossier des fonctions Netlify (priorité sur les fonctions internes Nuxt)
   functions = "netlify/functions"
@@ -16,7 +16,9 @@
   command = "npm run dev"
   targetPort = 3000
 
-# Redirections pour forcer Netlify à utiliser nos fonctions au lieu de Nuxt
+# Redirections spécifiques pour nos fonctions Netlify personnalisées
+# IMPORTANT: Ces redirections sont testées dans l'ordre, les plus spécifiques d'abord
+
 [[redirects]]
   from = "/api/test"
   to = "/.netlify/functions/test"
@@ -29,14 +31,10 @@
   status = 200
   force = true
 
-[[redirects]]
-  from = "/.netlify/functions/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-  force = true
+# PAS de redirection catch-all - laisser Nuxt/Nitro gérer le routage SPA/SSR automatiquement
+# Le preset netlify de Nuxt configure automatiquement les redirections nécessaires
 
-# Note: Avec Nuxt + preset netlify, les fonctions sont automatiquement dans .netlify/functions-internal/
-# et Netlify les détecte automatiquement, pas besoin de configuration explicite
-
-# Laisser Nuxt/Nitro gérer le routage automatiquement
-# Les redirections manuelles peuvent interférer avec les API routes
+# Note: 
+# - Les fonctions Nuxt API routes sont dans .netlify/functions-internal/ (automatique)
+# - Nos fonctions personnalisées sont dans netlify/functions/ (configuré ci-dessus)
+# - Nuxt gère automatiquement le fallback pour les routes SPA
