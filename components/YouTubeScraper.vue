@@ -20,6 +20,10 @@ const { data: videoData, pending, error, refresh } = await useLazyFetch<{
   totalResults: number
   demo?: boolean
   message?: string
+  serviceError?: boolean
+  errorType?: 'network' | 'scraping'
+  errorMessage?: string
+  errorDetails?: string
 }>('/api/youtube-scraper', {
   query: { band: props.bandName },
   server: false
@@ -28,6 +32,10 @@ const { data: videoData, pending, error, refresh } = await useLazyFetch<{
 const videos = computed(() => videoData.value?.videos || [])
 const isDemo = computed(() => videoData.value?.demo || false)
 const noVideosMessage = computed(() => videoData.value?.message || '')
+const hasServiceError = computed(() => videoData.value?.serviceError || false)
+const serviceErrorMessage = computed(() => videoData.value?.errorMessage || 'Service temporairement indisponible')
+const serviceErrorDetails = computed(() => videoData.value?.errorDetails || '')
+const isNetworkError = computed(() => videoData.value?.errorType === 'network')
 
 // État pour la vidéo sélectionnée (par défaut la première)
 const selectedVideo = ref<YouTubeVideo | null>(null)
@@ -57,8 +65,8 @@ const refreshVideos = () => {
 </script>
 
 <template>
-  <!-- N'afficher le composant que s'il y a des vidéos trouvées ou en cas d'erreur/chargement -->
-  <div v-if="pending || error || videos.length > 0" class="youtube-scraper">
+  <!-- N'afficher le composant que s'il y a des vidéos trouvées, une erreur de service ou en cas d'erreur/chargement -->
+  <div v-if="pending || error || videos.length > 0 || hasServiceError" class="youtube-scraper">
     <!-- Titre de la section (seulement si des vidéos sont trouvées) -->
     <div v-if="videos.length > 0" class="flex items-center justify-between mb-6">
       <h2 class="font-bold text-xl">Vidéos Live de {{ props.bandName }} sur ConcertsMetal-BZH</h2>
@@ -87,7 +95,7 @@ const refreshVideos = () => {
       <p class="mt-4 text-gray-600">Recherche des vidéos...</p>
     </div>
     
-    <!-- Erreur -->
+    <!-- Erreur HTTP (véritable erreur de connexion) -->
     <div v-else-if="error" class="text-center py-12">
       <div class="text-red-600 mb-4">
         <Icon name="heroicons:exclamation-triangle" class="h-12 w-12 mx-auto mb-2" />
@@ -99,6 +107,41 @@ const refreshVideos = () => {
       >
         Réessayer
       </button>
+    </div>
+    
+    <!-- Erreur de service (YouTube bloqué, mais service fonctionne) -->
+    <div v-else-if="hasServiceError && videos.length === 0" class="py-8">
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-6">
+        <div class="flex items-start gap-3">
+          <Icon 
+            :name="isNetworkError ? 'heroicons:wifi-slash' : 'heroicons:exclamation-triangle'" 
+            class="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" 
+          />
+          <div class="flex-1">
+            <h3 class="font-medium text-amber-800 mb-1">{{ serviceErrorMessage }}</h3>
+            <p class="text-sm text-amber-700 mb-3">{{ noVideosMessage }}</p>
+            
+            <details class="text-xs text-amber-600">
+              <summary class="cursor-pointer hover:text-amber-800">Détails techniques</summary>
+              <p class="mt-1 font-mono">{{ serviceErrorDetails }}</p>
+            </details>
+            
+            <div class="flex items-center gap-3 mt-4">
+              <button 
+                @click="refreshVideos"
+                :disabled="pending"
+                class="text-sm px-3 py-1 bg-amber-600 text-white rounded hover:bg-amber-700 disabled:opacity-50"
+              >
+                {{ pending ? 'Chargement...' : 'Réessayer' }}
+              </button>
+              
+              <p v-if="isNetworkError" class="text-xs text-amber-600">
+                ℹ️ Ce service fonctionne localement mais est bloqué en production
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- Lecteur vidéo + liste (seulement si des vidéos sont trouvées) -->
