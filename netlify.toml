@@ -8,8 +8,5 @@
 # Note: Avec Nuxt + preset netlify, les fonctions sont automatiquement dans .netlify/functions-internal/
 # et Netlify les détecte automatiquement, pas besoin de configuration explicite
 
-# Redirection pour gérer les routes dynamiques SPA
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Laisser Nuxt/Nitro gérer le routage automatiquement
+# Les redirections manuelles peuvent interférer avec les API routes
