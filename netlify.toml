@@ -33,14 +33,14 @@
 # Redirection pour l'API interne Nitro (preset netlify)
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/server"
+  to = "/.netlify/functions-internal/server"
   status = 200
 
 # Redirection catch-all pour le routing Nuxt (preset netlify)
 # IMPORTANT: Cette redirection doit être APRÈS les redirections spécifiques ci-dessus
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/server"
+  to = "/.netlify/functions-internal/server"
   status = 200
 
 # Note: 
