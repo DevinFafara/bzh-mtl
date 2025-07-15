@@ -1,11 +1,14 @@
 # netlify.toml
 [build]
-  # Commande explicite pour la génération statique
-  command = "npx nuxi generate"
-  # Le dossier de sortie de 'nuxi generate'
-  publish = "dist"
+  # Commande pour build avec support des API routes
+  command = "npm run build"
+  # Le dossier de sortie pour les fichiers statiques
+  publish = ".output/public"
 
-# Redirection pour gérer les routes dynamiques en mode statique (SPA fallback)
+# Note: Avec Nuxt + preset netlify, les fonctions sont automatiquement dans .netlify/functions-internal/
+# et Netlify les détecte automatiquement, pas besoin de configuration explicite
+
+# Redirection pour gérer les routes dynamiques SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"

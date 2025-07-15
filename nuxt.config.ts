@@ -3,6 +3,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   compatibilityDate: '2025-06-30',
   ssr: false,
+  
+  // Configuration Nitro pour Netlify
+  nitro: {
+    preset: 'netlify',
+  },
+  
   modules: [
     '@nuxt/eslint',
     '@nuxt/icon',
