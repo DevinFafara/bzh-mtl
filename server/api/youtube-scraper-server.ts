@@ -84,26 +84,61 @@ export default defineEventHandler(async (event) => {
     let videos = []
     const contents = videoData?.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents || []
     
+    console.log(`[YouTube Scraper Server] Nombre de sections trouvées: ${contents.length}`)
+    
+    let totalVideosFound = 0
+    let brunoVideosFound = 0
+    
     for (const section of contents) {
       const items = section?.itemSectionRenderer?.contents || []
+      console.log(`[YouTube Scraper Server] Nombre d'items dans cette section: ${items.length}`)
       
       for (const item of items) {
         const videoRenderer = item?.videoRenderer
         if (videoRenderer) {
+          totalVideosFound++
           const channelName = videoRenderer?.ownerText?.runs?.[0]?.text || 
                             videoRenderer?.longBylineText?.runs?.[0]?.text || ''
+          const title = videoRenderer?.title?.runs?.[0]?.text || ''
+          const videoId = videoRenderer?.videoId
+          
+          console.log(`[YouTube Scraper Server] Vidéo ${totalVideosFound}: "${title}" - Chaîne: "${channelName}"`)
           
           // Filtrer par chaîne Bruno Guézennec
-          if (channelName.toLowerCase().includes('bruno') && channelName.toLowerCase().includes('guézennec')) {
-            const title = videoRenderer?.title?.runs?.[0]?.text || ''
-            const videoId = videoRenderer?.videoId
+          const isBrunoChannel = channelName.toLowerCase().includes('bruno') && channelName.toLowerCase().includes('guézennec')
+          
+          if (isBrunoChannel) {
+            brunoVideosFound++
+            console.log(`[YouTube Scraper Server] ✓ Vidéo de Bruno trouvée: "${title}"`)
             
             if (videoId && title) {
-              // Vérifier si le titre contient le nom du groupe
+              // Vérifier si le titre contient le nom du groupe (avec variantes tiret/espace)
               const titleLower = title.toLowerCase()
               const bandNameLower = bandName.toLowerCase()
               
-              if (titleLower.includes(bandNameLower)) {
+              console.log(`[YouTube Scraper Server] Comparaison:`)
+              console.log(`[YouTube Scraper Server] - Titre: "${titleLower}"`)
+              console.log(`[YouTube Scraper Server] - Groupe recherché: "${bandNameLower}"`)
+              
+              // Recherche normale
+              let matches = titleLower.includes(bandNameLower)
+              console.log(`[YouTube Scraper Server] - Match direct: ${matches}`)
+              
+              // Si pas de match et que le nom contient un tiret, essayer avec des espaces
+              if (!matches && bandNameLower.includes('-')) {
+                const bandWithSpaces = bandNameLower.replace(/-/g, ' ')
+                matches = titleLower.includes(bandWithSpaces)
+                console.log(`[YouTube Scraper Server] - Essai avec espaces "${bandWithSpaces}": ${matches}`)
+              }
+              
+              // Si pas de match et que le nom contient des espaces, essayer avec des tirets
+              if (!matches && bandNameLower.includes(' ')) {
+                const bandWithDashes = bandNameLower.replace(/\s+/g, '-')
+                matches = titleLower.includes(bandWithDashes)
+                console.log(`[YouTube Scraper Server] - Essai avec tirets "${bandWithDashes}": ${matches}`)
+              }
+              
+              if (matches) {
                 const video = {
                   id: videoId,
                   title: title,
@@ -115,22 +150,72 @@ export default defineEventHandler(async (event) => {
                 }
                 
                 videos.push(video)
-                console.log(`[YouTube Scraper Server] Vidéo trouvée: ${title}`)
+                console.log(`[YouTube Scraper Server] 🎯 VIDÉO MATCHÉE: ${title}`)
                 console.log(`[YouTube Scraper Server] - ID: ${videoId}`)
                 console.log(`[YouTube Scraper Server] - Thumbnail URL: ${video.thumbnail}`)
                 console.log(`[YouTube Scraper Server] - Channel: ${channelName}`)
                 console.log(`[YouTube Scraper Server] - Duration: ${video.duration}`)
                 console.log(`[YouTube Scraper Server] - Views: ${video.viewCount}`)
                 console.log(`[YouTube Scraper Server] - Published: ${video.publishedTime}`)
+              } else {
+                console.log(`[YouTube Scraper Server] ❌ Pas de match pour: "${title}"`)
               }
             }
+          } else {
+            console.log(`[YouTube Scraper Server] ✗ Pas une vidéo de Bruno: "${channelName}"`)
           }
         }
       }
     }
 
     console.log(`[YouTube Scraper Server] ${videos.length} vidéo(s) trouvée(s) pour "${bandName}"`)
-    const totalVideosFound = videos.length
+    const totalVideosProcessed = videos.length
+
+    // Debug spécial pour comprendre le problème Coupe-Gorge
+    if (bandName.toLowerCase().includes('coupe')) {
+      console.log(`[YouTube Scraper Server] === DEBUG COUPE-GORGE ===`)
+      console.log(`[YouTube Scraper Server] Recherche pour: "${bandName}"`)
+      console.log(`[YouTube Scraper Server] URL de recherche: ${brunoSearchUrl}`)
+      console.log(`[YouTube Scraper Server] Vidéos totales trouvées: ${totalVideosFound}`)
+      console.log(`[YouTube Scraper Server] Vidéos de Bruno trouvées: ${brunoVideosFound}`)
+      console.log(`[YouTube Scraper Server] Vidéos matchées: ${totalVideosProcessed}`)
+      
+      // Parcourir toutes les vidéos trouvées pour debug
+      let debugVideoCount = 0
+      for (const section of contents) {
+        const items = section?.itemSectionRenderer?.contents || []
+        for (const item of items) {
+          const videoRenderer = item?.videoRenderer
+          if (videoRenderer) {
+            debugVideoCount++
+            const title = videoRenderer?.title?.runs?.[0]?.text || ''
+            const channelName = videoRenderer?.ownerText?.runs?.[0]?.text || 
+                              videoRenderer?.longBylineText?.runs?.[0]?.text || ''
+            
+            console.log(`[YouTube Scraper Server] Vidéo ${debugVideoCount}: "${title}"`)
+            console.log(`[YouTube Scraper Server] - Channel: "${channelName}"`)
+            console.log(`[YouTube Scraper Server] - Is Bruno channel: ${channelName.toLowerCase().includes('bruno') && channelName.toLowerCase().includes('guézennec')}`)
+            
+            if (channelName.toLowerCase().includes('bruno') && channelName.toLowerCase().includes('guézennec')) {
+              const titleLower = title.toLowerCase()
+              const bandNameLower = bandName.toLowerCase()
+              
+              console.log(`[YouTube Scraper Server] - Title lower: "${titleLower}"`)
+              console.log(`[YouTube Scraper Server] - Band lower: "${bandNameLower}"`)
+              console.log(`[YouTube Scraper Server] - Direct match: ${titleLower.includes(bandNameLower)}`)
+              
+              if (bandNameLower.includes('-')) {
+                const bandWithSpaces = bandNameLower.replace(/-/g, ' ')
+                console.log(`[YouTube Scraper Server] - Band with spaces: "${bandWithSpaces}"`)
+                console.log(`[YouTube Scraper Server] - Space match: ${titleLower.includes(bandWithSpaces)}`)
+              }
+            }
+          }
+        }
+      }
+      console.log(`[YouTube Scraper Server] Total vidéos trouvées dans la page: ${debugVideoCount}`)
+      console.log(`[YouTube Scraper Server] === FIN DEBUG ===`)
+    }
 
     // Limiter à 6 vidéos pour l'affichage
     const limitedVideos = videos.slice(0, 6)

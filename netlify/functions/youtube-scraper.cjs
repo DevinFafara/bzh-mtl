@@ -120,26 +120,61 @@ exports.handler = async (event, context) => {
     try {
       const contents = videoData?.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents || []
       
+      console.log(`[Netlify Function] Nombre de sections trouvées: ${contents.length}`)
+      
+      let totalVideosFound = 0
+      let brunoVideosFound = 0
+      
       for (const section of contents) {
         const items = section?.itemSectionRenderer?.contents || []
+        console.log(`[Netlify Function] Nombre d'items dans cette section: ${items.length}`)
         
         for (const item of items) {
           const videoRenderer = item?.videoRenderer
           if (videoRenderer) {
+            totalVideosFound++
             const channelName = videoRenderer?.ownerText?.runs?.[0]?.text || 
                               videoRenderer?.longBylineText?.runs?.[0]?.text || ''
+            const title = videoRenderer?.title?.runs?.[0]?.text || ''
+            const videoId = videoRenderer?.videoId
+            
+            console.log(`[Netlify Function] Vidéo ${totalVideosFound}: "${title}" - Chaîne: "${channelName}"`)
             
             // Filtrer par chaîne Bruno Guézennec
-            if (channelName.toLowerCase().includes('bruno') && channelName.toLowerCase().includes('guézennec')) {
-              const title = videoRenderer?.title?.runs?.[0]?.text || ''
-              const videoId = videoRenderer?.videoId
+            const isBrunoChannel = channelName.toLowerCase().includes('bruno') && channelName.toLowerCase().includes('guézennec')
+            
+            if (isBrunoChannel) {
+              brunoVideosFound++
+              console.log(`[Netlify Function] ✓ Vidéo de Bruno trouvée: "${title}"`)
               
               if (videoId && title) {
-                // Vérifier si le titre contient le nom du groupe (insensible à la casse)
+                // Vérifier si le titre contient le nom du groupe (avec variantes tiret/espace)
                 const titleLower = title.toLowerCase()
                 const bandNameLower = bandName.toLowerCase()
                 
-                if (titleLower.includes(bandNameLower)) {
+                console.log(`[Netlify Function] Comparaison:`)
+                console.log(`[Netlify Function] - Titre: "${titleLower}"`)
+                console.log(`[Netlify Function] - Groupe recherché: "${bandNameLower}"`)
+                
+                // Recherche normale
+                let matches = titleLower.includes(bandNameLower)
+                console.log(`[Netlify Function] - Match direct: ${matches}`)
+                
+                // Si pas de match et que le nom contient un tiret, essayer avec des espaces
+                if (!matches && bandNameLower.includes('-')) {
+                  const bandWithSpaces = bandNameLower.replace(/-/g, ' ')
+                  matches = titleLower.includes(bandWithSpaces)
+                  console.log(`[Netlify Function] - Essai avec espaces "${bandWithSpaces}": ${matches}`)
+                }
+                
+                // Si pas de match et que le nom contient des espaces, essayer avec des tirets
+                if (!matches && bandNameLower.includes(' ')) {
+                  const bandWithDashes = bandNameLower.replace(/\s+/g, '-')
+                  matches = titleLower.includes(bandWithDashes)
+                  console.log(`[Netlify Function] - Essai avec tirets "${bandWithDashes}": ${matches}`)
+                }
+                
+                if (matches) {
                   const video = {
                     id: videoId,
                     title: title,
@@ -151,19 +186,29 @@ exports.handler = async (event, context) => {
                   }
                   
                   videos.push(video)
-                  console.log(`[YouTube Scraper] Vidéo trouvée: ${title}`)
-                  console.log(`[YouTube Scraper] - ID: ${videoId}`)
-                  console.log(`[YouTube Scraper] - Thumbnail URL: ${video.thumbnail}`)
-                  console.log(`[YouTube Scraper] - Channel: ${channelName}`)
-                  console.log(`[YouTube Scraper] - Duration: ${video.duration}`)
-                  console.log(`[YouTube Scraper] - Views: ${video.viewCount}`)
-                  console.log(`[YouTube Scraper] - Published: ${video.publishedTime}`)
+                  console.log(`[Netlify Function] 🎯 VIDÉO MATCHÉE: ${title}`)
+                  console.log(`[Netlify Function] - ID: ${videoId}`)
+                  console.log(`[Netlify Function] - Thumbnail URL: ${video.thumbnail}`)
+                  console.log(`[Netlify Function] - Channel: ${channelName}`)
+                  console.log(`[Netlify Function] - Duration: ${video.duration}`)
+                  console.log(`[Netlify Function] - Views: ${video.viewCount}`)
+                  console.log(`[Netlify Function] - Published: ${video.publishedTime}`)
+                } else {
+                  console.log(`[Netlify Function] ❌ Pas de match pour: "${title}"`)
                 }
               }
+            } else {
+              console.log(`[Netlify Function] ✗ Pas une vidéo de Bruno: "${channelName}"`)
             }
           }
         }
       }
+      
+      console.log(`[Netlify Function] Résumé du scraping:`)
+      console.log(`[Netlify Function] - Vidéos totales trouvées: ${totalVideosFound}`)
+      console.log(`[Netlify Function] - Vidéos de Bruno trouvées: ${brunoVideosFound}`)
+      console.log(`[Netlify Function] - Vidéos matchées pour "${bandName}": ${videos.length}`)
+      
     } catch (parseError) {
       console.error('[YouTube Scraper] Erreur lors du parsing des vidéos:', parseError)
       return {

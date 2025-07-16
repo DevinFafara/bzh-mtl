@@ -118,8 +118,26 @@ export default defineEventHandler(async (event) => {
         const isBruno = isBrunoGuezennecChannel(video.channelName)
         if (!isBruno) return false
         
-        // Vérifier si le titre contient le nom du groupe
-        return video.title.toLowerCase().includes(bandName.toLowerCase())
+        // Vérifier si le titre contient le nom du groupe (avec variantes tiret/espace)
+        const titleLower = video.title.toLowerCase()
+        const bandNameLower = bandName.toLowerCase()
+        
+        // Recherche normale
+        let matches = titleLower.includes(bandNameLower)
+        
+        // Si pas de match et que le nom contient un tiret, essayer avec des espaces
+        if (!matches && bandNameLower.includes('-')) {
+          const bandWithSpaces = bandNameLower.replace(/-/g, ' ')
+          matches = titleLower.includes(bandWithSpaces)
+        }
+        
+        // Si pas de match et que le nom contient des espaces, essayer avec des tirets
+        if (!matches && bandNameLower.includes(' ')) {
+          const bandWithDashes = bandNameLower.replace(/\s+/g, '-')
+          matches = titleLower.includes(bandWithDashes)
+        }
+        
+        return matches
       })
       .map((video: any) => ({
         id: video.videoId,
