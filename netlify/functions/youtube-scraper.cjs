@@ -182,9 +182,13 @@ exports.handler = async (event, context) => {
     }
 
     console.log(`[YouTube Scraper] ${videos.length} vidéo(s) trouvée(s) pour "${bandName}"`)
+    const totalVideosFound = videos.length
+
+    // Limiter à 6 vidéos pour l'affichage
+    const limitedVideos = videos.slice(0, 6)
 
     // Si aucune vidéo trouvée, retourner des vidéos de démo
-    if (videos.length === 0) {
+    if (limitedVideos.length === 0) {
       console.log('[YouTube Scraper] Aucune vidéo trouvée, retour de vidéos de démo')
       
       const demoVideo = {
@@ -209,6 +213,7 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({
           videos: [demoVideo],
           totalResults: 1,
+          totalVideosFound: 0,
           demo: true,
           message: `Aucune vidéo trouvée pour "${bandName}" sur la chaîne Bruno Guézennec. Vidéo d'exemple affichée.`
         })
@@ -219,8 +224,9 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        videos: videos,
-        totalResults: videos.length
+        videos: limitedVideos,
+        totalResults: limitedVideos.length,
+        totalVideosFound: totalVideosFound
       })
     }
 

@@ -30,6 +30,7 @@ const currentEndpointIndex = ref(0)
 const { data: videoData, pending, error, refresh: originalRefresh } = await useLazyFetch<{ 
   videos: YouTubeVideo[]
   totalResults: number
+  totalVideosFound?: number
   demo?: boolean
   message?: string
   serviceError?: boolean
@@ -143,33 +144,40 @@ const parseViewCount = (viewCountString: string): number => {
   }
 }
 
-// Vidéos avec tri appliqué
-const videos = computed(() => {
+// Vidéos organisées : 1 récente + 5 populaires (maximum 6 au total)
+const organizedVideos = computed(() => {
   const rawVideos = videoData.value?.videos || []
-  if (rawVideos.length === 0) return []
+  if (rawVideos.length === 0) return { recent: null, popular: [] }
   
-  // Créer une copie pour éviter de modifier l'original
-  return [...rawVideos].sort((a, b) => {
-    // Trier par nombre de vues décroissant
-    const viewsA = parseViewCount(a.viewCount || '0')
-    const viewsB = parseViewCount(b.viewCount || '0')
-    return viewsB - viewsA
-  })
-})
-
-// Vidéo la plus récente (basée sur la date de publication réelle)
-const mostRecentVideo = computed(() => {
-  const rawVideos = videoData.value?.videos || []
-  if (rawVideos.length === 0) return null
-  
-  // Trier par date de publication (plus récent en premier)
+  // Trouver la vidéo la plus récente
   const sortedByDate = [...rawVideos].sort((a, b) => {
     const timeA = parsePublishedTime(a.publishedTime || '')
     const timeB = parsePublishedTime(b.publishedTime || '')
     return timeB - timeA // Plus récent en premier
   })
+  const mostRecent = sortedByDate[0]
   
-  return sortedByDate[0]
+  // Trier les autres par popularité (excluant la plus récente)
+  const others = rawVideos.filter(video => video.id !== mostRecent?.id)
+  const sortedByViews = others.sort((a, b) => {
+    const viewsA = parseViewCount(a.viewCount || '0')
+    const viewsB = parseViewCount(b.viewCount || '0')
+    return viewsB - viewsA
+  })
+  
+  // Prendre maximum 5 vidéos populaires
+  const popular = sortedByViews.slice(0, 5)
+  
+  return { recent: mostRecent, popular }
+})
+
+// Vidéo la plus récente (pour compatibilité)
+const mostRecentVideo = computed(() => organizedVideos.value.recent)
+
+// Toutes les vidéos affichées (récente + populaires)
+const videos = computed(() => {
+  const { recent, popular } = organizedVideos.value
+  return recent ? [recent, ...popular] : popular
 })
 
 // Autres vidéos triées par vues (excluant la vidéo actuellement sélectionnée)
@@ -185,6 +193,18 @@ const hasServiceError = computed(() => videoData.value?.serviceError || false)
 const serviceErrorMessage = computed(() => videoData.value?.errorMessage || 'Service temporairement indisponible')
 const serviceErrorDetails = computed(() => videoData.value?.errorDetails || '')
 const isNetworkError = computed(() => videoData.value?.errorType === 'network')
+
+// Informations sur les vidéos supplémentaires
+const totalVideosFound = computed(() => videoData.value?.totalVideosFound || 0)
+const hasMoreVideos = computed(() => totalVideosFound.value > videos.value.length)
+const moreVideosCount = computed(() => totalVideosFound.value - videos.value.length)
+
+// URL vers la chaîne YouTube pour voir toutes les vidéos
+const channelSearchUrl = computed(() => {
+  if (!props.bandName) return ''
+  const searchQuery = encodeURIComponent(`${props.bandName}`)
+  return `https://www.youtube.com/@ConcertsMetal-BZH/search?query=${searchQuery}`
+})
 
 // Informations détaillées sur l'erreur pour debugging
 const errorDetails = computed(() => {
@@ -291,18 +311,18 @@ const handleImageLoad = (event: Event, videoId: string) => {
     
     <!-- En-tête avec compteur et bouton refresh (seulement si des vidéos sont trouvées) -->
     <div v-if="videos.length > 0" class="flex items-center justify-between mb-4">
-      <div class="flex items-center gap-2">
+      <!-- <div class="flex items-center gap-2">
         <Icon name="simple-icons:youtube" class="h-6 w-6 text-red-600" />
         <span class="text-sm text-gray-600">
           {{ isDemo ? 'Mode démo' : `${videos.length} vidéo${videos.length > 1 ? 's' : ''} trouvée${videos.length > 1 ? 's' : ''}` }}
         </span>
-      </div>
+      </div> -->
       <button 
         @click="refreshVideos"
         :disabled="pending"
         class="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
       >
-        {{ pending ? 'Chargement...' : 'Actualiser' }}
+        {{ pending ? 'Chargement...' : '' }}
       </button>
     </div>
     
@@ -441,7 +461,6 @@ const handleImageLoad = (event: Event, videoId: string) => {
       <div v-if="videos.length > 1" class="space-y-3">
         <h5 class="font-medium text-gray-900">
           Autres vidéos 
-          <span class="text-sm font-normal text-gray-600">(triées par popularité)</span>
         </h5>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <button
@@ -480,13 +499,6 @@ const handleImageLoad = (event: Event, videoId: string) => {
             <div class="flex-1 min-w-0 space-y-1">
               <div class="flex items-start gap-2">
                 <p class="font-medium text-gray-900 line-clamp-2 text-sm leading-tight flex-1">{{ video.title }}</p>
-                <!-- Badge "Plus populaire" pour la première vidéo triée par vues -->
-                <!-- <span 
-                  v-if="otherVideosSorted[0]?.id === video.id && otherVideosSorted.length > 1" 
-                  class="px-1.5 py-0.5 bg-orange-100 text-orange-800 rounded text-xs font-medium flex-shrink-0"
-                >
-                  🔥
-                </span> -->
               </div>
               <p class="text-xs text-gray-600">{{ video.channelTitle }}</p>
               <div class="flex items-center gap-2 text-xs text-gray-500">
@@ -495,6 +507,20 @@ const handleImageLoad = (event: Event, videoId: string) => {
               </div>
             </div>
           </button>
+        </div>
+
+        <!-- Lien vers plus de vidéos si disponibles -->
+        <div v-if="hasMoreVideos" class="mt-4 pt-4 border-t border-gray-200">
+          <a 
+            :href="channelSearchUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline"
+          >
+            <Icon name="heroicons:arrow-top-right-on-square" class="h-4 w-4" />
+            Voir les autres vidéos de {{ props.bandName }} sur ConcertsMetal-BZH
+            <span class="text-gray-500">({{ moreVideosCount }} vidéo{{ moreVideosCount > 1 ? 's' : '' }} supplémentaire{{ moreVideosCount > 1 ? 's' : '' }})</span>
+          </a>
         </div>
       </div>
     </div>

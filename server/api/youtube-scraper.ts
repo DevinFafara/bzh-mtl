@@ -110,7 +110,7 @@ export default defineEventHandler(async (event) => {
     }
     
     // Filtrer uniquement les vidéos de la chaîne "Bruno Guézennec" qui contiennent le nom du groupe
-    const brunoVideos = videoData
+    const allBrunoVideos = videoData
       .filter((video: any) => {
         if (!video.videoId || !video.title) return false
         
@@ -121,7 +121,6 @@ export default defineEventHandler(async (event) => {
         // Vérifier si le titre contient le nom du groupe
         return video.title.toLowerCase().includes(bandName.toLowerCase())
       })
-      .slice(0, 6) // Limiter à 6 vidéos
       .map((video: any) => ({
         id: video.videoId,
         title: cleanTitle(video.title),
@@ -131,6 +130,9 @@ export default defineEventHandler(async (event) => {
         viewCount: video.viewCount || '',
         publishedTime: video.publishedTime || ''
       }))
+
+    const totalVideosFound = allBrunoVideos.length
+    const brunoVideos = allBrunoVideos.slice(0, 6) // Limiter à 6 vidéos pour l'affichage
 
     // Ajouter des logs détaillés pour chaque vidéo trouvée
     brunoVideos.forEach((video, index) => {
@@ -148,13 +150,18 @@ export default defineEventHandler(async (event) => {
       return {
         videos: [],
         totalResults: 0,
+        totalVideosFound: 0,
         message: `Aucune vidéo de la chaîne "Bruno Guézennec" trouvée pour ${bandName}`
       }
     }
 
     const videos = brunoVideos
     
-    return { videos, totalResults: videos.length }
+    return { 
+      videos, 
+      totalResults: videos.length,
+      totalVideosFound: totalVideosFound
+    }
     
   } catch (error: any) {
     console.error('[YouTube Scraper] Erreur complète:', error)
@@ -188,6 +195,7 @@ export default defineEventHandler(async (event) => {
     return {
       videos: [],
       totalResults: 0,
+      totalVideosFound: 0,
       serviceError: true,
       errorType: isNetworkError ? 'network' : 'scraping',
       errorMessage: errorMessage,
