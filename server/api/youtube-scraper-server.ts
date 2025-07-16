@@ -110,7 +110,8 @@ export default defineEventHandler(async (event) => {
                   thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
                   channelTitle: channelName,
                   duration: videoRenderer?.lengthText?.simpleText || '',
-                  viewCount: videoRenderer?.viewCountText?.simpleText || ''
+                  viewCount: videoRenderer?.viewCountText?.simpleText || '',
+                  publishedTime: videoRenderer?.publishedTimeText?.simpleText || ''
                 }
                 
                 videos.push(video)
@@ -120,6 +121,7 @@ export default defineEventHandler(async (event) => {
                 console.log(`[YouTube Scraper Server] - Channel: ${channelName}`)
                 console.log(`[YouTube Scraper Server] - Duration: ${video.duration}`)
                 console.log(`[YouTube Scraper Server] - Views: ${video.viewCount}`)
+                console.log(`[YouTube Scraper Server] - Published: ${video.publishedTime}`)
               }
             }
           }

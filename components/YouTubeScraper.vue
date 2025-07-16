@@ -6,6 +6,7 @@ interface YouTubeVideo {
   channelTitle: string
   duration?: string
   viewCount?: string
+  publishedTime?: string
 }
 
 interface Props {
@@ -90,7 +91,94 @@ const refresh = async () => {
   }
 }
 
-const videos = computed(() => videoData.value?.videos || [])
+// Fonction pour convertir la date de publication en timestamp pour tri
+const parsePublishedTime = (publishedTimeString: string): number => {
+  if (!publishedTimeString) return 0
+  
+  const now = Date.now()
+  const cleanTime = publishedTimeString.toLowerCase().trim()
+  
+  // Gérer les formats français comme "il y a 2 semaines"
+  if (cleanTime.includes('il y a')) {
+    if (cleanTime.includes('minute') || cleanTime.includes('min')) {
+      const minutes = parseInt(cleanTime.match(/\d+/)?.[0] || '0')
+      return now - (minutes * 60 * 1000)
+    } else if (cleanTime.includes('heure') || cleanTime.includes('h ')) {
+      const hours = parseInt(cleanTime.match(/\d+/)?.[0] || '0')
+      return now - (hours * 60 * 60 * 1000)
+    } else if (cleanTime.includes('jour') || cleanTime.includes('day')) {
+      const days = parseInt(cleanTime.match(/\d+/)?.[0] || '0')
+      return now - (days * 24 * 60 * 60 * 1000)
+    } else if (cleanTime.includes('semaine') || cleanTime.includes('week')) {
+      const weeks = parseInt(cleanTime.match(/\d+/)?.[0] || '0')
+      return now - (weeks * 7 * 24 * 60 * 60 * 1000)
+    } else if (cleanTime.includes('mois') || cleanTime.includes('month')) {
+      const months = parseInt(cleanTime.match(/\d+/)?.[0] || '0')
+      return now - (months * 30 * 24 * 60 * 60 * 1000)
+    } else if (cleanTime.includes('an') || cleanTime.includes('year')) {
+      const years = parseInt(cleanTime.match(/\d+/)?.[0] || '0')
+      return now - (years * 365 * 24 * 60 * 60 * 1000)
+    }
+  }
+  
+  // Si on ne peut pas parser, retourner une date très ancienne
+  return 0
+}
+// Fonction pour convertir le nombre de vues en nombre pour tri
+const parseViewCount = (viewCountString: string): number => {
+  if (!viewCountString) return 0
+  
+  // Extraire le nombre du string "123 456 vues" ou "1,2M vues" etc.
+  const cleanCount = viewCountString.replace(/[^\d.,]/g, '')
+  
+  if (viewCountString.includes('M') || viewCountString.includes('m')) {
+    // Millions
+    return parseFloat(cleanCount) * 1000000
+  } else if (viewCountString.includes('K') || viewCountString.includes('k')) {
+    // Milliers
+    return parseFloat(cleanCount) * 1000
+  } else {
+    // Nombre normal (enlever espaces et virgules)
+    return parseInt(cleanCount.replace(/[\s,]/g, '')) || 0
+  }
+}
+
+// Vidéos avec tri appliqué
+const videos = computed(() => {
+  const rawVideos = videoData.value?.videos || []
+  if (rawVideos.length === 0) return []
+  
+  // Créer une copie pour éviter de modifier l'original
+  return [...rawVideos].sort((a, b) => {
+    // Trier par nombre de vues décroissant
+    const viewsA = parseViewCount(a.viewCount || '0')
+    const viewsB = parseViewCount(b.viewCount || '0')
+    return viewsB - viewsA
+  })
+})
+
+// Vidéo la plus récente (basée sur la date de publication réelle)
+const mostRecentVideo = computed(() => {
+  const rawVideos = videoData.value?.videos || []
+  if (rawVideos.length === 0) return null
+  
+  // Trier par date de publication (plus récent en premier)
+  const sortedByDate = [...rawVideos].sort((a, b) => {
+    const timeA = parsePublishedTime(a.publishedTime || '')
+    const timeB = parsePublishedTime(b.publishedTime || '')
+    return timeB - timeA // Plus récent en premier
+  })
+  
+  return sortedByDate[0]
+})
+
+// Autres vidéos triées par vues (excluant la vidéo actuellement sélectionnée)
+const otherVideosSorted = computed(() => {
+  if (!selectedVideo.value) return videos.value
+  
+  return videos.value.filter(video => video.id !== selectedVideo.value?.id)
+})
+
 const isDemo = computed(() => videoData.value?.demo || false)
 const noVideosMessage = computed(() => videoData.value?.message || '')
 const hasServiceError = computed(() => videoData.value?.serviceError || false)
@@ -131,13 +219,13 @@ const errorDetails = computed(() => {
   return details
 })
 
-// État pour la vidéo sélectionnée (par défaut la première)
+// État pour la vidéo sélectionnée (par défaut la plus récente)
 const selectedVideo = ref<YouTubeVideo | null>(null)
 
-// Sélectionner la première vidéo par défaut
-watch(videos, (newVideos) => {
-  if (newVideos.length > 0 && !selectedVideo.value) {
-    selectedVideo.value = newVideos[0]
+// Sélectionner la vidéo la plus récente par défaut
+watch(mostRecentVideo, (newMostRecent) => {
+  if (newMostRecent && !selectedVideo.value) {
+    selectedVideo.value = newMostRecent
   }
 }, { immediate: true })
 
@@ -149,7 +237,7 @@ const selectVideo = (video: YouTubeVideo) => {
 // URL d'embed YouTube
 const embedUrl = computed(() => {
   if (!selectedVideo.value) return ''
-  return `https://www.youtube.com/embed/${selectedVideo.value.id}?autoplay=0&rel=0`
+  return `https://www.youtube.com/embed/${selectedVideo.value.id}?autoplay=0&rel=0&modestbranding=1&enablejsapi=0`
 })
 
 // Fonction pour rafraîchir les données
@@ -338,22 +426,33 @@ const handleImageLoad = (event: Event, videoId: string) => {
           <span>{{ selectedVideo.channelTitle }}</span>
           <span v-if="selectedVideo.duration">{{ selectedVideo.duration }}</span>
           <span v-if="selectedVideo.viewCount">{{ selectedVideo.viewCount }}</span>
+          <span v-if="selectedVideo.publishedTime" class="text-gray-600"> {{ selectedVideo.publishedTime }}</span>
+          <!-- Badge "Plus récente" si c'est la vidéo la plus récente -->
+          <span 
+            v-if="selectedVideo.id === mostRecentVideo?.id" 
+            class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium"
+          >
+            🆕 Plus récente
+          </span>
         </div>
       </div>
       
       <!-- Liste des autres vidéos (si plus d'une) -->
       <div v-if="videos.length > 1" class="space-y-3">
-        <h5 class="font-medium text-gray-900">Autres vidéos :</h5>
+        <h5 class="font-medium text-gray-900">
+          Autres vidéos 
+          <span class="text-sm font-normal text-gray-600">(triées par popularité)</span>
+        </h5>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <button
-            v-for="video in videos.filter((v: YouTubeVideo) => v.id !== selectedVideo?.id)"
+            v-for="video in otherVideosSorted"
             :key="video.id"
             @click="selectVideo(video)"
             class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left group"
           >
             <!-- Thumbnail avec overlay play -->
-            <div style="position: relative; flex-shrink: 0;">
-              <!-- TEST: Image simple sans classes Tailwind -->
+            <div style="position: relative; flex-shrink: 0;" class="thumbnail-container">
+              <!-- Image thumbnail -->
               <img
                 :src="video.thumbnail"
                 :alt="video.title"
@@ -365,10 +464,10 @@ const handleImageLoad = (event: Event, videoId: string) => {
               />
               
               <!-- Overlay play icon -->
-              <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background-color 0.2s;" 
-                   class="group-hover:bg-black group-hover:bg-opacity-30">
-                <Icon name="heroicons:play" style="width: 24px; height: 24px; color: white; opacity: 0; transition: opacity 0.2s;" 
-                      class="group-hover:opacity-100" />
+              <div class="play-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; background-color: rgba(0,0,0,0); transition: background-color 0.3s ease;">
+                <svg class="play-icon" style="width: 18px; height: 18px; color: white; opacity: 0; transition: opacity 0.3s ease;" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
               </div>
               
               <!-- Duration badge -->
@@ -379,9 +478,21 @@ const handleImageLoad = (event: Event, videoId: string) => {
             
             <!-- Infos vidéo -->
             <div class="flex-1 min-w-0 space-y-1">
-              <p class="font-medium text-gray-900 line-clamp-2 text-sm leading-tight">{{ video.title }}</p>
+              <div class="flex items-start gap-2">
+                <p class="font-medium text-gray-900 line-clamp-2 text-sm leading-tight flex-1">{{ video.title }}</p>
+                <!-- Badge "Plus populaire" pour la première vidéo triée par vues -->
+                <!-- <span 
+                  v-if="otherVideosSorted[0]?.id === video.id && otherVideosSorted.length > 1" 
+                  class="px-1.5 py-0.5 bg-orange-100 text-orange-800 rounded text-xs font-medium flex-shrink-0"
+                >
+                  🔥
+                </span> -->
+              </div>
               <p class="text-xs text-gray-600">{{ video.channelTitle }}</p>
-              <p v-if="video.viewCount" class="text-xs text-gray-500">{{ video.viewCount }}</p>
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                <span v-if="video.viewCount">{{ video.viewCount }}</span>
+                <span v-if="video.publishedTime" class="text-gray-500"> {{ video.publishedTime }}</span>
+              </div>
             </div>
           </button>
         </div>
@@ -397,5 +508,14 @@ const handleImageLoad = (event: Event, videoId: string) => {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Effet hover pour les thumbnails */
+.thumbnail-container:hover .play-overlay {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.thumbnail-container:hover .play-icon {
+  opacity: 1 !important;
 }
 </style>

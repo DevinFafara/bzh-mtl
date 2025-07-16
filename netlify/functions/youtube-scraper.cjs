@@ -146,7 +146,8 @@ exports.handler = async (event, context) => {
                     thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
                     channelTitle: channelName,
                     duration: videoRenderer?.lengthText?.simpleText || '',
-                    viewCount: videoRenderer?.viewCountText?.simpleText || ''
+                    viewCount: videoRenderer?.viewCountText?.simpleText || '',
+                    publishedTime: videoRenderer?.publishedTimeText?.simpleText || ''
                   }
                   
                   videos.push(video)
@@ -156,6 +157,7 @@ exports.handler = async (event, context) => {
                   console.log(`[YouTube Scraper] - Channel: ${channelName}`)
                   console.log(`[YouTube Scraper] - Duration: ${video.duration}`)
                   console.log(`[YouTube Scraper] - Views: ${video.viewCount}`)
+                  console.log(`[YouTube Scraper] - Published: ${video.publishedTime}`)
                 }
               }
             }

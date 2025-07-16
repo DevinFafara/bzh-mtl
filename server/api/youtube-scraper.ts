@@ -128,7 +128,8 @@ export default defineEventHandler(async (event) => {
         thumbnail: `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`,
         channelTitle: video.channelName || 'Bruno Guézennec',
         duration: video.duration || '',
-        viewCount: video.viewCount || ''
+        viewCount: video.viewCount || '',
+        publishedTime: video.publishedTime || ''
       }))
 
     // Ajouter des logs détaillés pour chaque vidéo trouvée
@@ -139,6 +140,7 @@ export default defineEventHandler(async (event) => {
       console.log(`[YouTube Scraper] - Channel: ${video.channelTitle}`)
       console.log(`[YouTube Scraper] - Duration: ${video.duration}`)
       console.log(`[YouTube Scraper] - Views: ${video.viewCount}`)
+      console.log(`[YouTube Scraper] - Published: ${video.publishedTime}`)
     })
 
     // Si aucune vidéo de Bruno n'est trouvée, retourner un message d'info
@@ -241,7 +243,8 @@ function extractVideoDataFromHTML(html: string) {
             title: videoRenderer.title?.runs?.[0]?.text || videoRenderer.title?.simpleText || '',
             channelName: channelName,
             duration: videoRenderer.lengthText?.simpleText || '',
-            viewCount: videoRenderer.viewCountText?.simpleText || ''
+            viewCount: videoRenderer.viewCountText?.simpleText || '',
+            publishedTime: videoRenderer.publishedTimeText?.simpleText || ''
           }
           
           if (video.videoId && video.title) {
