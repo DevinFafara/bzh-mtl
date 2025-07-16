@@ -156,6 +156,41 @@ const embedUrl = computed(() => {
 const refreshVideos = () => {
   refresh()
 }
+
+// Fonction pour gérer les erreurs de chargement d'image
+const handleImageError = (event: Event, videoId: string) => {
+  const img = event.target as HTMLImageElement
+  const currentSrc = img.src
+  
+  console.log(`[YouTubeScraper Frontend] Erreur de chargement pour thumbnail: ${currentSrc}`)
+  console.log(`[YouTubeScraper Frontend] Video ID: ${videoId}`)
+  console.log(`[YouTubeScraper Frontend] Event:`, event)
+  
+  // Essayer différentes résolutions de thumbnail
+  if (currentSrc.includes('mqdefault.jpg')) {
+    // Essayer avec maxresdefault.jpg
+    img.src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+    console.log(`[YouTubeScraper Frontend] Tentative avec maxresdefault: ${img.src}`)
+  } else if (currentSrc.includes('maxresdefault.jpg')) {
+    // Essayer avec hqdefault.jpg
+    img.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+    console.log(`[YouTubeScraper Frontend] Tentative avec hqdefault: ${img.src}`)
+  } else if (currentSrc.includes('hqdefault.jpg')) {
+    // Essayer avec default.jpg
+    img.src = `https://img.youtube.com/vi/${videoId}/default.jpg`
+    console.log(`[YouTubeScraper Frontend] Tentative avec default: ${img.src}`)
+  } else {
+    // En dernier recours, afficher une image placeholder
+    img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB2aWV3Qm94PSIwIDAgMTIwIDkwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjYwIiB5PSI0NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNjY2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Wm91VHViZTwvdGV4dD4KPHN2Zz4K'
+    console.log(`[YouTubeScraper Frontend] Fallback vers placeholder pour ${videoId}`)
+  }
+}
+
+// Fonction pour logger le chargement réussi d'une image
+const handleImageLoad = (event: Event, videoId: string) => {
+  const img = event.target as HTMLImageElement
+  console.log(`[YouTubeScraper Frontend] Image chargée avec succès: ${img.src} pour video ${videoId}`)
+}
 </script>
 
 <template>
@@ -317,17 +352,27 @@ const refreshVideos = () => {
             class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left group"
           >
             <!-- Thumbnail avec overlay play -->
-            <div class="relative flex-shrink-0">
+            <div style="position: relative; flex-shrink: 0;">
+              <!-- TEST: Image simple sans classes Tailwind -->
               <img
                 :src="video.thumbnail"
                 :alt="video.title"
-                class="w-24 h-18 object-cover rounded"
+                style="width: 96px; height: 72px; object-fit: cover; border-radius: 8px; display: block;"
                 loading="lazy"
+                referrerpolicy="no-referrer"
+                @error="handleImageError($event, video.id)"
+                @load="handleImageLoad($event, video.id)"
               />
-              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center rounded">
-                <Icon name="heroicons:play" class="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+              <!-- Overlay play icon -->
+              <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background-color 0.2s;" 
+                   class="group-hover:bg-black group-hover:bg-opacity-30">
+                <Icon name="heroicons:play" style="width: 24px; height: 24px; color: white; opacity: 0; transition: opacity 0.2s;" 
+                      class="group-hover:opacity-100" />
               </div>
-              <div v-if="video.duration" class="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-xs px-1 rounded">
+              
+              <!-- Duration badge -->
+              <div v-if="video.duration" style="position: absolute; bottom: 4px; right: 4px; background-color: rgba(0,0,0,0.8); color: white; font-size: 12px; padding: 2px 4px; border-radius: 4px;">
                 {{ video.duration }}
               </div>
             </div>

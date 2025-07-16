@@ -131,6 +131,16 @@ export default defineEventHandler(async (event) => {
         viewCount: video.viewCount || ''
       }))
 
+    // Ajouter des logs détaillés pour chaque vidéo trouvée
+    brunoVideos.forEach((video, index) => {
+      console.log(`[YouTube Scraper] Vidéo ${index + 1} trouvée: ${video.title}`)
+      console.log(`[YouTube Scraper] - ID: ${video.id}`)
+      console.log(`[YouTube Scraper] - Thumbnail URL: ${video.thumbnail}`)
+      console.log(`[YouTube Scraper] - Channel: ${video.channelTitle}`)
+      console.log(`[YouTube Scraper] - Duration: ${video.duration}`)
+      console.log(`[YouTube Scraper] - Views: ${video.viewCount}`)
+    })
+
     // Si aucune vidéo de Bruno n'est trouvée, retourner un message d'info
     if (brunoVideos.length === 0) {
       return {

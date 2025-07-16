@@ -143,7 +143,7 @@ exports.handler = async (event, context) => {
                   const video = {
                     id: videoId,
                     title: title,
-                    thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+                    thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
                     channelTitle: channelName,
                     duration: videoRenderer?.lengthText?.simpleText || '',
                     viewCount: videoRenderer?.viewCountText?.simpleText || ''
@@ -151,6 +151,11 @@ exports.handler = async (event, context) => {
                   
                   videos.push(video)
                   console.log(`[YouTube Scraper] Vidéo trouvée: ${title}`)
+                  console.log(`[YouTube Scraper] - ID: ${videoId}`)
+                  console.log(`[YouTube Scraper] - Thumbnail URL: ${video.thumbnail}`)
+                  console.log(`[YouTube Scraper] - Channel: ${channelName}`)
+                  console.log(`[YouTube Scraper] - Duration: ${video.duration}`)
+                  console.log(`[YouTube Scraper] - Views: ${video.viewCount}`)
                 }
               }
             }
@@ -180,20 +185,27 @@ exports.handler = async (event, context) => {
     if (videos.length === 0) {
       console.log('[YouTube Scraper] Aucune vidéo trouvée, retour de vidéos de démo')
       
+      const demoVideo = {
+        id: "qTsomvebRAA",
+        title: "Testament - Electric crown [Live Hellfest 2023 - dimanche 18 juin]",
+        thumbnail: "https://img.youtube.com/vi/qTsomvebRAA/hqdefault.jpg",
+        channelTitle: "Bruno Guézennec",
+        duration: "5:35",
+        viewCount: "482 vues"
+      }
+      
+      console.log(`[YouTube Scraper] Vidéo de démo retournée:`)
+      console.log(`[YouTube Scraper] - ID: ${demoVideo.id}`)
+      console.log(`[YouTube Scraper] - Thumbnail URL: ${demoVideo.thumbnail}`)
+      console.log(`[YouTube Scraper] - Channel: ${demoVideo.channelTitle}`)
+      console.log(`[YouTube Scraper] - Duration: ${demoVideo.duration}`)
+      console.log(`[YouTube Scraper] - Views: ${demoVideo.viewCount}`)
+      
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
-          videos: [
-            {
-              id: "qTsomvebRAA",
-              title: "Testament - Electric crown [Live Hellfest 2023 - dimanche 18 juin]",
-              thumbnail: "https://img.youtube.com/vi/qTsomvebRAA/mqdefault.jpg",
-              channelTitle: "Bruno Guézennec",
-              duration: "5:35",
-              viewCount: "482 vues"
-            }
-          ],
+          videos: [demoVideo],
           totalResults: 1,
           demo: true,
           message: `Aucune vidéo trouvée pour "${bandName}" sur la chaîne Bruno Guézennec. Vidéo d'exemple affichée.`
