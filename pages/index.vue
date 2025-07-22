@@ -106,7 +106,30 @@ onMounted(() => {
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Bannière avec logo et titre -->
-    <section class="relative bg-stone-900 text-white">
+    <section class="relative bg-stone-900 text-white overflow-hidden">
+      <!-- Logo en arrière-plan -->
+      <div class="absolute inset-0 flex items-center justify-center opacity-90">
+        <img 
+          src="~/assets/img/logo.png" 
+          alt="BZH-MTL Logo Background" 
+          class="h-64 w-64 md:h-80 md:w-80 lg:h-96 lg:w-96 object-contain"
+        />
+      </div>
+      
+      <!-- Contenu par-dessus -->
+      <div class="relative z-10 container mx-auto px-4 py-12 md:py-16">
+        <div class="text-center">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 hero-title">
+            Breizh Metal Magazine
+          </h1>
+          <p class="text-lg md:text-xl text-white-300 font-medium hero-subtitle">
+            Scène bretonne • Chroniques • Concerts
+          </p>
+        </div>
+      </div>
+      
+      <!-- Ancien affichage en commentaire -->
+      <!--
       <div class="container mx-auto px-4 py-12 md:py-16">
         <div class="flex flex-col md:flex-row items-center justify-between">
           <div class="flex items-center space-x-4 mb-6 md:mb-0">
@@ -129,6 +152,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
+      -->
     </section>
 
     <!-- Contenu principal -->
@@ -222,3 +246,18 @@ onMounted(() => {
     </main>
   </div>
 </template>
+
+<style scoped>
+.hero-title {
+  text-shadow: 
+    2px 2px 4px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  text-shadow: 
+    1px 1px 3px rgba(0, 0, 0, 0.7),
+    0 0 8px rgba(0, 0, 0, 0.4);
+}
+</style>
