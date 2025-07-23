@@ -71,6 +71,7 @@ interface Band {
     bandcamp?: string
     spotify?: string
     facebook?: string
+    soundcloud?: string
     youtube?: string
     linktree?: string
     instagram?: string
@@ -250,6 +251,9 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
               </a>
               <a v-if="band.links.facebook" :href="band.links.facebook" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-black">
                 <Icon name="simple-icons:facebook" class="h-6 w-6" />
+              </a>
+              <a v-if="band.links.soundcloud" :href="band.links.soundcloud" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-black">
+                <Icon name="simple-icons:soundcloud" class="h-6 w-6" />
               </a>
               <a v-if="band.links.instagram" :href="band.links.instagram" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-black">
                 <Icon name="simple-icons:instagram" class="h-6 w-6" />
