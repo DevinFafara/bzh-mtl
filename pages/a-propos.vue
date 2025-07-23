@@ -39,10 +39,10 @@ useHead({
       </div>
       <div class="prose lg:prose-xl mx-auto mt-12 text-justify">
         <p>
-          Breizh Metal Magazine est né d'une idée simple : créer un espace dédié à la richesse et à la diversité de la scène metal en Bretagne. Des côtes du Finistère aux terres d'Ille-et-Vilaine, notre région regorge de talents, de salles mythiques et de festivals qui méritent d'être mis en lumière.
+          Breizh Metal Magazine est né d’une idée simple : créer un espace dédié à la richesse et à la diversité de la scène Metal / Punk / Hardcore en Bretagne. Des côtes du Finistère aux terres de Loire-Atlantique, notre région regorge de talents, de salles mythiques et de festivals qui méritent d’être mis en lumière.
         </p>
         <blockquote>
-          Notre mission : être votre boussole dans le Maelström du metal breton.
+          Notre mission : être votre boussole dans le Maelström de la scène locale et émergente en Bretagne.
         </blockquote>
         <p>
           Ce projet est porté par des passionnés, pour des passionnés. Chaque ligne de code, chaque chronique et chaque photo est le fruit de notre dévotion à cette musique qui nous anime.
