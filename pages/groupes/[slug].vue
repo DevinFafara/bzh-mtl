@@ -453,6 +453,22 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
 /* Layout par défaut : mobile/petit écran */
 /* 1) logo, 2) infos, 3) bio, 4) auteur en colonne */
 
+/* Rendre les iframes YouTube responsives dans la bio */
+.bio-section :deep(iframe) {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+/* Conteneur responsive pour les iframes YouTube */
+.bio-section :deep(iframe[src*="youtube.com"]),
+.bio-section :deep(iframe[src*="youtu.be"]) {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
 /* Écran moyen : logo + infos côte à côte, bio en pleine largeur dessous */
 @media (min-width: 640px) and (max-width: 1023px) {
   .container {
