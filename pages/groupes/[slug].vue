@@ -57,6 +57,24 @@ const upcomingEventsQuery = groq`*[_type == "event" && (
   }
 }`;
 
+// Requête pour navigation (groupe précédent et suivant par ordre alphabétique)
+const navigationQuery = groq`{
+  "previous": *[_type == "band" && name < $currentName] | order(name desc) [0] {
+    _id,
+    name,
+    "slug": slug.current,
+    pressPhoto,
+    "styles": styles[]->{title}
+  },
+  "next": *[_type == "band" && name > $currentName] | order(name asc) [0] {
+    _id,
+    name,
+    "slug": slug.current,
+    pressPhoto,
+    "styles": styles[]->{title}
+  }
+}`;
+
 interface Band {
   _id: string
   name: string
@@ -119,6 +137,19 @@ interface UpcomingEvent {
   }
 }
 
+interface NavigationBand {
+  _id: string
+  name: string
+  slug: string
+  pressPhoto?: { asset: { _ref: string } }
+  styles?: Array<{ title: string }>
+}
+
+interface Navigation {
+  previous?: NavigationBand
+  next?: NavigationBand
+}
+
 const { data: band } = await useSanityQuery<Band>(query, { slug: route.params.slug });
 
 // Requête pour les articles connexes (seulement si on a un groupe)
@@ -129,6 +160,11 @@ const { data: relatedPosts } = await useSanityQuery<RelatedPost[]>(relatedPostsQ
 // Requête pour les prochains événements où ce groupe est dans le lineup
 const { data: upcomingEvents } = await useSanityQuery<UpcomingEvent[]>(upcomingEventsQuery, {
   bandId: band.value?._id || ''
+});
+
+// Requête pour la navigation (groupes précédent et suivant)
+const { data: navigation } = await useSanityQuery<Navigation>(navigationQuery, {
+  currentName: band.value?.name || ''
 });
 
 // Fonction pour formater la date des événements (nouvelle structure)
@@ -365,6 +401,43 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
           </div>
         </div>
       </div>
+
+      <!-- 8. Navigation entre groupes -->
+      <div v-if="navigation?.previous || navigation?.next" class="navigation-section mt-12">
+        <div class="grid grid-cols-2 w-full border border-gray-300 rounded-lg overflow-hidden">
+          <!-- Moitié gauche : Groupe précédent -->
+          <NuxtLink 
+            v-if="navigation.previous" 
+            :to="`/groupes/${navigation.previous.slug}`"
+            class="flex flex-col items-center justify-center p-4 bg-white hover:bg-gray-50 transition-colors border-r border-gray-300 text-center"
+          >
+            <div class="flex items-center mb-1">
+              <Icon name="heroicons:chevron-left" class="h-5 w-5 text-gray-600 mr-2" />
+              <span class="text-gray-800 font-medium">Groupe précédent</span>
+            </div>
+            <span class="text-gray-800 font-semibold bg-blue-100 px-3 py-1 rounded-lg w-full text-center">{{ navigation.previous.name }}</span>
+          </NuxtLink>
+          <div v-else class="flex items-center justify-center p-4 bg-gray-100 border-r border-gray-300 text-center">
+            <span class="text-gray-400">Pas de groupe précédent</span>
+          </div>
+          
+          <!-- Moitié droite : Groupe suivant -->
+          <NuxtLink 
+            v-if="navigation.next" 
+            :to="`/groupes/${navigation.next.slug}`"
+            class="flex flex-col items-center justify-center p-4 bg-white hover:bg-gray-50 transition-colors text-center"
+          >
+            <div class="flex items-center mb-1">
+              <span class="text-gray-800 font-medium">Groupe suivant</span>
+              <Icon name="heroicons:chevron-right" class="h-5 w-5 text-gray-600 ml-2" />
+            </div>
+            <span class="text-gray-800 font-semibold bg-blue-100 px-3 py-1 rounded-lg w-full text-center">{{ navigation.next.name }}</span>
+          </NuxtLink>
+          <div v-else class="flex items-center justify-center p-4 bg-gray-100 text-center">
+            <span class="text-gray-400">Pas de groupe suivant</span>
+          </div>
+        </div>
+      </div>
       
 
       
@@ -389,8 +462,10 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
       "logo infos"
       "bio bio"
       "events events"
+      "youtube youtube"
       "related related"
-      "author author";
+      "author author"
+      "navigation navigation";
     gap: 1.5rem;
   }
   
@@ -401,9 +476,11 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
   .logo-section { grid-area: logo; }
   .infos-section { grid-area: infos; }
   .bio-section { grid-area: bio; }
+  .youtube-section { grid-area: youtube; }
   .related-posts-section { grid-area: related; }
   .upcoming-events-section { grid-area: events; }
   .author-section { grid-area: author; }
+  .navigation-section { grid-area: navigation; }
 }
 
 /* Grand écran : logo + infos dans colonne gauche (33%), bio à droite (67%) */
@@ -416,7 +493,8 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
       "events events"
       "youtube youtube"
       "related related"
-      "author author";
+      "author author"
+      "navigation navigation";
     gap: 2rem;
   }
   
@@ -449,6 +527,11 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
   .author-section { 
     grid-area: author; 
     margin-top: 2rem;
+  }
+  
+  .navigation-section { 
+    grid-area: navigation; 
+    margin-top: 0;
   }
 }
 </style>
