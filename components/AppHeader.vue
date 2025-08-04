@@ -9,7 +9,7 @@ const sceneLocaleItems = [
 ];
 const chroniquesItems = [
   { label: 'News', to: '/chroniques/news' },
-  { label: 'Album Review', to: '/chroniques/album-review' },
+  // { label: 'Album Review', to: '/chroniques/album-review' },
   { label: 'Live Report', to: '/chroniques/live-report' },
   { label: 'Interviews', to: '/chroniques/interviews' }
 ];
