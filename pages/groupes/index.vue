@@ -91,6 +91,10 @@ const clearSearch = () => {
   <div class="container mx-auto p-4 md:p-8">
     <h1 class="text-2xl md:text-4xl font-bold mb-8">La Scène Bretonne</h1>
 
+    <p>Cette liste n’est pas définitive, nous ajoutons des groupes chaque semaine.
+      Une condition : avoir au moins un EP (ou une démo)
+    </p>
+    <br></br>
     <!-- Barre de recherche -->
     <div class="mb-6">
       <div class="max-w-md mx-auto sm:mx-0">

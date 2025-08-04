@@ -15,6 +15,40 @@ const query = groq`*[_type == "post" && slug.current == $slug][0] {
   "relatedVenue": relatedVenue->{ name, "slug": slug.current, city }
 }`;
 
+// Requête pour navigation (article précédent et suivant par date de publication)
+const navigationQuery = groq`{
+  "previous": *[_type == "post" && publishedAt < $currentDate] | order(publishedAt desc) [0] {
+    _id,
+    title,
+    "slug": slug.current,
+    mainImage,
+    articleType,
+    publishedAt
+  },
+  "next": *[_type == "post" && publishedAt > $currentDate] | order(publishedAt asc) [0] {
+    _id,
+    title,
+    "slug": slug.current,
+    mainImage,
+    articleType,
+    publishedAt
+  }
+}`;
+
+interface NavigationPost {
+  _id: string
+  title: string
+  slug: string
+  mainImage?: { asset: { _ref: string } }
+  articleType: string
+  publishedAt: string
+}
+
+interface Navigation {
+  previous?: NavigationPost
+  next?: NavigationPost
+}
+
 // Définition du type Post pour typer correctement la donnée récupérée
 interface Post {
   title?: string;
@@ -42,6 +76,11 @@ interface Post {
 
 // On passe le slug de l'URL en paramètre à la requête
 const { data: post, pending } = await useSanityQuery<Post>(query, { slug: route.params.slug });
+
+// Requête pour la navigation (articles précédent et suivant)
+const { data: navigation } = await useSanityQuery<Navigation>(navigationQuery, {
+  currentDate: post.value?.publishedAt || ''
+});
 
 const formattedDate = computed(() => {
   if (!post.value?.publishedAt) return '';
@@ -146,6 +185,43 @@ const formattedDate = computed(() => {
           </div>
         </aside>
 
+      </div>
+      
+      <!-- Navigation entre articles -->
+      <div v-if="navigation?.previous || navigation?.next" class="navigation-section mt-12">
+        <div class="grid grid-cols-2 w-full border border-gray-300 rounded-lg overflow-hidden">
+          <!-- Moitié gauche : Article précédent -->
+          <NuxtLink 
+            v-if="navigation.previous" 
+            :to="`/articles/${navigation.previous.slug}`"
+            class="flex flex-col items-center justify-center p-4 bg-white hover:bg-gray-50 transition-colors border-r border-gray-300 text-center"
+          >
+            <div class="flex items-center mb-1">
+              <Icon name="heroicons:chevron-left" class="h-5 w-5 text-gray-600 mr-2" />
+              <span class="text-gray-800 font-medium">Article précédent</span>
+            </div>
+            <span class="text-gray-800 font-semibold bg-blue-100 px-3 py-1 rounded-lg w-full text-center">{{ navigation.previous.title }}</span>
+          </NuxtLink>
+          <div v-else class="flex items-center justify-center p-4 bg-gray-100 border-r border-gray-300 text-center">
+            <span class="text-gray-400">Pas d'article précédent</span>
+          </div>
+          
+          <!-- Moitié droite : Article suivant -->
+          <NuxtLink 
+            v-if="navigation.next" 
+            :to="`/articles/${navigation.next.slug}`"
+            class="flex flex-col items-center justify-center p-4 bg-white hover:bg-gray-50 transition-colors text-center"
+          >
+            <div class="flex items-center mb-1">
+              <span class="text-gray-800 font-medium">Article suivant</span>
+              <Icon name="heroicons:chevron-right" class="h-5 w-5 text-gray-600 ml-2" />
+            </div>
+            <span class="text-gray-800 font-semibold bg-blue-100 px-3 py-1 rounded-lg w-full text-center">{{ navigation.next.title }}</span>
+          </NuxtLink>
+          <div v-else class="flex items-center justify-center p-4 bg-gray-100 text-center">
+            <span class="text-gray-400">Pas d'article suivant</span>
+          </div>
+        </div>
       </div>
     </div>
   </article>

@@ -123,7 +123,7 @@ onMounted(() => {
             Breizh Metal Magazine
           </h1>
           <p class="text-lg md:text-xl text-white-300 font-medium hero-subtitle">
-            Scène bretonne • Chroniques • Concerts
+            Tout sur la Scène locale / émergente / underground
           </p>
         </div>
       </div>
