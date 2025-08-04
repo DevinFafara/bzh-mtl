@@ -103,10 +103,11 @@ const formattedDate = computed(() => {
       <div class="container mx-auto px-4 relative text-center">
         <h1 class="text-4xl md:text-6xl font-extrabold">{{ post.title }}</h1>
         <p class="mt-4 text-lg text-gray-300">
-          Publié le {{ formattedDate }} par 
+          Publié le {{ formattedDate }} 
+          <!-- par 
           <NuxtLink v-if="post.author" :to="`/auteurs/${post.author.slug}`" class="font-semibold hover:underline">
             {{ post.author.name }}
-          </NuxtLink>
+          </NuxtLink> -->
         </p>
       </div>
     </header>
