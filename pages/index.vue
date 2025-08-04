@@ -98,7 +98,7 @@ const randomBands = ref<Band[]>([]);
 onMounted(() => {
   if (allBands.value && Array.isArray(allBands.value) && allBands.value.length > 0) {
     const shuffled = [...allBands.value].sort(() => Math.random() - 0.5);
-    randomBands.value = shuffled.slice(0, 3);
+    randomBands.value = shuffled.slice(0, 4);
   }
 });
 </script>
@@ -232,7 +232,7 @@ onMounted(() => {
         
         <!-- Skeleton loading côté client -->
         <div v-else-if="allBands && allBands.length > 0" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <div v-for="n in 3" :key="n" class="animate-pulse">
+          <div v-for="n in 4" :key="n" class="animate-pulse">
             <div class="bg-gray-200 rounded-lg h-64"></div>
           </div>
         </div>
