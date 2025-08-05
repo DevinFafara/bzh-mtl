@@ -68,7 +68,7 @@
               de suppression et de portabilité des données vous concernant.
             </p>
             <p class="text-gray-700 leading-relaxed">
-              Pour exercer ces droits, contactez-nous à : contact@bzhmetalmagazine.com
+              Pour exercer ces droits, contactez-nous à : breizh.webzine@gmail.com
             </p>
           </div>
 

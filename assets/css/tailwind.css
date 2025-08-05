@@ -5,3 +5,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Styles personnalisés pour les iframes YouTube responsives */
+@layer components {
+  /* Rendre toutes les iframes YouTube responsives */
+  iframe[src*="youtube.com"],
+  iframe[src*="youtu.be"] {
+    @apply max-w-full h-auto;
+    aspect-ratio: 16/9;
+  }
+  
+  /* Container pour le contenu Sanity avec iframes responsives */
+  .sanity-content iframe {
+    @apply max-w-full h-auto;
+  }
+}
+
