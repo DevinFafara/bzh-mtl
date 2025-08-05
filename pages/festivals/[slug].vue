@@ -209,27 +209,7 @@ const formatDuration = computed(() => {
           </div>
 
           <!-- Auteur -->
-          <div v-if="festival.author" class="bg-gray-50 p-6 rounded-lg">
-            <div class="flex items-start gap-4">
-              <NuxtImg
-                v-if="festival.author.image"
-                :src="festival.author.image.asset._ref"
-                provider="sanity"
-                class="h-16 w-16 rounded-full object-cover flex-shrink-0"
-              />
-              <div>
-                <p class="font-semibold">
-                  Fiche rédigée par 
-                  <NuxtLink :to="`/auteurs/${festival.author.slug}`" class="text-blue-600 hover:underline">
-                    {{ festival.author.name }}
-                  </NuxtLink>
-                </p>
-                <div v-if="festival.author.citation" class="text-gray-600 italic mt-2 prose prose-sm">
-                  <p>{{ festival.author.citation }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AuthorSection :author="festival.author" />
         </div>
         
         <!-- Colonne latérale -->

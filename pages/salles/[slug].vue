@@ -230,27 +230,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
         <hr class="my-12">
 
         <!-- 5. AUTEUR : Bloc réutilisé -->
-        <div v-if="venue.author" class="bg-gray-50 p-6 rounded-lg mt-8">
-          <div class="flex items-start gap-4">
-            <NuxtImg
-              v-if="venue.author.image"
-              :src="venue.author.image.asset._ref"
-              provider="sanity"
-              class="h-16 w-16 rounded-full object-cover flex-shrink-0"
-            />
-            <div>
-              <p class="font-semibold">
-                Fiche rédigée par 
-                <NuxtLink :to="`/auteurs/${venue.author.slug}`" class="text-blue-600 hover:underline">
-                  {{ venue.author.name }}
-                </NuxtLink>
-              </p>
-              <p v-if="venue.author.citation" class="text-gray-600 italic mt-2 prose prose-sm">
-                {{ venue.author.citation }}
-              </p>
-            </div>
-          </div>
-        </div>
+        <AuthorSection :author="venue.author" class="mt-8" />
 
 
 

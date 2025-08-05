@@ -1,8 +1,7 @@
 <script setup lang="ts">
 // 1. La requête GROQ pour récupérer tous les groupes
-// On trie par nom (name asc)
-// On récupère les champs dont on a besoin pour la vignette
-const query = groq`*[_type == "band"] | order(name asc) {
+// On ne trie PAS ici car on va le faire côté frontend pour gérer les accents
+const query = groq`*[_type == "band"] {
   _id,
   name,
   "slug": slug.current,
@@ -13,9 +12,25 @@ const query = groq`*[_type == "band"] | order(name asc) {
 }`;
 
 // 2. On exécute la requête
-const { data: bands } = await useSanityQuery<Array<any>>(query);
+const { data: bandsData } = await useSanityQuery<Array<any>>(query);
 
-// 3. Configuration du filtrage alphabétique
+// 3. Fonction pour normaliser les chaînes (enlever les accents)
+const normalizeString = (str: string): string => {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+};
+
+// 4. Trier les groupes en normalisant les noms pour gérer les accents
+const bands = computed(() => {
+  if (!bandsData.value) return [];
+  
+  return [...bandsData.value].sort((a, b) => {
+    const nameA = normalizeString(a.name);
+    const nameB = normalizeString(b.name);
+    return nameA.localeCompare(nameB);
+  });
+});
+
+// 5. Configuration du filtrage alphabétique
 const alphabetFilters = [
   { label: 'Tous', range: 'all' },
   { label: 'A - C', range: 'a-c' },
@@ -25,15 +40,16 @@ const alphabetFilters = [
   { label: '0 - 9', range: '0-9' }
 ];
 
-// 4. État du filtre actuel et recherche
+// 6. État du filtre actuel et recherche
 const currentFilter = ref('all');
 const searchQuery = ref('');
 
-// 5. Fonction pour vérifier si un groupe correspond au filtre alphabétique
+// 7. Fonction pour vérifier si un groupe correspond au filtre alphabétique
 const matchesFilter = (bandName: string, filterRange: string): boolean => {
   if (filterRange === 'all') return true;
   
-  const firstChar = bandName.charAt(0).toLowerCase();
+  // Utiliser la normalisation pour gérer les accents
+  const firstChar = normalizeString(bandName).charAt(0);
   
   switch (filterRange) {
     case 'a-c':
@@ -51,12 +67,13 @@ const matchesFilter = (bandName: string, filterRange: string): boolean => {
   }
 };
 
-// 6. Fonction pour vérifier si un groupe correspond à la recherche
+// 8. Fonction pour vérifier si un groupe correspond à la recherche
 const matchesSearch = (bandName: string, query: string): boolean => {
   if (!query.trim()) return true;
   
-  const normalizedBandName = bandName.toLowerCase();
-  const normalizedQuery = query.toLowerCase().trim();
+  // Utiliser la normalisation pour la recherche aussi
+  const normalizedBandName = normalizeString(bandName);
+  const normalizedQuery = normalizeString(query.trim());
   
   // 1-2 lettres : recherche par début
   if (normalizedQuery.length <= 2) {
@@ -67,7 +84,7 @@ const matchesSearch = (bandName: string, query: string): boolean => {
   return normalizedBandName.includes(normalizedQuery);
 };
 
-// 7. Groupes filtrés (computed) - combine filtre alphabétique et recherche
+// 9. Groupes filtrés (computed) - combine filtre alphabétique et recherche
 const filteredBands = computed(() => {
   if (!bands.value) return [];
   return bands.value.filter(band => 
@@ -76,12 +93,12 @@ const filteredBands = computed(() => {
   );
 });
 
-// 8. Fonction pour changer le filtre alphabétique
+// 10. Fonction pour changer le filtre alphabétique
 const setFilter = (filterRange: string) => {
   currentFilter.value = filterRange;
 };
 
-// 9. Fonction pour réinitialiser la recherche
+// 11. Fonction pour réinitialiser la recherche
 const clearSearch = () => {
   searchQuery.value = '';
 };

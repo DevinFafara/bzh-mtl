@@ -312,6 +312,10 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
           <CustomSanityContent :blocks="band.bio"/>
         </div>
       </div>
+      <!-- 7. Auteur (toujours en pleine largeur en bas) -->
+      <div class="author-section">
+        <AuthorSection :author="band.author" />
+      </div>
 
       <!-- 4. Prochains événements -->
       <div v-if="upcomingEvents && upcomingEvents.length > 0" class="upcoming-events-section mb-12">
@@ -377,30 +381,6 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
         </details>
       </div> -->
       
-      <!-- 7. Auteur (toujours en pleine largeur en bas) -->
-      <div class="author-section">
-        <div v-if="band.author" class="bg-gray-50 p-6 rounded-lg">
-          <div class="flex items-start gap-4">
-            <NuxtImg
-              v-if="band.author.image"
-              :src="band.author.image.asset._ref"
-              provider="sanity"
-              class="h-16 w-16 rounded-full object-cover flex-shrink-0"
-            />
-            <div>
-              <p class="font-semibold">
-                Fiche rédigée par 
-                <NuxtLink :to="`/auteurs/${band.author.slug}`" class="text-blue-600 hover:underline">
-                  {{ band.author.name }}
-                </NuxtLink>
-              </p>
-              <div v-if="band.author.citation" class="text-gray-600 italic mt-2 prose prose-sm">
-                <p>{{ band.author.citation }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- 8. Navigation entre groupes -->
       <div v-if="navigation?.previous || navigation?.next" class="navigation-section mt-12">
@@ -477,10 +457,10 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
     grid-template-areas: 
       "logo infos"
       "bio bio"
+      "author author"
       "events events"
       "youtube youtube"
       "related related"
-      "author author"
       "navigation navigation";
     gap: 1.5rem;
   }
@@ -506,10 +486,10 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
     grid-template-columns: 1fr 2fr;
     grid-template-areas: 
       "sidebar bio"
+      "author author"
       "events events"
       "youtube youtube"
       "related related"
-      "author author"
       "navigation navigation";
     gap: 2rem;
   }

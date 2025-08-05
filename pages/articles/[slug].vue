@@ -168,27 +168,11 @@ const formattedDate = computed(() => {
             <CustomSanityContent :blocks="post.body" />
           </div>
         </div>
-        <div v-if="post.author" class="bg-gray-50 p-6 rounded-lg">
-          <div class="flex items-start gap-4">
-            <NuxtImg
-              v-if="post.author.image"
-              :src="post.author.image.asset._ref"
-              provider="sanity"
-              class="h-16 w-16 rounded-full object-cover flex-shrink-0"
-            />
-            <div>
-              <p class="font-semibold">
-                Article rédigé par 
-                <NuxtLink :to="`/auteurs/${post.author.slug}`" class="text-blue-600 hover:underline">
-                  {{ post.author.name }}
-                </NuxtLink>
-              </p>
-              <div v-if="post.author.citation" class="text-gray-600 italic mt-2 prose prose-sm">
-                <p>{{ post.author.citation }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AuthorSection 
+          v-if="post.author && post.author.name && post.author.slug" 
+          :author="post.author as any" 
+          prefix="Article rédigé par" 
+        />
         
         <!-- Colonne Latérale (Infos contextuelles) -->
         <aside class="w-full lg:w-1/3 lg:sticky lg:top-28 self-start">
