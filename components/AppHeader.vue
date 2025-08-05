@@ -5,7 +5,8 @@ const isSearchModalOpen = ref(false);
 
 const sceneLocaleItems = [
   { label: 'Groupes Locaux', to: '/groupes' },
-  { label: 'Salles', to: '/salles' }
+  { label: 'Salles', to: '/salles' },
+  { label: 'Festivals', to: '/festivals' }
 ];
 const chroniquesItems = [
   { label: 'News', to: '/chroniques/news' },

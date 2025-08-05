@@ -5,14 +5,15 @@ const route = useRoute();
 // La requête pour UN seul article, en utilisant le slug comme filtre
 // $slug est une variable que nous allons passer à la requête
 const query = groq`*[_type == "post" && slug.current == $slug][0] {
+  _id,
   title,
   publishedAt,
   mainImage,
   body,
   articleType,
   "author": author->{ name, "slug": slug.current, image, citation },
-  "relatedBand": relatedBand->{ name, "slug": slug.current, logoImage },
-  "relatedVenue": relatedVenue->{ name, "slug": slug.current, city }
+  "relatedBand": relatedBand->{ _id, name, "slug": slug.current, logoImage, pressPhoto, "styles": styles[]->{ _id, title, "slug": slug.current } },
+  "relatedVenue": relatedVenue->{ _id, name, "slug": slug.current, city }
 }`;
 
 // Requête pour navigation (article précédent et suivant par date de publication)
@@ -35,6 +36,20 @@ const navigationQuery = groq`{
   }
 }`;
 
+// Requête pour les articles liés (même groupe ou même lieu)
+const relatedPostsQuery = groq`*[_type == "post" && _id != $currentPostId && (
+  (defined($bandId) && relatedBand._ref == $bandId) ||
+  (defined($venueId) && relatedVenue._ref == $venueId)
+)] | order(publishedAt desc) [0...6] {
+  _id,
+  title,
+  "slug": slug.current,
+  mainImage,
+  publishedAt,
+  articleType,
+  "author": author->name
+}`;
+
 interface NavigationPost {
   _id: string
   title: string
@@ -49,8 +64,19 @@ interface Navigation {
   next?: NavigationPost
 }
 
+interface RelatedPost {
+  _id: string
+  title: string
+  slug: string
+  mainImage?: { asset: { _ref: string } }
+  articleType: string
+  publishedAt: string
+  author?: string
+}
+
 // Définition du type Post pour typer correctement la donnée récupérée
 interface Post {
+  _id?: string;
   title?: string;
   publishedAt?: string;
   mainImage?: any;
@@ -63,11 +89,15 @@ interface Post {
     citation?: string;
   };
   relatedBand?: {
+    _id?: string;
     name?: string;
     slug?: string;
     logoImage?: any;
+    pressPhoto?: any;
+    styles?: Array<{ _id: string; title: string; slug: string }>;
   };
   relatedVenue?: {
+    _id?: string;
     name?: string;
     slug?: string;
     city?: string;
@@ -80,6 +110,13 @@ const { data: post, pending } = await useSanityQuery<Post>(query, { slug: route.
 // Requête pour la navigation (articles précédent et suivant)
 const { data: navigation } = await useSanityQuery<Navigation>(navigationQuery, {
   currentDate: post.value?.publishedAt || ''
+});
+
+// Requête pour les articles liés
+const { data: relatedPosts } = await useSanityQuery<RelatedPost[]>(relatedPostsQuery, {
+  currentPostId: post.value?._id || '',
+  bandId: post.value?.relatedBand?._id || null,
+  venueId: post.value?.relatedVenue?._id || null
 });
 
 const formattedDate = computed(() => {
@@ -155,37 +192,137 @@ const formattedDate = computed(() => {
         
         <!-- Colonne Latérale (Infos contextuelles) -->
         <aside class="w-full lg:w-1/3 lg:sticky lg:top-28 self-start">
-          <div class="bg-gray-50 p-6 rounded-lg">
-            <h3 class="text-xl font-bold mb-4 border-b pb-2">En lien avec cet article</h3>
+          <div class="space-y-4">
+            <h3 class="text-xl font-bold mb-4">En lien avec cet article</h3>
             
             <!-- Affichage conditionnel du Groupe -->
-            <div v-if="post.relatedBand" class="mb-4">
-              <h4 class="font-semibold text-gray-700">Groupe</h4>
-              <NuxtLink :to="`/groupes/${post.relatedBand.slug}`" class="flex items-center gap-3 mt-2 group">
-                <div v-if="post.relatedBand.logoImage" class="h-12 w-12 bg-white rounded-md flex-shrink-0 flex items-center justify-center p-1">
-                  <NuxtImg :src="post.relatedBand.logoImage.asset._ref" provider="sanity" class="h-full w-full object-contain" />
+            <div v-if="post.relatedBand">
+              <NuxtLink 
+                :to="`/groupes/${post.relatedBand.slug}`" 
+                class="group flex bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
+              >
+                <!-- Image/Photo à gauche -->
+                <div class="relative w-48 h-32 flex-shrink-0 overflow-hidden">
+                  <div v-if="post.relatedBand.pressPhoto" class="w-full h-full">
+                    <NuxtImg 
+                      :src="post.relatedBand.pressPhoto.asset._ref" 
+                      provider="sanity" 
+                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      :alt="`Photo de ${post.relatedBand.name}`"
+                    />
+                  </div>
+                  <div v-else-if="post.relatedBand.logoImage" class="w-full h-full flex items-center justify-center bg-white p-2">
+                    <NuxtImg 
+                      :src="post.relatedBand.logoImage.asset._ref" 
+                      provider="sanity" 
+                      class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                      :alt="`Logo de ${post.relatedBand.name}`"
+                    />
+                  </div>
+                  <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                    <Icon name="heroicons:musical-note" class="h-8 w-8 text-gray-400" />
+                  </div>
+                  
+                  <!-- Overlay gradient -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  <!-- Badge type -->
+                  <div class="absolute top-2 left-2">
+                    <span class="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                      Groupe
+                    </span>
+                  </div>
                 </div>
-                <span class="text-lg text-black group-hover:underline">{{ post.relatedBand.name }}</span>
+
+                <!-- Contenu à droite -->
+                <div class="flex-1 p-4 flex flex-col justify-between">
+                  <!-- Titre du groupe -->
+                  <h4 class="text-lg font-bold text-gray-900 group-hover:text-yellow-600 transition-colors mb-2 line-clamp-2 leading-tight">
+                    {{ post.relatedBand.name }}
+                  </h4>
+
+                  <!-- Métadonnées et indicateur -->
+                  <div class="space-y-2">
+                    <!-- Styles musicaux -->
+                    <div v-if="post.relatedBand.styles && post.relatedBand.styles.length > 0" class="flex flex-wrap gap-1">
+                      <span 
+                        v-for="style in post.relatedBand.styles.slice(0, 3)" 
+                        :key="style._id"
+                        class="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-1 rounded-full"
+                      >
+                        {{ style.title }}
+                      </span>
+                      <span v-if="post.relatedBand.styles.length > 3" class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                        +{{ post.relatedBand.styles.length - 3 }}
+                      </span>
+                    </div>
+
+                    <!-- Indicateur de navigation -->
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                      <span class="text-sm text-gray-400">Voir la fiche</span>
+                      <Icon name="heroicons:arrow-right" class="h-4 w-4 text-gray-400 group-hover:text-yellow-500 group-hover:translate-x-1 transition-all duration-300" />
+                    </div>
+                  </div>
+                </div>
               </NuxtLink>
             </div>
             
             <!-- Affichage conditionnel de la Salle -->
             <div v-if="post.relatedVenue">
-              <h4 class="font-semibold text-gray-700">Lieu</h4>
-              <NuxtLink :to="`/salles/${post.relatedVenue.slug}`" class="flex items-center gap-3 mt-2 group">
-                 <div class="h-12 w-12 bg-white rounded-md flex-shrink-0 flex items-center justify-center p-1 text-gray-400">
-                  <Icon name="heroicons:map-pin-20-solid" class="h-8 w-8" />
-                 </div>
-                 <div>
-                   <span class="text-lg text-black group-hover:underline">{{ post.relatedVenue.name }}</span>
-                   <p class="text-sm text-gray-500">{{ post.relatedVenue.city }}</p>
-                 </div>
+              <NuxtLink 
+                :to="`/salles/${post.relatedVenue.slug}`" 
+                class="group flex bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
+              >
+                <!-- Image/Icône à gauche -->
+                <div class="relative w-32 h-24 flex-shrink-0 overflow-hidden">
+                  <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                    <Icon name="heroicons:map-pin" class="h-8 w-8 text-gray-400" />
+                  </div>
+                  
+                  <!-- Overlay gradient -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  <!-- Badge type -->
+                  <div class="absolute top-1 left-1">
+                    <span class="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                      Lieu
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Contenu à droite -->
+                <div class="flex-1 p-4 flex flex-col justify-center">
+                  <h4 class="text-base font-bold text-gray-900 group-hover:text-yellow-600 transition-colors leading-tight">
+                    {{ post.relatedVenue.name }}
+                  </h4>
+                  <p class="text-sm text-gray-500 mb-1">{{ post.relatedVenue.city }}</p>
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-400">Voir la fiche</span>
+                    <Icon name="heroicons:arrow-right" class="h-4 w-4 text-gray-400 group-hover:text-yellow-500 group-hover:translate-x-1 transition-all duration-300" />
+                  </div>
+                </div>
               </NuxtLink>
             </div>
 
           </div>
         </aside>
 
+      </div>
+      
+      <!-- Articles connexes -->
+      <div v-if="relatedPosts && Array.isArray(relatedPosts) && relatedPosts.length > 0" class="related-posts-section mt-12">
+        <h2 class="font-bold text-xl mb-6">
+          Articles connexes
+          <span v-if="post.relatedBand">avec {{ post.relatedBand.name }}</span>
+          <span v-else-if="post.relatedVenue">au {{ post.relatedVenue.name }}</span>
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <PostCard 
+            v-for="relatedPost in relatedPosts" 
+            :key="relatedPost._id"
+            :post="relatedPost"
+          />
+        </div>
       </div>
       
       <!-- Navigation entre articles -->
