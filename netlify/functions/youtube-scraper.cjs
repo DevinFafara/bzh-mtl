@@ -148,7 +148,7 @@ exports.handler = async (event, context) => {
               console.log(`[Netlify Function] ✓ Vidéo de Bruno trouvée: "${title}"`)
               
               if (videoId && title) {
-                // Vérifier si le titre contient le nom du groupe (avec variantes tiret/espace)
+                // Vérifier si le titre contient le nom du groupe suivi d'un séparateur valide
                 const titleLower = title.toLowerCase()
                 const bandNameLower = bandName.toLowerCase()
                 
@@ -156,21 +156,27 @@ exports.handler = async (event, context) => {
                 console.log(`[Netlify Function] - Titre: "${titleLower}"`)
                 console.log(`[Netlify Function] - Groupe recherché: "${bandNameLower}"`)
                 
-                // Recherche normale
-                let matches = titleLower.includes(bandNameLower)
+                // Fonction pour vérifier si le nom du groupe est suivi d'un séparateur valide
+                const isValidMatch = (title, bandName) => {
+                  const regex = new RegExp(`\\b${bandName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+[-:()]`, 'i')
+                  return regex.test(title)
+                }
+                
+                // Recherche avec le nom original
+                let matches = isValidMatch(titleLower, bandNameLower)
                 console.log(`[Netlify Function] - Match direct: ${matches}`)
                 
                 // Si pas de match et que le nom contient un tiret, essayer avec des espaces
                 if (!matches && bandNameLower.includes('-')) {
                   const bandWithSpaces = bandNameLower.replace(/-/g, ' ')
-                  matches = titleLower.includes(bandWithSpaces)
+                  matches = isValidMatch(titleLower, bandWithSpaces)
                   console.log(`[Netlify Function] - Essai avec espaces "${bandWithSpaces}": ${matches}`)
                 }
                 
                 // Si pas de match et que le nom contient des espaces, essayer avec des tirets
                 if (!matches && bandNameLower.includes(' ')) {
                   const bandWithDashes = bandNameLower.replace(/\s+/g, '-')
-                  matches = titleLower.includes(bandWithDashes)
+                  matches = isValidMatch(titleLower, bandWithDashes)
                   console.log(`[Netlify Function] - Essai avec tirets "${bandWithDashes}": ${matches}`)
                 }
                 

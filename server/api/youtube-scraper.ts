@@ -118,23 +118,29 @@ export default defineEventHandler(async (event) => {
         const isBruno = isBrunoGuezennecChannel(video.channelName)
         if (!isBruno) return false
         
-        // Vérifier si le titre contient le nom du groupe (avec variantes tiret/espace)
+        // Vérifier si le titre contient le nom du groupe suivi d'un espace et d'un caractère séparateur
         const titleLower = video.title.toLowerCase()
         const bandNameLower = bandName.toLowerCase()
         
-        // Recherche normale
-        let matches = titleLower.includes(bandNameLower)
+        // Fonction pour vérifier si le nom du groupe est suivi d'un séparateur valide
+        const isValidMatch = (title: string, bandName: string) => {
+          const regex = new RegExp(`\\b${bandName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+[-:()]`, 'i')
+          return regex.test(title)
+        }
+        
+        // Recherche avec le nom original
+        let matches = isValidMatch(titleLower, bandNameLower)
         
         // Si pas de match et que le nom contient un tiret, essayer avec des espaces
         if (!matches && bandNameLower.includes('-')) {
           const bandWithSpaces = bandNameLower.replace(/-/g, ' ')
-          matches = titleLower.includes(bandWithSpaces)
+          matches = isValidMatch(titleLower, bandWithSpaces)
         }
         
         // Si pas de match et que le nom contient des espaces, essayer avec des tirets
         if (!matches && bandNameLower.includes(' ')) {
           const bandWithDashes = bandNameLower.replace(/\s+/g, '-')
-          matches = titleLower.includes(bandWithDashes)
+          matches = isValidMatch(titleLower, bandWithDashes)
         }
         
         return matches

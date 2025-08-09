@@ -77,8 +77,8 @@ const eventsQuery = groq`*[_type == "event" && (
   }
 }`;
 
-// Requête pour 6 groupes récents (on en prendra 3 au hasard)
-const bandsQuery = groq`*[_type == "band"] | order(_createdAt desc) [0...6] {
+// Requête pour TOUS les groupes (on en prendra 4 au hasard côté client)
+const bandsQuery = groq`*[_type == "band"] {
   _id,
   name,
   "slug": slug.current,
@@ -184,32 +184,6 @@ onMounted(() => {
         </div>
       </section>
 
-      <!-- Section Prochains Événements -->
-      <section class="mb-12">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl md:text-2xl font-bold text-gray-900">
-            Prochains Événements
-          </h2>
-          <NuxtLink 
-            to="/evenements" 
-            class="text-purple-600 hover:text-purple-700 font-medium transition-colors"
-          >
-            Voir l'agenda →
-          </NuxtLink>
-        </div>
-        
-        <ul v-if="events && events.length > 0" class="space-y-2">
-          <li v-for="event in (events || [])" :key="event._id">
-            <EventCard :event="event" />
-          </li>
-        </ul>
-        
-        <!-- Message si pas d'événements -->
-        <div v-else class="text-center py-8 text-gray-500">
-          <p>Aucun événement à venir pour le moment.</p>
-        </div>
-      </section>
-
       <!-- Section Groupes à Découvrir -->
       <section class="mb-12">
         <div class="flex items-center justify-between mb-8">
@@ -240,6 +214,32 @@ onMounted(() => {
         <!-- Message si pas de groupes -->
         <div v-else class="text-center py-8 text-gray-500">
           <p>Aucun groupe disponible pour le moment.</p>
+        </div>
+      </section>
+      
+      <!-- Section Prochains Événements -->
+      <section class="mb-12">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-2xl md:text-2xl font-bold text-gray-900">
+            Prochains Événements
+          </h2>
+          <NuxtLink 
+            to="/evenements" 
+            class="text-purple-600 hover:text-purple-700 font-medium transition-colors"
+          >
+            Voir l'agenda →
+          </NuxtLink>
+        </div>
+        
+        <ul v-if="events && events.length > 0" class="space-y-2">
+          <li v-for="event in (events || [])" :key="event._id">
+            <EventCard :event="event" />
+          </li>
+        </ul>
+        
+        <!-- Message si pas d'événements -->
+        <div v-else class="text-center py-8 text-gray-500">
+          <p>Aucun événement à venir pour le moment.</p>
         </div>
       </section>
 

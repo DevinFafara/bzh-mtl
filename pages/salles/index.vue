@@ -61,6 +61,7 @@ const groupedVenues = computed(() => {
 <template>
   <div class="container mx-auto p-4 md:p-8">
     <h1 class="text-2xl md:text-4xl font-bold mb-8">Les Salles de Concert</h1>
+    <p class="text-lg text-gray-600 mb-12">Nous ajouterons des lieux de concert régulièrement.</p>
 
     <!-- 1. On fait une boucle sur notre ordre de départements défini dans le script -->
     <div v-for="dept in departmentOrder" :key="dept.value">
