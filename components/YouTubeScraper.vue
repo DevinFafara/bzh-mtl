@@ -41,21 +41,21 @@ const { data: videoData, pending, error, refresh: originalRefresh } = await useL
   query: { band: props.bandName },
   server: false,
   onResponseError({ request, response, options }) {
-    console.error('YouTube Scraper - Erreur HTTP:', {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-      url: request,
-      body: response._data,
-      endpointIndex: currentEndpointIndex.value
-    })
+    // console.error('YouTube Scraper - Erreur HTTP:', {
+    //   status: response.status,
+    //   statusText: response.statusText,
+    //   headers: response.headers,
+    //   url: request,
+    //   body: response._data,
+    //   endpointIndex: currentEndpointIndex.value
+    // })
   },
   onRequestError({ request, options, error }) {
-    console.error('YouTube Scraper - Erreur de requête:', {
-      url: request,
-      error: error.message,
-      endpointIndex: currentEndpointIndex.value
-    })
+    // console.error('YouTube Scraper - Erreur de requête:', {
+    //   url: request,
+    //   error: error.message,
+    //   endpointIndex: currentEndpointIndex.value
+    // })
   }
 })
 
@@ -63,7 +63,7 @@ const { data: videoData, pending, error, refresh: originalRefresh } = await useL
 const tryNextEndpoint = async () => {
   if (currentEndpointIndex.value < apiEndpoints.length - 1) {
     currentEndpointIndex.value++
-    console.log(`Tentative avec l'endpoint ${currentEndpointIndex.value + 1}/${apiEndpoints.length}: ${apiEndpoints[currentEndpointIndex.value]}`)
+    // console.log(`Tentative avec l'endpoint ${currentEndpointIndex.value + 1}/${apiEndpoints.length}: ${apiEndpoints[currentEndpointIndex.value]}`)
     await originalRefresh()
     return true
   }
@@ -78,7 +78,7 @@ const refresh = async () => {
   
   // Si erreur et qu'il y a d'autres endpoints à tester
   if (error.value && currentEndpointIndex.value < apiEndpoints.length - 1) {
-    console.log('Premier endpoint échoué, tentative des alternatives...')
+    // console.log('Premier endpoint échoué, tentative des alternatives...')
     let success = false
     while (!success && currentEndpointIndex.value < apiEndpoints.length - 1) {
       success = await tryNextEndpoint()
@@ -270,34 +270,34 @@ const handleImageError = (event: Event, videoId: string) => {
   const img = event.target as HTMLImageElement
   const currentSrc = img.src
   
-  console.log(`[YouTubeScraper Frontend] Erreur de chargement pour thumbnail: ${currentSrc}`)
-  console.log(`[YouTubeScraper Frontend] Video ID: ${videoId}`)
-  console.log(`[YouTubeScraper Frontend] Event:`, event)
+  // console.log(`[YouTubeScraper Frontend] Erreur de chargement pour thumbnail: ${currentSrc}`)
+  // console.log(`[YouTubeScraper Frontend] Video ID: ${videoId}`)
+  // console.log(`[YouTubeScraper Frontend] Event:`, event)
   
   // Essayer différentes résolutions de thumbnail
   if (currentSrc.includes('mqdefault.jpg')) {
     // Essayer avec maxresdefault.jpg
     img.src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-    console.log(`[YouTubeScraper Frontend] Tentative avec maxresdefault: ${img.src}`)
+    // console.log(`[YouTubeScraper Frontend] Tentative avec maxresdefault: ${img.src}`)
   } else if (currentSrc.includes('maxresdefault.jpg')) {
     // Essayer avec hqdefault.jpg
     img.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-    console.log(`[YouTubeScraper Frontend] Tentative avec hqdefault: ${img.src}`)
+    // console.log(`[YouTubeScraper Frontend] Tentative avec hqdefault: ${img.src}`)
   } else if (currentSrc.includes('hqdefault.jpg')) {
     // Essayer avec default.jpg
     img.src = `https://img.youtube.com/vi/${videoId}/default.jpg`
-    console.log(`[YouTubeScraper Frontend] Tentative avec default: ${img.src}`)
+    // console.log(`[YouTubeScraper Frontend] Tentative avec default: ${img.src}`)
   } else {
     // En dernier recours, afficher une image placeholder
     img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB2aWV3Qm94PSIwIDAgMTIwIDkwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjYwIiB5PSI0NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNjY2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Wm91VHViZTwvdGV4dD4KPHN2Zz4K'
-    console.log(`[YouTubeScraper Frontend] Fallback vers placeholder pour ${videoId}`)
+    // console.log(`[YouTubeScraper Frontend] Fallback vers placeholder pour ${videoId}`)
   }
 }
 
 // Fonction pour logger le chargement réussi d'une image
 const handleImageLoad = (event: Event, videoId: string) => {
   const img = event.target as HTMLImageElement
-  console.log(`[YouTubeScraper Frontend] Image chargée avec succès: ${img.src} pour video ${videoId}`)
+  // console.log(`[YouTubeScraper Frontend] Image chargée avec succès: ${img.src} pour video ${videoId}`)
 }
 </script>
 

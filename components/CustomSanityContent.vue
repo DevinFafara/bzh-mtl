@@ -12,7 +12,6 @@ interface SanityBlock {
   style?: string;
   listItem?: string;
   level?: number;
-  // Propriétés pour les images
   asset?: {
     _ref: string;
     _type: string;

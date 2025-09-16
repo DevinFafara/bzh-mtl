@@ -34,6 +34,7 @@ const upcomingEventsQuery = groq`*[_type == "event" && (
   (dateInfo.eventDuration == "multiple" && dateInfo.endDate >= now()) ||
   date >= now()
 ) && (
+  $bandId in referencedBands[]._ref ||
   $bandId in lineup[].band._ref ||
   $bandId in lineup[]._ref
 )] | order(
@@ -215,6 +216,65 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
   const cleanBandName = encodeURIComponent(`${bandName} ConcertsMetal-BZH`);
   return `https://www.youtube.com/results?search_query=${cleanBandName}`;
 };
+
+// Configuration SEO dynamique pour le groupe
+const extractBioDescription = (bio: any[]): string => {
+  if (!bio || !Array.isArray(bio)) return '';
+  
+  const textBlock = bio.find(block => block._type === 'block' && block.children);
+  if (textBlock && textBlock.children) {
+    const text = textBlock.children
+      .filter((child: any) => child._type === 'span' && child.text)
+      .map((child: any) => child.text)
+      .join(' ');
+    
+    return text.length > 155 ? text.substring(0, 155) + '...' : text;
+  }
+  
+  return '';
+};
+
+useSeoMeta({
+  title: () => band.value ? `${band.value.name} - Groupes - Breizh Metal Magazine` : 'Groupe - Breizh Metal Magazine',
+  description: () => {
+    if (band.value) {
+      const bioDesc = band.value.bio ? extractBioDescription(band.value.bio) : '';
+      if (bioDesc) {
+        return bioDesc;
+      }
+      
+      // Générer une description basée sur les informations disponibles
+      const location = band.value.cityOfOrigin ? ` de ${band.value.cityOfOrigin}` : '';
+      const styles = band.value.styles && band.value.styles.length > 0 
+        ? ` - ${band.value.styles.map(s => s.title).join(', ')}` 
+        : '';
+      
+      return `Découvrez ${band.value.name}, groupe de metal${location}${styles}. Biographie, actualités et concerts sur Breizh Metal Magazine.`;
+    }
+    return 'Découvrez ce groupe de metal sur Breizh Metal Magazine';
+  },
+  ogTitle: () => band.value?.name || 'Groupe - Breizh Metal Magazine',
+  ogDescription: () => {
+    if (band.value) {
+      const bioDesc = band.value.bio ? extractBioDescription(band.value.bio) : '';
+      if (bioDesc) return bioDesc;
+      
+      const location = band.value.cityOfOrigin ? ` de ${band.value.cityOfOrigin}` : '';
+      return `${band.value.name}, groupe de metal${location} - Breizh Metal Magazine`;
+    }
+    return 'Groupe de metal sur Breizh Metal Magazine';
+  },
+  ogImage: () => {
+    if (band.value?.pressPhoto?.asset?._ref) {
+      return band.value.pressPhoto.asset._ref;
+    }
+    if (band.value?.logoImage?.asset?._ref) {
+      return band.value.logoImage.asset._ref;
+    }
+    return '/bzh-mtl-mgz_logo.png';
+  },
+  twitterCard: 'summary_large_image'
+});
 </script>
 
 <template>
@@ -317,9 +377,15 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
         <AuthorSection :author="band.author" />
       </div>
 
+      <!-- 5. Section Vidéos YouTube -->
+      <div class="youtube-section mb-12">
+        <!-- Scraper YouTube intégré (n'affiche rien si aucune vidéo trouvée) -->
+        <YouTubeScraper :band-name="band.name" />
+      </div>
+
       <!-- 4. Prochains événements -->
       <div v-if="upcomingEvents && upcomingEvents.length > 0" class="upcoming-events-section mb-12">
-        <h2 class="font-bold text-xl mb-6">Prochains concerts de {{ band.name }}</h2>
+        <h2 class="font-bold text-xl mb-6">Prochains concerts locaux de {{ band.name }}</h2>
         <ul class="space-y-2">
           <li v-for="event in upcomingEvents" :key="event._id">
             <NuxtLink
@@ -349,12 +415,6 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
             </NuxtLink>
           </li>
         </ul>
-      </div>
-
-      <!-- 5. Section Vidéos YouTube -->
-      <div class="youtube-section mb-12">
-        <!-- Scraper YouTube intégré (n'affiche rien si aucune vidéo trouvée) -->
-        <YouTubeScraper :band-name="band.name" />
       </div>
 
       <!-- 6. Articles connexes -->
@@ -458,8 +518,8 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
       "logo infos"
       "bio bio"
       "author author"
-      "events events"
       "youtube youtube"
+      "events events"
       "related related"
       "navigation navigation";
     gap: 1.5rem;
@@ -487,8 +547,8 @@ const getYouTubeGeneralSearchLink = (bandName: string) => {
     grid-template-areas: 
       "sidebar bio"
       "author author"
-      "events events"
       "youtube youtube"
+      "events events"
       "related related"
       "navigation navigation";
     gap: 2rem;

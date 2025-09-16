@@ -119,6 +119,46 @@ const { data: relatedPosts } = await useSanityQuery<RelatedPost[]>(relatedPostsQ
   venueId: post.value?.relatedVenue?._id || null
 });
 
+// Configuration SEO dynamique pour l'article
+const extractDescription = (body: any[]): string => {
+  if (!body || !Array.isArray(body)) return '';
+  
+  // Chercher le premier bloc de texte
+  const textBlock = body.find(block => block._type === 'block' && block.children);
+  if (textBlock && textBlock.children) {
+    const text = textBlock.children
+      .filter((child: any) => child._type === 'span' && child.text)
+      .map((child: any) => child.text)
+      .join(' ');
+    
+    // Limiter à 155 caractères pour la meta description
+    return text.length > 155 ? text.substring(0, 155) + '...' : text;
+  }
+  
+  return '';
+};
+
+useSeoMeta({
+  title: () => post.value ? `${post.value.title} - Breizh Metal Magazine` : 'Article - Breizh Metal Magazine',
+  description: () => {
+    if (post.value?.body) {
+      const extracted = extractDescription(post.value.body);
+      return extracted || `Lisez cet article ${post.value.articleType || ''} sur Breizh Metal Magazine`;
+    }
+    return 'Découvrez cet article sur la scène metal bretonne';
+  },
+  ogTitle: () => post.value?.title || 'Article - Breizh Metal Magazine',
+  ogDescription: () => {
+    if (post.value?.body) {
+      return extractDescription(post.value.body) || `Article ${post.value.articleType || ''} sur Breizh Metal Magazine`;
+    }
+    return 'Découvrez cet article sur la scène metal bretonne';
+  },
+  ogImage: () => post.value?.mainImage?.asset?._ref ? post.value.mainImage.asset._ref : '/bzh-mtl-mgz_logo.png',
+  articlePublishedTime: () => post.value?.publishedAt,
+  twitterCard: 'summary_large_image'
+});
+
 const formattedDate = computed(() => {
   if (!post.value?.publishedAt) return '';
   return new Date(post.value.publishedAt).toLocaleDateString('fr-FR', {

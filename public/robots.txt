@@ -1,2 +1,47 @@
-User-Agent: *
-Disallow:
+# Robots.txt pour Breizh Metal Magazine
+User-agent: *
+Allow: /
+
+# Blocage des ressources techniques et administratives
+Disallow: /api/
+Disallow: /_nuxt/
+Disallow: /__sitemap__/
+Disallow: /admin/
+Disallow: /.netlify/
+
+# Blocage des pages de test ou développement
+Disallow: /test*
+Disallow: /dev*
+Disallow: /*?preview=*
+
+# Autorisations spécifiques pour tous les contenus importants
+Allow: /
+Allow: /groupes/
+Allow: /articles/
+Allow: /evenements/
+Allow: /festivals/
+Allow: /salles/
+Allow: /styles/
+Allow: /a-propos
+Allow: /contact
+Allow: /mentions-legales
+Allow: /cgu
+Allow: /credits
+Allow: /scene-locale
+Allow: /recherche
+
+# Configuration pour différents bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+# Limitation de crawl pour éviter la surcharge
+Crawl-delay: 1
+
+# Référence du sitemap
+Sitemap: https://breizh-metal-mag.bzh/sitemap.xml

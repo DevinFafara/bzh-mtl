@@ -1,5 +1,15 @@
 <!-- pages/salles/index.vue -->
 <script setup lang="ts">
+// Configuration SEO pour la page des salles
+useSeoMeta({
+  title: 'Salles de Concert - Breizh Metal Magazine',
+  description: 'Découvrez toutes les salles de concert de Bretagne qui accueillent des événements metal. Informations, capacités et événements à venir.',
+  ogTitle: 'Salles de Concert Metal - Breizh Metal Magazine',
+  ogDescription: 'Toutes les salles de concert metal en Bretagne. Découvrez les lieux qui font vibrer la scène metal bretonne.',
+  ogImage: '/bzh-mtl-mgz_logo.png',
+  twitterCard: 'summary_large_image'
+})
+
 // 1. La requête GROQ reste simple : on récupère toutes les salles.
 // IMPORTANT : on ajoute le champ 'department' à la requête !
 const query = groq`*[_type == "venue"] | order(name asc) {

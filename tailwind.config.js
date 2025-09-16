@@ -1,7 +1,6 @@
 // tailwind.config.js
 
 /** @type {import('tailwindcss').Config} */
-// On utilise module.exports au lieu de export default
 module.exports = {
   content: [
       "./components/**/*.{js,vue,ts}",

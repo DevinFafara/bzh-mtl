@@ -1,4 +1,16 @@
 <script setup lang="ts">
+// Configuration SEO pour la page d'accueil
+useSeoMeta({
+  title: 'Breizh Metal Magazine',
+  description: 'Découvrez la scène metal bretonne : groupes, festivals, concerts, chroniques et actualités. Suivez l\'actualité du metal en Bretagne et au-delà avec interviews, reviews et agenda.',
+  ogTitle: 'Breizh Metal Magazine - Le portail metal de Bretagne',
+  ogDescription: 'Le magazine de référence de la scène metal bretonne. Actualités, groupes, festivals, concerts et chroniques.',
+  ogImage: '/bzh-mtl-mgz_logo.png',
+  twitterCard: 'summary_large_image',
+  twitterTitle: 'Breizh Metal Magazine',
+  twitterDescription: 'Le portail de référence de la scène metal bretonne'
+})
+
 // Types pour les données
 interface Post {
   _id: string;
@@ -108,11 +120,11 @@ onMounted(() => {
     <!-- Bannière avec logo et titre -->
     <section class="relative bg-stone-900 text-white overflow-hidden">
       <!-- Logo en arrière-plan -->
-      <div class="absolute inset-0 flex items-center justify-center opacity-90">
+      <div class="absolute inset-0 flex items-center justify-center opacity-90 p-8">
         <img 
-          src="~/assets/img/logo.png" 
+          src="~/assets/img/bzh-mtl-mgz_logo.png" 
           alt="BZH-MTL Logo Background" 
-          class="h-64 w-64 md:h-80 md:w-80 lg:h-96 lg:w-96 object-contain"
+          class="h-48 w-48 md:h-64 md:w-64 lg:h-72 lg:w-72 object-contain"
         />
       </div>
       

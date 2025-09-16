@@ -35,6 +35,36 @@ const { data } = await useSanityQuery<StyleQueryResult>(query, { slug: styleSlug
 
 const styleDetails = data.value?.style;
 const bands = data.value?.bands;
+
+// Configuration SEO dynamique pour le style musical
+useSeoMeta({
+  title: () => styleDetails?.title ? `${styleDetails.title} - Styles - Breizh Metal Magazine` : 'Style Musical - Breizh Metal Magazine',
+  description: () => {
+    if (styleDetails) {
+      if (styleDetails.description) {
+        const description = styleDetails.description.length > 155 
+          ? styleDetails.description.substring(0, 155) + '...' 
+          : styleDetails.description;
+        return description;
+      }
+      
+      const bandCount = bands?.length || 0;
+      return `Découvrez les groupes de ${styleDetails.title} sur Breizh Metal Magazine. ${bandCount} groupe${bandCount > 1 ? 's' : ''} référencé${bandCount > 1 ? 's' : ''} dans ce style musical.`;
+    }
+    return 'Découvrez les groupes par style musical sur Breizh Metal Magazine';
+  },
+  ogTitle: () => styleDetails?.title ? `Groupes de ${styleDetails.title}` : 'Style Musical - Breizh Metal Magazine',
+  ogDescription: () => {
+    if (styleDetails) {
+      if (styleDetails.description) return styleDetails.description;
+      const bandCount = bands?.length || 0;
+      return `${bandCount} groupe${bandCount > 1 ? 's' : ''} de ${styleDetails.title} référencé${bandCount > 1 ? 's' : ''} sur Breizh Metal Magazine`;
+    }
+    return 'Groupes par style musical sur Breizh Metal Magazine';
+  },
+  ogImage: '/logo.png',
+  twitterCard: 'summary_large_image'
+});
 </script>
 
 <template>

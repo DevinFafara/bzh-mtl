@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html {{ HTML_ATTRS }}>
+  <head {{ HEAD_ATTRS }}>
+    {{ HEAD }}
+    <style>
+      /* Styles pour masquer le contenu par défaut de Nuxt pendant le chargement */
+      .nuxt-loading-indicator {
+        display: none !important;
+      }
+      
+      /* Style pour la page de chargement personnalisée */
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0f172a; /* bg-slate-900 */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      #loading-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .loading-logo {
+        width: 120px;
+        height: auto;
+        margin-bottom: 2rem;
+        animation: pulse 2s infinite;
+      }
+      
+      .loading-text {
+        color: white;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 1.2rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+      }
+      
+      /* Masquer le contenu avant que l'app soit chargée */
+      #__nuxt {
+        opacity: 0;
+        transition: opacity 0.3s ease-in;
+      }
+      
+      #__nuxt.loaded {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body {{ BODY_ATTRS }}>
+    <!-- Écran de chargement personnalisé -->
+    <div id="loading-screen">
+      <img src="/bzh-mtl-mgz_logo.png" alt="Breizh Metal Magazine" class="loading-logo" />
+      <div class="loading-text">Breizh Metal Magazine</div>
+    </div>
+    
+    <div id="__nuxt">{{ APP }}</div>
+    
+    <script>
+      // Script pour masquer l'écran de chargement une fois que l'app est prête
+      window.addEventListener('DOMContentLoaded', function() {
+        // Attendre un peu pour s'assurer que tout est chargé
+        setTimeout(function() {
+          const loadingScreen = document.getElementById('loading-screen');
+          const nuxtApp = document.getElementById('__nuxt');
+          
+          if (loadingScreen && nuxtApp) {
+            loadingScreen.classList.add('fade-out');
+            nuxtApp.classList.add('loaded');
+            
+            // Supprimer l'écran de chargement après la transition
+            setTimeout(function() {
+              loadingScreen.remove();
+            }, 500);
+          }
+        }, 1000); // Délai minimum d'affichage du logo
+      });
+    </script>
+  </body>
+</html>

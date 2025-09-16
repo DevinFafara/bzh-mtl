@@ -34,8 +34,8 @@ exports.handler = async (event, context) => {
     const brunoSearchQuery = encodeURIComponent(`"Bruno Guézennec" ${bandName}`)
     const brunoSearchUrl = `https://www.youtube.com/results?search_query=${brunoSearchQuery}`
     
-    console.log(`[YouTube Scraper] Recherche pour "${bandName}"`)
-    console.log(`[YouTube Scraper] URL: ${brunoSearchUrl}`)
+    // console.log(`[YouTube Scraper] Recherche pour "${bandName}"`)
+    // console.log(`[YouTube Scraper] URL: ${brunoSearchUrl}`)
     
     // Timeout avec AbortController
     const controller = new AbortController()
@@ -78,21 +78,21 @@ exports.handler = async (event, context) => {
     }
 
     const html = await response.text()
-    console.log(`[YouTube Scraper] HTML reçu: ${html.length} caractères`)
+    // console.log(`[YouTube Scraper] HTML reçu: ${html.length} caractères`)
 
     // Rechercher les données JSON dans le HTML
     const scriptRegex = /var ytInitialData = ({.*?});/
     const match = html.match(scriptRegex)
     
     if (!match) {
-      console.log('[YouTube Scraper] ytInitialData non trouvé, recherche alternative...')
+      // console.log('[YouTube Scraper] ytInitialData non trouvé, recherche alternative...')
       
       // Essayer une regex alternative
       const altRegex = /window\["ytInitialData"\] = ({.*?});/
       const altMatch = html.match(altRegex)
       
       if (!altMatch) {
-        console.log('[YouTube Scraper] Aucune donnée YouTube trouvée')
+        // console.log('[YouTube Scraper] Aucune donnée YouTube trouvée')
         return {
           statusCode: 200,
           headers,
@@ -113,7 +113,7 @@ exports.handler = async (event, context) => {
       videoData = JSON.parse(match[1])
     }
 
-    console.log('[YouTube Scraper] Données YouTube extraites')
+    // console.log('[YouTube Scraper] Données YouTube extraites')
 
     // Extraire les vidéos des résultats de recherche
     let videos = []
@@ -150,12 +150,12 @@ exports.handler = async (event, context) => {
                   }
                   
                   videos.push(video)
-                  console.log(`[YouTube Scraper] Vidéo trouvée: ${title}`)
-                  console.log(`[YouTube Scraper] - ID: ${videoId}`)
-                  console.log(`[YouTube Scraper] - Thumbnail URL: ${video.thumbnail}`)
-                  console.log(`[YouTube Scraper] - Channel: ${channelName}`)
-                  console.log(`[YouTube Scraper] - Duration: ${video.duration}`)
-                  console.log(`[YouTube Scraper] - Views: ${video.viewCount}`)
+                  // console.log(`[YouTube Scraper] Vidéo trouvée: ${title}`)
+                  // console.log(`[YouTube Scraper] - ID: ${videoId}`)
+                  // console.log(`[YouTube Scraper] - Thumbnail URL: ${video.thumbnail}`)
+                  // console.log(`[YouTube Scraper] - Channel: ${channelName}`)
+                  // console.log(`[YouTube Scraper] - Duration: ${video.duration}`)
+                  // console.log(`[YouTube Scraper] - Views: ${video.viewCount}`)
                 }
               }
             }
@@ -179,11 +179,11 @@ exports.handler = async (event, context) => {
       }
     }
 
-    console.log(`[YouTube Scraper] ${videos.length} vidéo(s) trouvée(s) pour "${bandName}"`)
+    // console.log(`[YouTube Scraper] ${videos.length} vidéo(s) trouvée(s) pour "${bandName}"`)
 
     // Si aucune vidéo trouvée, retourner des vidéos de démo
     if (videos.length === 0) {
-      console.log('[YouTube Scraper] Aucune vidéo trouvée, retour de vidéos de démo')
+      // console.log('[YouTube Scraper] Aucune vidéo trouvée, retour de vidéos de démo')
       
       const demoVideo = {
         id: "qTsomvebRAA",
@@ -194,12 +194,12 @@ exports.handler = async (event, context) => {
         viewCount: "482 vues"
       }
       
-      console.log(`[YouTube Scraper] Vidéo de démo retournée:`)
-      console.log(`[YouTube Scraper] - ID: ${demoVideo.id}`)
-      console.log(`[YouTube Scraper] - Thumbnail URL: ${demoVideo.thumbnail}`)
-      console.log(`[YouTube Scraper] - Channel: ${demoVideo.channelTitle}`)
-      console.log(`[YouTube Scraper] - Duration: ${demoVideo.duration}`)
-      console.log(`[YouTube Scraper] - Views: ${demoVideo.viewCount}`)
+      // console.log(`[YouTube Scraper] Vidéo de démo retournée:`)
+      // console.log(`[YouTube Scraper] - ID: ${demoVideo.id}`)
+      // console.log(`[YouTube Scraper] - Thumbnail URL: ${demoVideo.thumbnail}`)
+      // console.log(`[YouTube Scraper] - Channel: ${demoVideo.channelTitle}`)
+      // console.log(`[YouTube Scraper] - Duration: ${demoVideo.duration}`)
+      // console.log(`[YouTube Scraper] - Views: ${demoVideo.viewCount}`)
       
       return {
         statusCode: 200,

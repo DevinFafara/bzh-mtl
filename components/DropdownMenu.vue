@@ -13,7 +13,6 @@ const isOpen = ref(false);
 </script>
 
 <template>
-  <!-- Le conteneur doit être en 'relative' pour que le menu en 'absolute' se positionne par rapport à lui -->
   <div 
     class="relative" 
     @mouseover="isOpen = true" 
@@ -21,14 +20,11 @@ const isOpen = ref(false);
     @focusin="isOpen = true"
     @focusout="isOpen = false"
   >
-    <!-- 1. Le lien principal du menu (non cliquable ici, mais on pourrait le changer) -->
     <button class="relative font-medium text-white px-2 py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full flex items-center gap-1">
       {{ title }}
-      <!-- Petite flèche pour indiquer qu'il y a un sous-menu -->
       <Icon name="heroicons:chevron-down-20-solid" class="h-5 w-5 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" />
     </button>
 
-    <!-- 2. Le menu déroulant, qui apparaît/disparaît avec une transition -->
     <transition
       enter-active-class="transition ease-out duration-100"
       enter-from-class="transform opacity-0 scale-95"
@@ -39,7 +35,6 @@ const isOpen = ref(false);
     >
       <div v-if="isOpen" class="absolute left-0 w-56 origin-top-left bg-black shadow-lg ring-opacity-5 z-50">
         <div class="">
-          <!-- On fait une boucle sur les 'items' reçus en props -->
           <NuxtLink
             v-for="item in items"
             :key="item.label"

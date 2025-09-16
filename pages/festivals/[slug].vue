@@ -74,6 +74,36 @@ interface Festival {
 // On passe le slug de l'URL en paramètre à la requête
 const { data: festival, pending } = await useSanityQuery<Festival>(query, { slug: route.params.slug });
 
+// Requête pour récupérer les événements qui référencent ce festival
+const eventsQuery = groq`*[_type == "event" && festival._ref == $festivalId] | order(dateInfo.singleDate desc, dateInfo.startDate desc) {
+  _id,
+  title,
+  "slug": slug.current,
+  dateInfo,
+  poster,
+  "eventType": eventType->title
+}`;
+
+interface FestivalEvent {
+  _id: string;
+  title: string;
+  slug: string;
+  dateInfo?: {
+    eventDuration: 'single' | 'multiple';
+    singleDate?: string;
+    startDate?: string;
+    endDate?: string;
+  };
+  poster?: { asset: { _ref: string } };
+  eventType?: string;
+}
+
+// Récupération des événements liés (seulement si on a le festival)
+const { data: festivalEvents } = await useSanityQuery<FestivalEvent[]>(
+  eventsQuery, 
+  { festivalId: festival.value?._id || '' }
+);
+
 // Configuration SEO dynamique
 useSeoMeta({
   title: () => festival.value ? `${festival.value.name} - Festivals - Breizh Metal Magazine` : 'Festival - Breizh Metal Magazine',
@@ -100,6 +130,23 @@ const formatDuration = computed(() => {
   
   return text;
 });
+
+// Fonction pour formater les dates des événements
+const formatEventDate = (event: FestivalEvent) => {
+  if (!event.dateInfo) return 'Date non définie';
+  
+  if (event.dateInfo.eventDuration === 'single' && event.dateInfo.singleDate) {
+    return new Date(event.dateInfo.singleDate).toLocaleDateString('fr-FR', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+  } else if (event.dateInfo.eventDuration === 'multiple' && event.dateInfo.startDate && event.dateInfo.endDate) {
+    const startDate = new Date(event.dateInfo.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    const endDate = new Date(event.dateInfo.endDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `${startDate} - ${endDate}`;
+  }
+  
+  return 'Date non définie';
+};
 </script>
 
 <template>
@@ -155,6 +202,20 @@ const formatDuration = computed(() => {
         
         <!-- Colonne principale -->
         <div class="w-full lg:w-2/3">
+          <!-- Styles musicaux -->
+          <div v-if="festival.musicalStyles && festival.musicalStyles.length > 0" class="mb-8">
+            <h2 class="text-2xl font-bold mb-4">Styles musicaux</h2>
+            <div class="flex flex-wrap gap-2">
+              <span 
+                v-for="style in festival.musicalStyles" 
+                :key="style.slug" 
+                class="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm"
+              >
+                {{ style.title }}
+              </span>
+            </div>
+          </div>
+
           <!-- Description -->
           <div v-if="festival.description" class="mb-8">
             <h2 class="text-2xl font-bold mb-4">À propos du festival</h2>
@@ -163,23 +224,54 @@ const formatDuration = computed(() => {
             </div>
           </div>
 
-          <!-- Styles musicaux -->
-          <div v-if="festival.musicalStyles && festival.musicalStyles.length > 0" class="mb-8">
-            <h2 class="text-2xl font-bold mb-4">Styles musicaux</h2>
-            <div class="flex flex-wrap gap-2">
-              <NuxtLink 
-                v-for="style in festival.musicalStyles" 
-                :key="style.slug" 
-                :to="`/styles/${style.slug}`"
-                class="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors"
+          <!-- Éditions du festival -->
+          <div v-if="festivalEvents && festivalEvents.length > 0" class="mb-8">
+            <h2 class="text-2xl font-bold mb-4">Éditions</h2>
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <NuxtLink
+                v-for="event in festivalEvents"
+                :key="event._id"
+                :to="`/evenements/${event.slug}`"
+                class="group block bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200"
               >
-                {{ style.title }}
+                <!-- Image/Affiche avec ratio fixe -->
+                <div class="relative w-full h-48 bg-gray-100 overflow-hidden">
+                  <NuxtImg
+                    v-if="event.poster"
+                    :src="event.poster.asset._ref"
+                    provider="sanity"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    :alt="`Affiche de ${event.title}`"
+                  />
+                  <div v-else class="w-full h-full flex items-center justify-center bg-gray-200">
+                    <Icon name="heroicons:calendar-days" class="w-12 h-12 text-gray-400" />
+                  </div>
+                </div>
+
+                <!-- Informations -->
+                <div class="p-4">
+                  <h3 class="font-bold text-lg group-hover:text-yellow-600 transition-colors mb-2">
+                    {{ event.title }}
+                  </h3>
+                  
+                  <div class="text-sm text-gray-600 space-y-1">
+                    <div class="flex items-center">
+                      <Icon name="heroicons:calendar" class="h-4 w-4 mr-2" />
+                      <span>{{ formatEventDate(event) }}</span>
+                    </div>
+                    
+                    <div v-if="event.eventType" class="flex items-center">
+                      <Icon name="heroicons:tag" class="h-4 w-4 mr-2" />
+                      <span>{{ event.eventType }}</span>
+                    </div>
+                  </div>
+                </div>
               </NuxtLink>
             </div>
           </div>
 
-          <!-- Informations pratiques -->
-          <div class="mb-8">
+          <!-- Informations pratiques (seulement si il y a du contenu) -->
+          <div v-if="festival.campingInfo?.hasCamping || festival.accessibility?.pmrAccess" class="mb-8">
             <h2 class="text-2xl font-bold mb-4">Informations pratiques</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               
@@ -207,9 +299,6 @@ const formatDuration = computed(() => {
 
             </div>
           </div>
-
-          <!-- Auteur -->
-          <AuthorSection :author="festival.author" />
         </div>
         
         <!-- Colonne latérale -->
@@ -283,6 +372,11 @@ const formatDuration = computed(() => {
             </div>
           </div>
         </aside>
+      </div>
+
+      <!-- Auteur en fin de page -->
+      <div class="mt-12">
+        <AuthorSection :author="festival.author" />
       </div>
     </div>
   </article>

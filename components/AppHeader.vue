@@ -1,5 +1,4 @@
 <script setup>
-// Import des icônes Heroicons
 const isMobileMenuOpen = ref(false);
 const isSearchModalOpen = ref(false);
 
@@ -22,7 +21,7 @@ const chroniquesItems = [
     <nav class="container mx-auto flex items-center justify-between p-4 h-20">
       <!-- 1. Le Logo -->
       <NuxtLink to="/" class="text-2xl font-bold flex items-center space-x-2">
-            <img class="h-12 w-auto" src="~/assets/img/logo.png" alt="Logo Breizh Metal Magazine" />
+            <img class="h-12 w-auto" src="~/assets/img/bzh-mtl-mgz_logo.png" alt="Logo Breizh Metal Magazine" />
             <span class="text-base">Breizh Metal Magazine</span>
       </NuxtLink>
 

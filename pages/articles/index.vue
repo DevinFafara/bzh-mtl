@@ -1,4 +1,14 @@
 <script setup lang="ts">
+// Configuration SEO pour la page d'articles
+useSeoMeta({
+  title: 'Articles - Breizh Metal Magazine',
+  description: 'Découvrez tous nos articles, chroniques, interviews et actualités sur la scène metal bretonne. Reviews d\'albums, portraits de groupes et couverture d\'événements.',
+  ogTitle: 'Articles - Breizh Metal Magazine',
+  ogDescription: 'Tous les articles de Breizh Metal Magazine : chroniques, interviews, actualités metal de Bretagne',
+  ogImage: '/bzh-mtl-mgz_logo.png',
+  twitterCard: 'summary_large_image'
+})
+
 // Interface pour les posts
 interface Post {
   _id: string;

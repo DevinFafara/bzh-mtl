@@ -16,8 +16,8 @@ export default defineEventHandler(async (event) => {
     const brunoSearchQuery = encodeURIComponent(`"Bruno Guézennec" ${bandName}`)
     const brunoSearchUrl = `https://www.youtube.com/results?search_query=${brunoSearchQuery}`
     
-    console.log(`[YouTube Scraper] Recherche pour "${bandName}"`)
-    console.log(`[YouTube Scraper] URL: ${brunoSearchUrl}`)
+    // console.log(`[YouTube Scraper] Recherche pour "${bandName}"`)
+    // console.log(`[YouTube Scraper] URL: ${brunoSearchUrl}`)
     
     // Timeout avec AbortController
     const controller = new AbortController()
@@ -37,21 +37,21 @@ export default defineEventHandler(async (event) => {
     
     clearTimeout(timeoutId)
     
-    console.log(`[YouTube Scraper] Status: ${response.status}`)
-    console.log(`[YouTube Scraper] Headers:`, Object.fromEntries(response.headers.entries()))
+    // console.log(`[YouTube Scraper] Status: ${response.status}`)
+    // console.log(`[YouTube Scraper] Headers:`, Object.fromEntries(response.headers.entries()))
     
     if (response.ok) {
       const html = await response.text()
-      console.log(`[YouTube Scraper] HTML reçu: ${html.length} caractères`)
+      // console.log(`[YouTube Scraper] HTML reçu: ${html.length} caractères`)
       videoData = extractVideoDataFromHTML(html)
-      console.log(`[YouTube Scraper] Vidéos extraites: ${videoData.length}`)
+      // console.log(`[YouTube Scraper] Vidéos extraites: ${videoData.length}`)
     } else {
       console.error(`[YouTube Scraper] Erreur HTTP: ${response.status} ${response.statusText}`)
     }
     
     // Stratégie 2: Si pas de résultats, recherche avec ConcertsMetal-BZH
     if (videoData.length === 0) {
-      console.log(`[YouTube Scraper] Tentative avec ConcertsMetal-BZH`)
+      // console.log(`[YouTube Scraper] Tentative avec ConcertsMetal-BZH`)
       const concertsMetalQuery = encodeURIComponent(`"ConcertsMetal-BZH" ${bandName}`)
       const concertsMetalUrl = `https://www.youtube.com/results?search_query=${concertsMetalQuery}`
       
@@ -75,13 +75,13 @@ export default defineEventHandler(async (event) => {
       if (response.ok) {
         const html = await response.text()
         videoData = extractVideoDataFromHTML(html)
-        console.log(`[YouTube Scraper] Vidéos ConcertsMetal-BZH: ${videoData.length}`)
+        // console.log(`[YouTube Scraper] Vidéos ConcertsMetal-BZH: ${videoData.length}`)
       }
     }
     
     // Stratégie 3: Si toujours pas de résultats, recherche générale avec filtre strict
     if (videoData.length === 0) {
-      console.log(`[YouTube Scraper] Tentative recherche générale`)
+      // console.log(`[YouTube Scraper] Tentative recherche générale`)
       const generalSearchQuery = encodeURIComponent(`${bandName} ConcertsMetal-BZH`)
       const generalSearchUrl = `https://www.youtube.com/results?search_query=${generalSearchQuery}`
       
@@ -105,7 +105,7 @@ export default defineEventHandler(async (event) => {
       if (response.ok) {
         const html = await response.text()
         videoData = extractVideoDataFromHTML(html)
-        console.log(`[YouTube Scraper] Vidéos générales: ${videoData.length}`)
+        // console.log(`[YouTube Scraper] Vidéos générales: ${videoData.length}`)
       }
     }
     
@@ -160,13 +160,13 @@ export default defineEventHandler(async (event) => {
 
     // Ajouter des logs détaillés pour chaque vidéo trouvée
     brunoVideos.forEach((video, index) => {
-      console.log(`[YouTube Scraper] Vidéo ${index + 1} trouvée: ${video.title}`)
-      console.log(`[YouTube Scraper] - ID: ${video.id}`)
-      console.log(`[YouTube Scraper] - Thumbnail URL: ${video.thumbnail}`)
-      console.log(`[YouTube Scraper] - Channel: ${video.channelTitle}`)
-      console.log(`[YouTube Scraper] - Duration: ${video.duration}`)
-      console.log(`[YouTube Scraper] - Views: ${video.viewCount}`)
-      console.log(`[YouTube Scraper] - Published: ${video.publishedTime}`)
+      // console.log(`[YouTube Scraper] Vidéo ${index + 1} trouvée: ${video.title}`)
+      // console.log(`[YouTube Scraper] - ID: ${video.id}`)
+      // console.log(`[YouTube Scraper] - Thumbnail URL: ${video.thumbnail}`)
+      // console.log(`[YouTube Scraper] - Channel: ${video.channelTitle}`)
+      // console.log(`[YouTube Scraper] - Duration: ${video.duration}`)
+      // console.log(`[YouTube Scraper] - Views: ${video.viewCount}`)
+      // console.log(`[YouTube Scraper] - Published: ${video.publishedTime}`)
     })
 
     // Si aucune vidéo de Bruno n'est trouvée, retourner un message d'info

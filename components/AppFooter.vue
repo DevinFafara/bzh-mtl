@@ -1,5 +1,4 @@
 <script setup>
-// On garde les données des liens, c'est une bonne pratique.
 const sceneLocaleItems = [
   { label: 'Groupes Locaux', to: '/groupes' },
   { label: 'Salles', to: '/salles' },
@@ -26,13 +25,11 @@ const legalItems = [
   <footer class="bg-black text-gray-400">
     <div class="container mx-auto px-4 py-8">
       
-      <!-- Section supérieure avec les liens -->
       <div class="flex flex-col md:flex-row justify-between gap-8">
         
-        <!-- Partie gauche : Logo et description -->
         <div class="w-full md:w-1/3 lg:w-1/2">
           <NuxtLink to="/" class="inline-flex items-center space-x-2 mb-4">
-            <img class="h-10 w-auto" src="~/assets/img/logo.png" alt="Logo Breizh Metal Magazine" />
+            <img class="h-10 w-auto" src="~/assets/img/bzh-mtl-mgz_logo.png" alt="Logo Breizh Metal Magazine" />
             <span class="font-bold text-white text-lg">Breizh Metal Magazine</span>
           </NuxtLink>
           <p class="text-sm max-w-sm">
@@ -40,12 +37,9 @@ const legalItems = [
           </p>
         </div>
 
-        <!-- Partie droite : Les 4 colonnes de liens -->
         <div class="w-full md:w-2/3 lg:w-1/2">
-          <!-- CSS Grid personnalisé pour un contrôle précis -->
           <div class="footer-grid">
             
-            <!-- Colonne 1 : Scène Locale -->
             <div>
               <h3 class="font-semibold text-white tracking-wider uppercase mb-4 text-sm">Scène Locale</h3>
               <ul class="space-y-2">
@@ -55,7 +49,6 @@ const legalItems = [
               </ul>
             </div>
 
-            <!-- Colonne 2 : Chroniques -->
             <div>
               <h3 class="font-semibold text-white tracking-wider uppercase mb-4 text-sm">Chroniques</h3>
               <ul class="space-y-2">
@@ -65,7 +58,6 @@ const legalItems = [
               </ul>
             </div>
 
-            <!-- Colonne 3 : Site -->
             <div>
               <h3 class="font-semibold text-white tracking-wider uppercase mb-4 text-sm">Site</h3>
               <ul class="space-y-2">
@@ -75,7 +67,6 @@ const legalItems = [
               </ul>
             </div>
 
-            <!-- Colonne 4 : Légal -->
             <div>
               <h3 class="font-semibold text-white tracking-wider uppercase mb-4 text-sm">Légal</h3>
               <ul class="space-y-2">
@@ -89,7 +80,6 @@ const legalItems = [
         </div>
       </div>
 
-      <!-- Séparateur et partie basse du footer -->
       <div class="mt-8 pt-8 border-t border-gray-800 text-center">
         <p class="text-sm text-gray-500">
           © {{ new Date().getFullYear() }} Breizh Metal Magazine. Tous droits réservés.

@@ -1,6 +1,5 @@
 <!-- components/PostCard.vue -->
 <script setup lang="ts">
-// On définit que ce composant attend une "prop" appelée "post"
 const props = defineProps({
   post: {
     type: Object,

@@ -1,6 +1,4 @@
 <script setup>
-// Le composant attend de savoir s'il doit être ouvert (`isOpen`)
-// et il doit pouvoir dire au parent de se fermer (`@close`)
 const props = defineProps({
   isOpen: Boolean
 });
@@ -36,7 +34,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- La magie de la transition pour l'apparition -->
+  <!-- La transition pour l'apparition -->
   <transition
     enter-active-class="ease-out duration-300"
     enter-from-class="opacity-0"
@@ -47,7 +45,6 @@ onUnmounted(() => {
   >
     <!-- Le fond semi-transparent -->
     <div v-if="isOpen" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" @click="$emit('close')">
-      <!-- Le conteneur de la modale (on clique dessus pour ne PAS fermer) -->
       <div class="fixed inset-y-0 right-0 flex max-w-full pl-10" @click.stop>
         <transition
           enter-active-class="transform transition ease-in-out duration-500 sm:duration-700"

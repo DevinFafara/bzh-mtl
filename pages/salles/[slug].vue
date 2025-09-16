@@ -126,6 +126,60 @@ const formatEventDate = (dateString: string) => {
 
 // Variable pour détecter l'environnement de développement
 const isDevelopment = process.env.NODE_ENV === 'development';
+
+// Configuration SEO dynamique pour la salle
+const extractVenueDescription = (description: any[]): string => {
+  if (!description || !Array.isArray(description)) return '';
+  
+  const textBlock = description.find(block => block._type === 'block' && block.children);
+  if (textBlock && textBlock.children) {
+    const text = textBlock.children
+      .filter((child: any) => child._type === 'span' && child.text)
+      .map((child: any) => child.text)
+      .join(' ');
+    
+    return text.length > 155 ? text.substring(0, 155) + '...' : text;
+  }
+  
+  return '';
+};
+
+useSeoMeta({
+  title: () => venue.value ? `${venue.value.name} - Salles - Breizh Metal Magazine` : 'Salle - Breizh Metal Magazine',
+  description: () => {
+    if (venue.value) {
+      const venueDesc = venue.value.description ? extractVenueDescription(venue.value.description) : '';
+      if (venueDesc) {
+        return venueDesc;
+      }
+      
+      // Générer une description basée sur les informations disponibles
+      const location = venue.value.city ? ` à ${venue.value.city}` : '';
+      const department = departmentName.value ? ` (${departmentName.value})` : '';
+      
+      return `${venue.value.name}, salle de concert${location}${department}. Découvrez les événements, concerts et actualités sur Breizh Metal Magazine.`;
+    }
+    return 'Découvrez cette salle de concert sur Breizh Metal Magazine';
+  },
+  ogTitle: () => venue.value?.name || 'Salle - Breizh Metal Magazine',
+  ogDescription: () => {
+    if (venue.value) {
+      const venueDesc = venue.value.description ? extractVenueDescription(venue.value.description) : '';
+      if (venueDesc) return venueDesc;
+      
+      const location = venue.value.city ? ` à ${venue.value.city}` : '';
+      return `${venue.value.name}, salle de concert${location} - Breizh Metal Magazine`;
+    }
+    return 'Salle de concert sur Breizh Metal Magazine';
+  },
+  ogImage: () => {
+    if (venue.value?.image?.asset?._ref) {
+      return venue.value.image.asset._ref;
+    }
+    return '/bzh-mtl-mgz_logo.png';
+  },
+  twitterCard: 'summary_large_image'
+});
 </script>
 
 <template>

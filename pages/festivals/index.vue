@@ -9,7 +9,7 @@ useSeoMeta({
   description: 'Découvrez les festivals de metal en Bretagne et au-delà.'
 });
 
-// Requête pour récupérer la liste des festivals
+// Requête pour récupérer la liste des festivals avec le département
 const query = groq`*[_type == "festival"] | order(name asc) {
   _id,
   name,
@@ -47,6 +47,36 @@ interface Festival {
 }
 
 const { data: festivals, pending } = await useSanityQuery<Festival[]>(query);
+
+// Définir l'ordre et les noms des départements
+const departmentOrder = [
+  { value: '29', title: 'Finistère (29)' },
+  { value: '22', title: 'Côtes-d\'Armor (22)' },
+  { value: '56', title: 'Morbihan (56)' },
+  { value: '35', title: 'Ille-et-Vilaine (35)' },
+  { value: '44', title: 'Loire-Atlantique (44)' },
+  { value: 'autre', title: 'Autres départements' }
+];
+
+// Grouper les festivals par département
+const groupedFestivals = computed(() => {
+  const festivalsArray = Array.isArray(festivals.value) ? festivals.value : [];
+
+  const groups = festivalsArray.reduce<Record<string, Festival[]>>((acc, festival) => {
+    // Récupérer le département ou utiliser 'autre' par défaut
+    const department = festival.location?.department || 'autre';
+
+    if (!acc[department]) {
+      acc[department] = [];
+    }
+
+    acc[department].push(festival);
+
+    return acc;
+  }, {});
+
+  return groups;
+});
 </script>
 
 <template>
@@ -74,85 +104,24 @@ const { data: festivals, pending } = await useSanityQuery<Festival[]>(query);
       </div>
 
       <div v-else-if="festivals && festivals.length > 0">
-        <!-- Grille des festivals -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div 
-            v-for="festival in festivals" 
-            :key="festival._id"
-            class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-          >
-            <!-- Image/Poster -->
-            <div class="relative h-48 overflow-hidden">
-              <NuxtImg
-                v-if="festival.mainImage"
-                :src="festival.mainImage.asset._ref"
-                provider="sanity"
-                class="w-full h-full object-cover"
-                :alt="`Image de ${festival.name}`"
-              />
-              <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                <Icon name="heroicons:musical-note" class="h-16 w-16 text-gray-400" />
+        <!-- Boucle sur les départements -->
+        <div v-for="dept in departmentOrder" :key="dept.value">
+          
+          <!-- Vérifier s'il y a des festivals pour ce département -->
+          <div v-if="groupedFestivals[dept.value] && groupedFestivals[dept.value].length > 0">
+            
+            <!-- Titre du département -->
+            <h2 class="text-2xl font-bold border-b-2 border-yellow-500 pb-2 mt-12 mb-8 first:mt-0">
+              {{ dept.title }}
+            </h2>
+            
+            <!-- Grille des festivals du département -->
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
+              <div v-for="festival in groupedFestivals[dept.value]" :key="festival._id">
+                <FestivalCard :festival="festival" />
               </div>
             </div>
 
-            <!-- Contenu -->
-            <div class="p-6">
-              <h3 class="text-xl font-bold text-gray-900 mb-2">{{ festival.name }}</h3>
-              
-              <div class="space-y-2 mb-4">
-                <div v-if="festival.location?.city" class="flex items-center text-gray-600 text-sm">
-                  <Icon name="heroicons:map-pin" class="h-4 w-4 mr-2" />
-                  <span>{{ festival.location.city }}{{ festival.location.department ? ` (${festival.location.department})` : '' }}</span>
-                </div>
-                
-                <div v-if="festival.duration" class="flex items-center text-gray-600 text-sm">
-                  <Icon name="heroicons:calendar-days" class="h-4 w-4 mr-2" />
-                  <span>{{ festival.duration.days }} jour{{ festival.duration.days > 1 ? 's' : '' }}{{ festival.duration.period ? ` en ${festival.duration.period}` : '' }}</span>
-                </div>
-
-                <div v-if="festival.foundedYear" class="flex items-center text-gray-600 text-sm">
-                  <Icon name="heroicons:clock" class="h-4 w-4 mr-2" />
-                  <span>Depuis {{ festival.foundedYear }}</span>
-                </div>
-              </div>
-
-              <!-- Styles musicaux -->
-              <div v-if="festival.musicalStyles && festival.musicalStyles.length > 0" class="mb-4">
-                <div class="flex flex-wrap gap-1">
-                  <span 
-                    v-for="style in festival.musicalStyles.slice(0, 3)" 
-                    :key="style.slug"
-                    class="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-1 rounded-full"
-                  >
-                    {{ style.title }}
-                  </span>
-                  <span v-if="festival.musicalStyles.length > 3" class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                    +{{ festival.musicalStyles.length - 3 }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="flex items-center justify-between">
-                <NuxtLink 
-                  :to="`/festivals/${festival.slug}`"
-                  class="inline-flex items-center text-yellow-600 hover:text-yellow-700 font-medium text-sm"
-                >
-                  En savoir plus
-                  <Icon name="heroicons:arrow-right" class="h-4 w-4 ml-1" />
-                </NuxtLink>
-                
-                <a 
-                  v-if="festival.website" 
-                  :href="festival.website" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  class="text-gray-400 hover:text-gray-600"
-                >
-                  <Icon name="heroicons:globe-alt" class="h-5 w-5" />
-                </a>
-              </div>
-            </div>
           </div>
         </div>
       </div>

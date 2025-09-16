@@ -21,6 +21,7 @@
     "@nuxt/icon": "^1.15.0",
     "@nuxt/image": "^1.10.0",
     "@nuxtjs/sanity": "^1.13.3",
+    "@nuxtjs/sitemap": "^7.4.3",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/typography": "^0.5.16"
   }

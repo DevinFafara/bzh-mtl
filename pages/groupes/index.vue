@@ -1,4 +1,14 @@
 <script setup lang="ts">
+// Configuration SEO pour la page de groupes
+useSeoMeta({
+  title: 'Groupes - Breizh Metal Magazine',
+  description: 'Découvrez tous les groupes de metal de Bretagne et d\'ailleurs. Biographies, discographies, actualités et concerts des artistes metal bretons.',
+  ogTitle: 'Groupes Metal - Breizh Metal Magazine',
+  ogDescription: 'Tous les groupes de metal référencés sur Breizh Metal Magazine. Découvrez la scène metal bretonne.',
+  ogImage: '/bzh-mtl-mgz_logo.png',
+  twitterCard: 'summary_large_image'
+})
+
 // 1. La requête GROQ pour récupérer tous les groupes
 // On ne trie PAS ici car on va le faire côté frontend pour gérer les accents
 const query = groq`*[_type == "band"] {

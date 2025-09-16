@@ -16,6 +16,27 @@ interface Event {
   poster?: { asset: { _ref: string } };
   ticketUrl?: string;
   eventType?: string;
+  festival?: {
+    _id: string;
+    name: string;
+    slug: string;
+    description?: any;
+    mainImage?: { asset: { _ref: string } };
+    location?: {
+      city: string;
+      department?: string;
+      region?: string;
+      venue?: string;
+    };
+    foundedYear?: number;
+    musicalStyles?: Array<{ title: string; slug: string }>;
+    capacity?: number;
+    duration?: {
+      days: number;
+      period: string;
+    };
+    website?: string;
+  };
   venue?: {
     venueType: string;
     venueText?: string;
@@ -43,6 +64,18 @@ interface Event {
     _id?: string;
     slug?: string;
   }>;
+  lineupText?: any; // Nouveau champ pour le line-up en texte riche
+  referencedBands?: Array<{
+    _id: string;
+    name: string;
+    slug: string;
+    bio?: any;
+    pressPhoto?: { asset: { _ref: string } };
+    logoImage?: { asset: { _ref: string } };
+    styles?: string[];
+    cityOfOrigin?: string;
+    departmentOfOrigin?: string[];
+  }>;
 }
 
 // La requête GROQ pour UN seul événement, avec toutes ses données liées
@@ -54,6 +87,20 @@ const query = groq`*[_type == "event" && slug.current == $slug][0] {
   poster,
   ticketUrl,
   "eventType": eventType->title,
+  // Récupération des données du festival
+  "festival": festival-> {
+    _id,
+    name,
+    "slug": slug.current,
+    description,
+    mainImage,
+    location,
+    foundedYear,
+    "musicalStyles": musicalStyles[]->{ title, "slug": slug.current },
+    capacity,
+    duration,
+    website
+  },
   // On récupère l'objet venue en entier
   venue {
     venueType,
@@ -86,6 +133,20 @@ const query = groq`*[_type == "event" && slug.current == $slug][0] {
       "isReference": true,
       ...@->{ _id, name, "slug": slug.current }
     }
+  },
+  // Nouveau champ line-up texte
+  lineupText,
+  // Groupes référencés avec leurs informations complètes
+  "referencedBands": referencedBands[]-> {
+    _id,
+    name,
+    "slug": slug.current,
+    bio,
+    pressPhoto,
+    logoImage,
+    "styles": styles[]->{title},
+    cityOfOrigin,
+    departmentOfOrigin
   }
 }`;
 
@@ -119,6 +180,74 @@ const formattedEventDate = computed(() => {
   }
   
   return 'Date non définie';
+});
+
+// Configuration SEO dynamique pour l'événement
+const extractEventDescription = (description: any[]): string => {
+  if (!description || !Array.isArray(description)) return '';
+  
+  const textBlock = description.find(block => block._type === 'block' && block.children);
+  if (textBlock && textBlock.children) {
+    const text = textBlock.children
+      .filter((child: any) => child._type === 'span' && child.text)
+      .map((child: any) => child.text)
+      .join(' ');
+    
+    return text.length > 155 ? text.substring(0, 155) + '...' : text;
+  }
+  
+  return '';
+};
+
+useSeoMeta({
+  title: () => event.value ? `${event.value.title} - Événements - Breizh Metal Magazine` : 'Événement - Breizh Metal Magazine',
+  description: () => {
+    if (event.value) {
+      // Essayer d'extraire la description du contenu
+      const eventDesc = event.value.description ? extractEventDescription(event.value.description) : '';
+      if (eventDesc) {
+        return eventDesc;
+      }
+      
+      // Générer une description basée sur les informations disponibles
+      const date = formattedEventDate.value;
+      const venue = event.value.venue?.venueDetails?.name || event.value.venue?.venueText || '';
+      const city = event.value.venue?.venueDetails?.city || '';
+      const festival = event.value.festival?.name || '';
+      const eventType = event.value.eventType || 'événement';
+      
+      let description = `${event.value.title} - ${eventType}`;
+      if (date !== 'Date non définie') description += ` le ${date}`;
+      if (venue) description += ` à ${venue}`;
+      if (city && venue !== city) description += ` (${city})`;
+      if (festival) description += ` - ${festival}`;
+      
+      return `${description}. Découvrez les détails sur Breizh Metal Magazine.`;
+    }
+    return 'Découvrez cet événement metal sur Breizh Metal Magazine';
+  },
+  ogTitle: () => event.value?.title || 'Événement - Breizh Metal Magazine',
+  ogDescription: () => {
+    if (event.value) {
+      const eventDesc = event.value.description ? extractEventDescription(event.value.description) : '';
+      if (eventDesc) return eventDesc;
+      
+      const date = formattedEventDate.value;
+      const venue = event.value.venue?.venueDetails?.name || event.value.venue?.venueText || '';
+      return `${event.value.title} - ${date !== 'Date non définie' ? date : 'Événement metal'} ${venue ? `à ${venue}` : ''}`;
+    }
+    return 'Événement metal sur Breizh Metal Magazine';
+  },
+  ogImage: () => {
+    if (event.value?.poster?.asset?._ref) {
+      return event.value.poster.asset._ref;
+    }
+    if (event.value?.festival?.mainImage?.asset?._ref) {
+      return event.value.festival.mainImage.asset._ref;
+    }
+    return '/bzh-mtl-mgz_logo.png';
+  },
+  twitterCard: 'summary_large_image'
 });
 </script>
 
@@ -166,112 +295,90 @@ const formattedEventDate = computed(() => {
         
         <!-- Colonne Principale (Line-up) -->
         <div class="w-full lg:w-2/3">
-          <!-- Line-up -->
-          <div v-if="event.lineup && event.lineup.length > 0" class="bg-white p-6 rounded-lg shadow-lg">
+          
+          <!-- Nouveau Line-up en texte riche -->
+          <div v-if="event.lineupText" class="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h2 class="text-2xl font-bold mb-6 border-b pb-3">Line-up</h2>
-            <div class="space-y-4">
-              <div v-for="band in event.lineup" :key="band._key" class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <div class="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></div>
-                <div class="flex-1">
-                  <!-- Nouveau format : groupe référencé -->
-                  <template v-if="band._type === 'referencedBand' && band.band">
-                    <NuxtLink 
-                      :to="`/groupes/${band.band.slug}`" 
-                      class="text-xl font-semibold text-gray-900 hover:text-yellow-600 transition-colors"
-                    >
-                      {{ band.band.name }}
-                    </NuxtLink>
-                    <div v-if="band.performanceDay || band.performanceTime" class="text-sm text-gray-600 mt-1">
-                      <span v-if="band.performanceDay">{{ new Date(band.performanceDay).toLocaleDateString('fr-FR') }}</span>
-                      <span v-if="band.performanceTime" class="ml-2">{{ band.performanceTime }}</span>
-                    </div>
-                  </template>
-                  
-                  <!-- Nouveau format : groupe externe -->
-                  <template v-else-if="band._type === 'externalBand'">
-                    <span class="text-xl font-semibold text-gray-900">{{ band.name }}</span>
-                    <div v-if="band.performanceDay || band.performanceTime" class="text-sm text-gray-600 mt-1">
-                      <span v-if="band.performanceDay">{{ new Date(band.performanceDay).toLocaleDateString('fr-FR') }}</span>
-                      <span v-if="band.performanceTime" class="ml-2">{{ band.performanceTime }}</span>
-                    </div>
-                  </template>
-                  
-                  <!-- Ancien format : rétrocompatibilité -->
-                  <template v-else>
-                    <NuxtLink 
-                      v-if="band.isReference && band.slug" 
-                      :to="`/groupes/${band.slug}`" 
-                      class="text-xl font-semibold text-gray-900 hover:text-yellow-600 transition-colors"
-                    >
-                      {{ band.name }}
-                    </NuxtLink>
-                    <span v-else class="text-xl font-semibold text-gray-900">
-                      {{ band.name }}
-                    </span>
-                  </template>
-                </div>
-                <Icon 
-                  v-if="(band._type === 'referencedBand' && band.band) || (band.isReference && band.slug)" 
-                  name="heroicons:arrow-top-right-on-square" 
-                  class="h-5 w-5 text-gray-400" 
-                />
-              </div>
+            <div class="prose prose-lg max-w-none">
+              <CustomSanityContent :blocks="event.lineupText" />
             </div>
           </div>
         </div>
         
         <!-- Colonne Latérale (Infos pratiques) -->
         <aside class="w-full lg:w-1/3 lg:sticky lg:top-28 self-start">
-          <div class="bg-gray-50 p-6 rounded-lg shadow-lg">
-            <h3 class="text-xl font-bold mb-4 border-b pb-3">Informations Pratiques</h3>
-            
-            <!-- Date de l'événement -->
-            <div class="mb-6">
-              <div class="flex items-start gap-3">
-                <Icon name="heroicons:calendar-days" class="h-6 w-6 text-gray-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 class="font-semibold text-gray-700 mb-1">Date</h4>
-                  <p class="text-lg text-black">{{ formattedEventDate }}</p>
+          <div class="space-y-16">
+            <!-- Informations Pratiques -->
+            <div class="bg-gray-50 p-6 rounded-lg shadow-lg">
+              <h3 class="text-xl font-bold mb-4 border-b pb-3">Informations Pratiques</h3>
+              
+              <!-- Date de l'événement -->
+              <div class="mb-6">
+                <div class="flex items-start gap-3">
+                  <Icon name="heroicons:calendar-days" class="h-6 w-6 text-gray-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 class="font-semibold text-gray-700 mb-1">Date</h4>
+                    <p class="text-lg text-black">{{ formattedEventDate }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lieu de l'événement -->
+              <div class="mb-6">
+                <div class="flex items-start gap-3">
+                  <Icon name="heroicons:map-pin" class="h-6 w-6 text-gray-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 class="font-semibold text-gray-700 mb-1">Lieu</h4>
+                    <!-- Cas 1 : Lieu référencé -->
+                    <NuxtLink 
+                      v-if="event.venue?.venueType === 'reference' && event.venue.venueDetails" 
+                      :to="`/salles/${event.venue.venueDetails.slug}`" 
+                      class="block group"
+                    >
+                      <p class="text-lg text-black group-hover:text-yellow-600 transition-colors">{{ event.venue.venueDetails.name }}</p>
+                      <p class="text-sm text-gray-500">{{ event.venue.venueDetails.city }}</p>
+                    </NuxtLink>
+                    <!-- Cas 2 : Lieu en texte simple -->
+                    <p v-else-if="event.venue?.venueType === 'text'" class="text-lg text-black">
+                      {{ event.venue.venueText }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Billetterie -->
+              <div v-if="event.ticketUrl" class="mb-6">
+                <a 
+                  :href="event.ticketUrl" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-yellow-600 text-white font-semibold rounded-lg hover:bg-yellow-700 transition-colors shadow-lg"
+                >
+                  <Icon name="heroicons:ticket" class="h-5 w-5" />
+                  Billetterie
+                </a>
+              </div>
+            </div>
+
+            <!-- Section Festival -->
+            <div v-if="event.festival" class="">
+              <h3 class="text-xl font-bold mb-4 pb-3">Fiche de présentation du festival</h3>
+              <div class="flex">
+                <div class="w-full max-w-[300px]">
+                  <FestivalCard :festival="event.festival" />
                 </div>
               </div>
             </div>
 
-            <!-- Lieu de l'événement -->
-            <div class="mb-6">
-              <div class="flex items-start gap-3">
-                <Icon name="heroicons:map-pin" class="h-6 w-6 text-gray-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 class="font-semibold text-gray-700 mb-1">Lieu</h4>
-                  <!-- Cas 1 : Lieu référencé -->
-                  <NuxtLink 
-                    v-if="event.venue?.venueType === 'reference' && event.venue.venueDetails" 
-                    :to="`/salles/${event.venue.venueDetails.slug}`" 
-                    class="block group"
-                  >
-                    <p class="text-lg text-black group-hover:text-yellow-600 transition-colors">{{ event.venue.venueDetails.name }}</p>
-                    <p class="text-sm text-gray-500">{{ event.venue.venueDetails.city }}</p>
-                  </NuxtLink>
-                  <!-- Cas 2 : Lieu en texte simple -->
-                  <p v-else-if="event.venue?.venueType === 'text'" class="text-lg text-black">
-                    {{ event.venue.venueText }}
-                  </p>
+            <!-- Section Groupes Référencés -->
+            <div v-if="event.referencedBands && event.referencedBands.length > 0" class="">
+              <h3 class="text-xl font-bold mb-4 pb-3">Groupes à l'affiche</h3>
+              <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div v-for="band in event.referencedBands" :key="band._id">
+                  <BandCard :band="band" />
                 </div>
               </div>
             </div>
-            
-            <!-- Billetterie -->
-            <div v-if="event.ticketUrl" class="mb-6">
-              <a 
-                :href="event.ticketUrl" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-yellow-600 text-white font-semibold rounded-lg hover:bg-yellow-700 transition-colors shadow-lg"
-              >
-                <Icon name="heroicons:ticket" class="h-5 w-5" />
-                Billetterie
-              </a>
-            </div>
-
           </div>
         </aside>
 

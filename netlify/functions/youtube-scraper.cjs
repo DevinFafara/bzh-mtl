@@ -34,8 +34,8 @@ exports.handler = async (event, context) => {
     const brunoSearchQuery = encodeURIComponent(`"Bruno Guézennec" ${bandName}`)
     const brunoSearchUrl = `https://www.youtube.com/results?search_query=${brunoSearchQuery}`
     
-    console.log(`[YouTube Scraper] Recherche pour "${bandName}"`)
-    console.log(`[YouTube Scraper] URL: ${brunoSearchUrl}`)
+    // console.log(`[YouTube Scraper] Recherche pour "${bandName}"`)
+    // console.log(`[YouTube Scraper] URL: ${brunoSearchUrl}`)
     
     // Timeout avec AbortController
     const controller = new AbortController()
@@ -78,21 +78,21 @@ exports.handler = async (event, context) => {
     }
 
     const html = await response.text()
-    console.log(`[YouTube Scraper] HTML reçu: ${html.length} caractères`)
+    // console.log(`[YouTube Scraper] HTML reçu: ${html.length} caractères`)
 
     // Rechercher les données JSON dans le HTML
     const scriptRegex = /var ytInitialData = ({.*?});/
     const match = html.match(scriptRegex)
     
     if (!match) {
-      console.log('[YouTube Scraper] ytInitialData non trouvé, recherche alternative...')
+      // console.log('[YouTube Scraper] ytInitialData non trouvé, recherche alternative...')
       
       // Essayer une regex alternative
       const altRegex = /window\["ytInitialData"\] = ({.*?});/
       const altMatch = html.match(altRegex)
       
       if (!altMatch) {
-        console.log('[YouTube Scraper] Aucune donnée YouTube trouvée')
+        // console.log('[YouTube Scraper] Aucune donnée YouTube trouvée')
         return {
           statusCode: 200,
           headers,
@@ -113,21 +113,21 @@ exports.handler = async (event, context) => {
       videoData = JSON.parse(match[1])
     }
 
-    console.log('[YouTube Scraper] Données YouTube extraites')
+    // console.log('[YouTube Scraper] Données YouTube extraites')
 
     // Extraire les vidéos des résultats de recherche
     let videos = []
     try {
       const contents = videoData?.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents || []
       
-      console.log(`[Netlify Function] Nombre de sections trouvées: ${contents.length}`)
+      // console.log(`[Netlify Function] Nombre de sections trouvées: ${contents.length}`)
       
       let totalVideosFound = 0
       let brunoVideosFound = 0
       
       for (const section of contents) {
         const items = section?.itemSectionRenderer?.contents || []
-        console.log(`[Netlify Function] Nombre d'items dans cette section: ${items.length}`)
+        // console.log(`[Netlify Function] Nombre d'items dans cette section: ${items.length}`)
         
         for (const item of items) {
           const videoRenderer = item?.videoRenderer
@@ -138,23 +138,23 @@ exports.handler = async (event, context) => {
             const title = videoRenderer?.title?.runs?.[0]?.text || ''
             const videoId = videoRenderer?.videoId
             
-            console.log(`[Netlify Function] Vidéo ${totalVideosFound}: "${title}" - Chaîne: "${channelName}"`)
+            // console.log(`[Netlify Function] Vidéo ${totalVideosFound}: "${title}" - Chaîne: "${channelName}"`)
             
             // Filtrer par chaîne Bruno Guézennec
             const isBrunoChannel = channelName.toLowerCase().includes('bruno') && channelName.toLowerCase().includes('guézennec')
             
             if (isBrunoChannel) {
               brunoVideosFound++
-              console.log(`[Netlify Function] ✓ Vidéo de Bruno trouvée: "${title}"`)
+              // console.log(`[Netlify Function] ✓ Vidéo de Bruno trouvée: "${title}"`)
               
               if (videoId && title) {
                 // Vérifier si le titre contient le nom du groupe suivi d'un séparateur valide
                 const titleLower = title.toLowerCase()
                 const bandNameLower = bandName.toLowerCase()
                 
-                console.log(`[Netlify Function] Comparaison:`)
-                console.log(`[Netlify Function] - Titre: "${titleLower}"`)
-                console.log(`[Netlify Function] - Groupe recherché: "${bandNameLower}"`)
+                // console.log(`[Netlify Function] Comparaison:`)
+                // console.log(`[Netlify Function] - Titre: "${titleLower}"`)
+                // console.log(`[Netlify Function] - Groupe recherché: "${bandNameLower}"`)
                 
                 // Fonction pour vérifier si le nom du groupe est suivi d'un séparateur valide
                 const isValidMatch = (title, bandName) => {
@@ -164,20 +164,20 @@ exports.handler = async (event, context) => {
                 
                 // Recherche avec le nom original
                 let matches = isValidMatch(titleLower, bandNameLower)
-                console.log(`[Netlify Function] - Match direct: ${matches}`)
+                // console.log(`[Netlify Function] - Match direct: ${matches}`)
                 
                 // Si pas de match et que le nom contient un tiret, essayer avec des espaces
                 if (!matches && bandNameLower.includes('-')) {
                   const bandWithSpaces = bandNameLower.replace(/-/g, ' ')
                   matches = isValidMatch(titleLower, bandWithSpaces)
-                  console.log(`[Netlify Function] - Essai avec espaces "${bandWithSpaces}": ${matches}`)
+                  // console.log(`[Netlify Function] - Essai avec espaces "${bandWithSpaces}": ${matches}`)
                 }
                 
                 // Si pas de match et que le nom contient des espaces, essayer avec des tirets
                 if (!matches && bandNameLower.includes(' ')) {
                   const bandWithDashes = bandNameLower.replace(/\s+/g, '-')
                   matches = isValidMatch(titleLower, bandWithDashes)
-                  console.log(`[Netlify Function] - Essai avec tirets "${bandWithDashes}": ${matches}`)
+                  // console.log(`[Netlify Function] - Essai avec tirets "${bandWithDashes}": ${matches}`)
                 }
                 
                 if (matches) {
@@ -192,28 +192,28 @@ exports.handler = async (event, context) => {
                   }
                   
                   videos.push(video)
-                  console.log(`[Netlify Function] 🎯 VIDÉO MATCHÉE: ${title}`)
-                  console.log(`[Netlify Function] - ID: ${videoId}`)
-                  console.log(`[Netlify Function] - Thumbnail URL: ${video.thumbnail}`)
-                  console.log(`[Netlify Function] - Channel: ${channelName}`)
-                  console.log(`[Netlify Function] - Duration: ${video.duration}`)
-                  console.log(`[Netlify Function] - Views: ${video.viewCount}`)
-                  console.log(`[Netlify Function] - Published: ${video.publishedTime}`)
+                  // console.log(`[Netlify Function] 🎯 VIDÉO MATCHÉE: ${title}`)
+                  // console.log(`[Netlify Function] - ID: ${videoId}`)
+                  // console.log(`[Netlify Function] - Thumbnail URL: ${video.thumbnail}`)
+                  // console.log(`[Netlify Function] - Channel: ${channelName}`)
+                  // console.log(`[Netlify Function] - Duration: ${video.duration}`)
+                  // console.log(`[Netlify Function] - Views: ${video.viewCount}`)
+                  // console.log(`[Netlify Function] - Published: ${video.publishedTime}`)
                 } else {
-                  console.log(`[Netlify Function] ❌ Pas de match pour: "${title}"`)
+                  // console.log(`[Netlify Function] ❌ Pas de match pour: "${title}"`)
                 }
               }
             } else {
-              console.log(`[Netlify Function] ✗ Pas une vidéo de Bruno: "${channelName}"`)
+              // console.log(`[Netlify Function] ✗ Pas une vidéo de Bruno: "${channelName}"`)
             }
           }
         }
       }
       
-      console.log(`[Netlify Function] Résumé du scraping:`)
-      console.log(`[Netlify Function] - Vidéos totales trouvées: ${totalVideosFound}`)
-      console.log(`[Netlify Function] - Vidéos de Bruno trouvées: ${brunoVideosFound}`)
-      console.log(`[Netlify Function] - Vidéos matchées pour "${bandName}": ${videos.length}`)
+      // console.log(`[Netlify Function] Résumé du scraping:`)
+      // console.log(`[Netlify Function] - Vidéos totales trouvées: ${totalVideosFound}`)
+      // console.log(`[Netlify Function] - Vidéos de Bruno trouvées: ${brunoVideosFound}`)
+      // console.log(`[Netlify Function] - Vidéos matchées pour "${bandName}": ${videos.length}`)
       
     } catch (parseError) {
       console.error('[YouTube Scraper] Erreur lors du parsing des vidéos:', parseError)
@@ -232,7 +232,7 @@ exports.handler = async (event, context) => {
       }
     }
 
-    console.log(`[YouTube Scraper] ${videos.length} vidéo(s) trouvée(s) pour "${bandName}"`)
+    // console.log(`[YouTube Scraper] ${videos.length} vidéo(s) trouvée(s) pour "${bandName}"`)
     const totalVideosFound = videos.length
 
     // Limiter à 6 vidéos pour l'affichage
@@ -240,7 +240,7 @@ exports.handler = async (event, context) => {
 
     // Si aucune vidéo trouvée, retourner des vidéos de démo
     if (limitedVideos.length === 0) {
-      console.log('[YouTube Scraper] Aucune vidéo trouvée, retour de vidéos de démo')
+      // console.log('[YouTube Scraper] Aucune vidéo trouvée, retour de vidéos de démo')
       
       const demoVideo = {
         id: "qTsomvebRAA",
@@ -251,12 +251,12 @@ exports.handler = async (event, context) => {
         viewCount: "482 vues"
       }
       
-      console.log(`[YouTube Scraper] Vidéo de démo retournée:`)
-      console.log(`[YouTube Scraper] - ID: ${demoVideo.id}`)
-      console.log(`[YouTube Scraper] - Thumbnail URL: ${demoVideo.thumbnail}`)
-      console.log(`[YouTube Scraper] - Channel: ${demoVideo.channelTitle}`)
-      console.log(`[YouTube Scraper] - Duration: ${demoVideo.duration}`)
-      console.log(`[YouTube Scraper] - Views: ${demoVideo.viewCount}`)
+      // console.log(`[YouTube Scraper] Vidéo de démo retournée:`)
+      // console.log(`[YouTube Scraper] - ID: ${demoVideo.id}`)
+      // console.log(`[YouTube Scraper] - Thumbnail URL: ${demoVideo.thumbnail}`)
+      // console.log(`[YouTube Scraper] - Channel: ${demoVideo.channelTitle}`)
+      // console.log(`[YouTube Scraper] - Duration: ${demoVideo.duration}`)
+      // console.log(`[YouTube Scraper] - Views: ${demoVideo.viewCount}`)
       
       return {
         statusCode: 200,

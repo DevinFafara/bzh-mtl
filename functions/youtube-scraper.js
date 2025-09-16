@@ -34,8 +34,8 @@ export const handler = async (event, context) => {
     const brunoSearchQuery = encodeURIComponent(`"Bruno Guézennec" ${bandName}`)
     const brunoSearchUrl = `https://www.youtube.com/results?search_query=${brunoSearchQuery}`
     
-    console.log(`[YouTube Scraper] Recherche pour "${bandName}"`)
-    console.log(`[YouTube Scraper] URL: ${brunoSearchUrl}`)
+    // console.log(`[YouTube Scraper] Recherche pour "${bandName}"`)
+    // console.log(`[YouTube Scraper] URL: ${brunoSearchUrl}`)
     
     // Timeout avec AbortController
     const controller = new AbortController()
@@ -55,20 +55,20 @@ export const handler = async (event, context) => {
     
     clearTimeout(timeoutId)
     
-    console.log(`[YouTube Scraper] Status: ${response.status}`)
+    // console.log(`[YouTube Scraper] Status: ${response.status}`)
     
     if (response.ok) {
       const html = await response.text()
-      console.log(`[YouTube Scraper] HTML reçu: ${html.length} caractères`)
+      // console.log(`[YouTube Scraper] HTML reçu: ${html.length} caractères`)
       videoData = extractVideoDataFromHTML(html)
-      console.log(`[YouTube Scraper] Vidéos extraites: ${videoData.length}`)
+      // console.log(`[YouTube Scraper] Vidéos extraites: ${videoData.length}`)
     } else {
       console.error(`[YouTube Scraper] Erreur HTTP: ${response.status} ${response.statusText}`)
     }
     
     // Stratégie 2: Si pas de résultats, recherche avec ConcertsMetal-BZH
     if (videoData.length === 0) {
-      console.log(`[YouTube Scraper] Tentative avec ConcertsMetal-BZH`)
+      // console.log(`[YouTube Scraper] Tentative avec ConcertsMetal-BZH`)
       const concertsMetalQuery = encodeURIComponent(`"ConcertsMetal-BZH" ${bandName}`)
       const concertsMetalUrl = `https://www.youtube.com/results?search_query=${concertsMetalQuery}`
       
@@ -92,13 +92,13 @@ export const handler = async (event, context) => {
       if (response.ok) {
         const html = await response.text()
         videoData = extractVideoDataFromHTML(html)
-        console.log(`[YouTube Scraper] Vidéos ConcertsMetal-BZH: ${videoData.length}`)
+        // console.log(`[YouTube Scraper] Vidéos ConcertsMetal-BZH: ${videoData.length}`)
       }
     }
     
     // Stratégie 3: Si toujours pas de résultats, recherche générale avec filtre strict
     if (videoData.length === 0) {
-      console.log(`[YouTube Scraper] Tentative recherche générale`)
+      // console.log(`[YouTube Scraper] Tentative recherche générale`)
       const generalSearchQuery = encodeURIComponent(`${bandName} ConcertsMetal-BZH`)
       const generalSearchUrl = `https://www.youtube.com/results?search_query=${generalSearchQuery}`
       
@@ -122,7 +122,7 @@ export const handler = async (event, context) => {
       if (response.ok) {
         const html = await response.text()
         videoData = extractVideoDataFromHTML(html)
-        console.log(`[YouTube Scraper] Vidéos générales: ${videoData.length}`)
+        // console.log(`[YouTube Scraper] Vidéos générales: ${videoData.length}`)
       }
     }
 
