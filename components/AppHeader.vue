@@ -22,7 +22,7 @@ const chroniquesItems = [
       <!-- 1. Le Logo -->
       <NuxtLink to="/" class="text-2xl font-bold flex items-center space-x-2">
             <img class="h-12 w-auto" src="~/assets/img/menu-bar-bm-logo.png" alt="Logo Breizh Metal" />
-            <span class="text-base">Breizh Metal</span>
+            <span class="text-base">BREIZH METAL</span>
       </NuxtLink>
 
       <!-- 2. Le Menu Desktop (caché sur mobile) -->
