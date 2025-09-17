@@ -235,7 +235,7 @@ const extractBioDescription = (bio: any[]): string => {
 };
 
 useSeoMeta({
-  title: () => band.value ? `${band.value.name} - Groupes - Breizh Metal Magazine` : 'Groupe - Breizh Metal Magazine',
+  title: () => band.value ? `${band.value.name} - Groupes - Breizh Metal` : 'Groupe - Breizh Metal',
   description: () => {
     if (band.value) {
       const bioDesc = band.value.bio ? extractBioDescription(band.value.bio) : '';
@@ -249,20 +249,20 @@ useSeoMeta({
         ? ` - ${band.value.styles.map(s => s.title).join(', ')}` 
         : '';
       
-      return `Découvrez ${band.value.name}, groupe de metal${location}${styles}. Biographie, actualités et concerts sur Breizh Metal Magazine.`;
+      return `Découvrez ${band.value.name}, groupe de metal${location}${styles}. Biographie, actualités et concerts sur Breizh Metal.`;
     }
-    return 'Découvrez ce groupe de metal sur Breizh Metal Magazine';
+    return 'Découvrez ce groupe de metal sur Breizh Metal';
   },
-  ogTitle: () => band.value?.name || 'Groupe - Breizh Metal Magazine',
+  ogTitle: () => band.value?.name || 'Groupe - Breizh Metal',
   ogDescription: () => {
     if (band.value) {
       const bioDesc = band.value.bio ? extractBioDescription(band.value.bio) : '';
       if (bioDesc) return bioDesc;
       
       const location = band.value.cityOfOrigin ? ` de ${band.value.cityOfOrigin}` : '';
-      return `${band.value.name}, groupe de metal${location} - Breizh Metal Magazine`;
+      return `${band.value.name}, groupe de metal${location} - Breizh Metal`;
     }
-    return 'Groupe de metal sur Breizh Metal Magazine';
+    return 'Groupe de metal sur Breizh Metal';
   },
   ogImage: () => {
     if (band.value?.pressPhoto?.asset?._ref) {

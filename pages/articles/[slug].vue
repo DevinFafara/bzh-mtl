@@ -139,18 +139,18 @@ const extractDescription = (body: any[]): string => {
 };
 
 useSeoMeta({
-  title: () => post.value ? `${post.value.title} - Breizh Metal Magazine` : 'Article - Breizh Metal Magazine',
+  title: () => post.value ? `${post.value.title} - Breizh Metal` : 'Article - Breizh Metal',
   description: () => {
     if (post.value?.body) {
       const extracted = extractDescription(post.value.body);
-      return extracted || `Lisez cet article ${post.value.articleType || ''} sur Breizh Metal Magazine`;
+      return extracted || `Lisez cet article ${post.value.articleType || ''} sur Breizh Metal`;
     }
     return 'Découvrez cet article sur la scène metal bretonne';
   },
-  ogTitle: () => post.value?.title || 'Article - Breizh Metal Magazine',
+  ogTitle: () => post.value?.title || 'Article - Breizh Metal',
   ogDescription: () => {
     if (post.value?.body) {
-      return extractDescription(post.value.body) || `Article ${post.value.articleType || ''} sur Breizh Metal Magazine`;
+      return extractDescription(post.value.body) || `Article ${post.value.articleType || ''} sur Breizh Metal`;
     }
     return 'Découvrez cet article sur la scène metal bretonne';
   },

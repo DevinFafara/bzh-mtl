@@ -5,7 +5,7 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: 'Festivals - Breizh Metal Magazine',
+  title: 'Festivals - Breizh Metal',
   description: 'Découvrez les festivals de metal en Bretagne et au-delà.'
 });
 

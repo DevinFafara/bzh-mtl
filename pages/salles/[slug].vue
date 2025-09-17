@@ -145,7 +145,7 @@ const extractVenueDescription = (description: any[]): string => {
 };
 
 useSeoMeta({
-  title: () => venue.value ? `${venue.value.name} - Salles - Breizh Metal Magazine` : 'Salle - Breizh Metal Magazine',
+  title: () => venue.value ? `${venue.value.name} - Salles - Breizh Metal` : 'Salle - Breizh Metal',
   description: () => {
     if (venue.value) {
       const venueDesc = venue.value.description ? extractVenueDescription(venue.value.description) : '';
@@ -157,20 +157,20 @@ useSeoMeta({
       const location = venue.value.city ? ` à ${venue.value.city}` : '';
       const department = departmentName.value ? ` (${departmentName.value})` : '';
       
-      return `${venue.value.name}, salle de concert${location}${department}. Découvrez les événements, concerts et actualités sur Breizh Metal Magazine.`;
+      return `${venue.value.name}, salle de concert${location}${department}. Découvrez les événements, concerts et actualités sur Breizh Metal.`;
     }
-    return 'Découvrez cette salle de concert sur Breizh Metal Magazine';
+    return 'Découvrez cette salle de concert sur Breizh Metal';
   },
-  ogTitle: () => venue.value?.name || 'Salle - Breizh Metal Magazine',
+  ogTitle: () => venue.value?.name || 'Salle - Breizh Metal',
   ogDescription: () => {
     if (venue.value) {
       const venueDesc = venue.value.description ? extractVenueDescription(venue.value.description) : '';
       if (venueDesc) return venueDesc;
       
       const location = venue.value.city ? ` à ${venue.value.city}` : '';
-      return `${venue.value.name}, salle de concert${location} - Breizh Metal Magazine`;
+      return `${venue.value.name}, salle de concert${location} - Breizh Metal`;
     }
-    return 'Salle de concert sur Breizh Metal Magazine';
+    return 'Salle de concert sur Breizh Metal';
   },
   ogImage: () => {
     if (venue.value?.image?.asset?._ref) {

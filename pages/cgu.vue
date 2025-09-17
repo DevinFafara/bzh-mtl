@@ -4,7 +4,7 @@
       <!-- En-tête -->
       <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">Conditions Générales d'Utilisation</h1>
-        <p class="text-xl text-gray-600">Règles d'utilisation du site Breizh Metal Magazine</p>
+        <p class="text-xl text-gray-600">Règles d'utilisation du site Breizh Metal</p>
       </div>
 
       <!-- Contenu -->
@@ -15,7 +15,7 @@
             <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Objet</h2>
             <p class="text-gray-700 leading-relaxed">
               Les présentes conditions générales d'utilisation (CGU) ont pour objet de définir les modalités 
-              et conditions d'utilisation du site Breizh Metal Magazine, ainsi que les droits et obligations 
+              et conditions d'utilisation du site Breizh Metal, ainsi que les droits et obligations 
               des utilisateurs.
             </p>
           </div>
@@ -120,9 +120,9 @@
 <script setup>
 // Configuration SEO
 useHead({
-  title: 'CGU - Breizh Metal Magazine',
+  title: 'CGU - Breizh Metal',
   meta: [
-    { name: 'description', content: 'Conditions générales d\'utilisation du site Breizh Metal Magazine' },
+    { name: 'description', content: 'Conditions générales d\'utilisation du site Breizh Metal' },
     { name: 'robots', content: 'noindex, nofollow' }
   ]
 })

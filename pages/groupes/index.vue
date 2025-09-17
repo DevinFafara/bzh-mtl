@@ -1,10 +1,10 @@
 <script setup lang="ts">
 // Configuration SEO pour la page de groupes
 useSeoMeta({
-  title: 'Groupes - Breizh Metal Magazine',
+  title: 'Groupes - Breizh Metal',
   description: 'Découvrez tous les groupes de metal de Bretagne et d\'ailleurs. Biographies, discographies, actualités et concerts des artistes metal bretons.',
-  ogTitle: 'Groupes Metal - Breizh Metal Magazine',
-  ogDescription: 'Tous les groupes de metal référencés sur Breizh Metal Magazine. Découvrez la scène metal bretonne.',
+  ogTitle: 'Groupes Metal - Breizh Metal',
+  ogDescription: 'Tous les groupes de metal référencés sur Breizh Metal. Découvrez la scène metal bretonne.',
   ogImage: '/bzh-mtl-mgz_logo.png',
   twitterCard: 'summary_large_image'
 })

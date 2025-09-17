@@ -4,7 +4,7 @@
       <!-- En-tête -->
       <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">Mentions Légales</h1>
-        <p class="text-xl text-gray-600">Informations légales relatives au site Breizh Metal Magazine</p>
+        <p class="text-xl text-gray-600">Informations légales relatives au site Breizh Metal</p>
       </div>
 
       <!-- Contenu -->
@@ -14,7 +14,7 @@
           <div>
             <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Informations sur l'éditeur</h2>
             <p class="text-gray-700 leading-relaxed">
-              <strong>Nom du site :</strong> Breizh Metal Magazine<br>
+              <strong>Nom du site :</strong> Breizh Metal<br>
               <strong>URL :</strong> {{ $config.public.siteUrl || 'https://bzh-mtl.netlify.app' }}<br>
               <strong>Nature :</strong> Site web d'information culturelle
             </p>
@@ -114,9 +114,9 @@
 <script setup>
 // Configuration SEO
 useHead({
-  title: 'Mentions Légales - Breizh Metal Magazine',
+  title: 'Mentions Légales - Breizh Metal',
   meta: [
-    { name: 'description', content: 'Mentions légales et informations juridiques du site Breizh Metal Magazine' },
+    { name: 'description', content: 'Mentions légales et informations juridiques du site Breizh Metal' },
     { name: 'robots', content: 'noindex, nofollow' }
   ]
 })

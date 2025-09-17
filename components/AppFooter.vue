@@ -29,8 +29,8 @@ const legalItems = [
         
         <div class="w-full md:w-1/3 lg:w-1/2">
           <NuxtLink to="/" class="inline-flex items-center space-x-2 mb-4">
-            <img class="h-10 w-auto" src="~/assets/img/bzh-mtl-mgz_logo.png" alt="Logo Breizh Metal Magazine" />
-            <span class="font-bold text-white text-lg">Breizh Metal Magazine</span>
+            <img class="h-10 w-auto" src="~/assets/img/menu-bar-bm-logo.png" alt="Logo Breizh Metal" />
+            <span class="font-bold text-white text-lg">Breizh Metal</span>
           </NuxtLink>
           <p class="text-sm max-w-sm">
             Le portail de la scène metal en Bretagne. Chroniques, interviews, agenda des concerts et fiches des groupes et salles locales.
@@ -82,7 +82,7 @@ const legalItems = [
 
       <div class="mt-8 pt-8 border-t border-gray-800 text-center">
         <p class="text-sm text-gray-500">
-          © {{ new Date().getFullYear() }} Breizh Metal Magazine. Tous droits réservés.
+          © {{ new Date().getFullYear() }} Breizh Metal. Tous droits réservés.
         </p>
       </div>
 

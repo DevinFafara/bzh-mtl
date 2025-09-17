@@ -15,7 +15,7 @@
           <h2 class="text-2xl font-bold text-gray-900 mb-6">Équipe éditoriale</h2>
           <div class="prose max-w-none">
             <p>
-              <strong>Breizh Metal Magazine</strong> est un site indépendant créé par des passionnés de musique metal, dédié à la promotion de la scène metal bretonne.
+              <strong>Breizh Metal</strong> est un site indépendant créé par des passionnés de musique metal, dédié à la promotion de la scène metal bretonne.
             </p>
             <p>
               <strong>Direction éditoriale :</strong> Bruno Guézennec<br>
@@ -103,9 +103,9 @@
 <script setup>
 // Configuration SEO
 useHead({
-  title: 'Crédits - Breizh Metal Magazine',
+  title: 'Crédits - Breizh Metal',
   meta: [
-    { name: 'description', content: 'Équipe, technologies et remerciements du site Breizh Metal Magazine' },
+    { name: 'description', content: 'Équipe, technologies et remerciements du site Breizh Metal' },
     { name: 'robots', content: 'index, follow' }
   ]
 })

@@ -2,9 +2,9 @@
 <script setup lang="ts">
 // Configuration SEO pour la page des salles
 useSeoMeta({
-  title: 'Salles de Concert - Breizh Metal Magazine',
+  title: 'Salles de Concert - Breizh Metal',
   description: 'Découvrez toutes les salles de concert de Bretagne qui accueillent des événements metal. Informations, capacités et événements à venir.',
-  ogTitle: 'Salles de Concert Metal - Breizh Metal Magazine',
+  ogTitle: 'Salles de Concert Metal - Breizh Metal',
   ogDescription: 'Toutes les salles de concert metal en Bretagne. Découvrez les lieux qui font vibrer la scène metal bretonne.',
   ogImage: '/bzh-mtl-mgz_logo.png',
   twitterCard: 'summary_large_image'

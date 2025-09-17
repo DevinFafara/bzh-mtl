@@ -200,7 +200,7 @@ const extractEventDescription = (description: any[]): string => {
 };
 
 useSeoMeta({
-  title: () => event.value ? `${event.value.title} - Événements - Breizh Metal Magazine` : 'Événement - Breizh Metal Magazine',
+  title: () => event.value ? `${event.value.title} - Événements - Breizh Metal` : 'Événement - Breizh Metal',
   description: () => {
     if (event.value) {
       // Essayer d'extraire la description du contenu
@@ -222,11 +222,11 @@ useSeoMeta({
       if (city && venue !== city) description += ` (${city})`;
       if (festival) description += ` - ${festival}`;
       
-      return `${description}. Découvrez les détails sur Breizh Metal Magazine.`;
+      return `${description}. Découvrez les détails sur Breizh Metal.`;
     }
-    return 'Découvrez cet événement metal sur Breizh Metal Magazine';
+    return 'Découvrez cet événement metal sur Breizh Metal';
   },
-  ogTitle: () => event.value?.title || 'Événement - Breizh Metal Magazine',
+  ogTitle: () => event.value?.title || 'Événement - Breizh Metal',
   ogDescription: () => {
     if (event.value) {
       const eventDesc = event.value.description ? extractEventDescription(event.value.description) : '';
@@ -236,7 +236,7 @@ useSeoMeta({
       const venue = event.value.venue?.venueDetails?.name || event.value.venue?.venueText || '';
       return `${event.value.title} - ${date !== 'Date non définie' ? date : 'Événement metal'} ${venue ? `à ${venue}` : ''}`;
     }
-    return 'Événement metal sur Breizh Metal Magazine';
+    return 'Événement metal sur Breizh Metal';
   },
   ogImage: () => {
     if (event.value?.poster?.asset?._ref) {

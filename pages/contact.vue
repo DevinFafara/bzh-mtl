@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // Pour le SEO de la page
 useHead({
-  title: 'Contact - Breizh Metal Magazine',
+  title: 'Contact - Breizh Metal',
   meta: [
-    { name: 'description', content: 'Contactez l\'équipe de Breizh Metal Magazine. Envoyez-nous un message, une proposition de chronique ou une suggestion.' }
+    { name: 'description', content: 'Contactez l\'équipe de Breizh Metal. Envoyez-nous un message, une proposition de chronique ou une suggestion.' }
   ]
 });
 

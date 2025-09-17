@@ -1,13 +1,13 @@
 <script setup lang="ts">
 // Configuration SEO pour la page d'accueil
 useSeoMeta({
-  title: 'Breizh Metal Magazine',
+  title: 'Breizh Metal',
   description: 'Découvrez la scène metal bretonne : groupes, festivals, concerts, chroniques et actualités. Suivez l\'actualité du metal en Bretagne et au-delà avec interviews, reviews et agenda.',
-  ogTitle: 'Breizh Metal Magazine - Le portail metal de Bretagne',
-  ogDescription: 'Le magazine de référence de la scène metal bretonne. Actualités, groupes, festivals, concerts et chroniques.',
+  ogTitle: 'Breizh Metal - Le portail metal de Bretagne',
+  ogDescription: 'Le webzine de référence de la scène metal bretonne. Actualités, groupes, festivals, concerts et chroniques.',
   ogImage: '/bzh-mtl-mgz_logo.png',
   twitterCard: 'summary_large_image',
-  twitterTitle: 'Breizh Metal Magazine',
+  twitterTitle: 'Breizh Metal',
   twitterDescription: 'Le portail de référence de la scène metal bretonne'
 })
 
@@ -120,51 +120,23 @@ onMounted(() => {
     <!-- Bannière avec logo et titre -->
     <section class="relative bg-stone-900 text-white overflow-hidden">
       <!-- Logo en arrière-plan -->
-      <div class="absolute inset-0 flex items-center justify-center opacity-90 p-8">
+      <!-- <div class="absolute inset-0 flex items-center justify-center opacity-90 p-8">
         <img 
           src="~/assets/img/bzh-mtl-mgz_logo.png" 
           alt="BZH-MTL Logo Background" 
           class="h-48 w-48 md:h-64 md:w-64 lg:h-72 lg:w-72 object-contain"
         />
-      </div>
+      </div> -->
       
-      <!-- Contenu par-dessus -->
-      <div class="relative z-10 container mx-auto px-4 py-12 md:py-16">
-        <div class="text-center">
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 hero-title">
-            Breizh Metal Magazine
-          </h1>
-          <p class="text-lg md:text-xl text-white-300 font-medium hero-subtitle">
-            Tout sur la Scène locale / émergente / underground
-          </p>
-        </div>
+      <!-- Nouveau logo en arrière-plan -->
+      <div class="flex items-center justify-center opacity-90">
+        <img 
+          src="~/assets/img/bm-logo.png" 
+          alt="BM Logo Background" 
+          class="w-full max-w-[500px] h-auto object-contain"
+        />
       </div>
-      
-      <!-- Ancien affichage en commentaire -->
-      <!--
-      <div class="container mx-auto px-4 py-12 md:py-16">
-        <div class="flex flex-col md:flex-row items-center justify-between">
-          <div class="flex items-center space-x-4 mb-6 md:mb-0">
-            <img 
-              src="~/assets/img/logo.png" 
-              alt="BZH-MTL Logo" 
-              class="h-16 w-16 md:h-20 md:w-20 rounded-full shadow-lg"
-            />
-            <div>
-              <h1 class="text-3xl md:text-4xl font-bold tracking-tight">
-                Breizh Metal Magazine
-              </h1>
-            </div>
-          </div>
-          
-          <div class="text-center md:text-right">
-            <p class="text-sm md:text-base text-stone-300">
-              Scène bretonne • Chroniques • Concerts
-            </p>
-          </div>
-        </div>
-      </div>
-      -->
+    
     </section>
 
     <!-- Contenu principal -->

@@ -21,9 +21,9 @@ const { data: authors, pending, error } = await useSanityQuery<Author[]>(query);
 
 // Pour le SEO de la page
 useHead({
-  title: 'À Propos - Breizh Metal Magazine',
+  title: 'À Propos - Breizh Metal',
   meta: [
-    { name: 'description', content: 'Découvrez l\'histoire et l\'équipe derrière Breizh Metal Magazine, le portail de la scène metal en Bretagne.' }
+    { name: 'description', content: 'Découvrez l\'histoire et l\'équipe derrière Breizh Metal, le portail de la scène metal en Bretagne.' }
   ]
 });
 </script>
@@ -40,7 +40,7 @@ useHead({
       <div class="max-w-4xl mx-auto mt-12">
         <div class="space-y-6 text-lg leading-relaxed">
           <p class="text-gray-700">
-            Breizh Metal Magazine est né d'une idée simple : créer un espace dédié à la richesse et à la diversité de la scène Metal / Punk / Hardcore en Bretagne. Des côtes du Finistère aux terres de Loire-Atlantique, notre région regorge de talents, de salles mythiques et de festivals qui méritent d'être mis en lumière.
+            Breizh Metal est né d'une idée simple : créer un espace dédié à la richesse et à la diversité de la scène Metal / Punk / Hardcore en Bretagne. Des côtes du Finistère aux terres de Loire-Atlantique, notre région regorge de talents, de salles mythiques et de festivals qui méritent d'être mis en lumière.
           </p>
           <div class="border-l-4 border-yellow-600 pl-6 py-4 bg-gray-50 rounded-r-lg my-8">
             <p class="text-xl font-semibold text-gray-900 italic">

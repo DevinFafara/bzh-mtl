@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // Configuration SEO pour la page des événements
 useSeoMeta({
-  title: 'Événements - Breizh Metal Magazine',
+  title: 'Événements - Breizh Metal',
   description: 'Découvrez tous les événements metal en Bretagne : concerts, festivals, soirées et spectacles. Agenda de la scène metal bretonne.',
-  ogTitle: 'Événements Metal - Breizh Metal Magazine',
+  ogTitle: 'Événements Metal - Breizh Metal',
   ogDescription: 'Agenda des événements metal en Bretagne. Concerts, festivals et soirées metal.',
   ogImage: '/bzh-mtl-mgz_logo.png',
   twitterCard: 'summary_large_image'

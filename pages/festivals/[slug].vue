@@ -106,7 +106,7 @@ const { data: festivalEvents } = await useSanityQuery<FestivalEvent[]>(
 
 // Configuration SEO dynamique
 useSeoMeta({
-  title: () => festival.value ? `${festival.value.name} - Festivals - Breizh Metal Magazine` : 'Festival - Breizh Metal Magazine',
+  title: () => festival.value ? `${festival.value.name} - Festivals - Breizh Metal` : 'Festival - Breizh Metal',
   description: () => festival.value?.description || 'Découvrez ce festival de metal'
 });
 

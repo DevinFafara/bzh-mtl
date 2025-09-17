@@ -7,17 +7,17 @@ export default defineNuxtConfig({
   // Configuration SEO par défaut
   app: {
     head: {
-      title: 'Breizh Metal Magazine',
+      title: 'Breizh Metal',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { 
           name: 'description', 
-          content: 'Découvrez la scène metal bretonne : groupes, festivals, concerts, chroniques et actualités. Le magazine de référence du metal en Bretagne.' 
+          content: 'Découvrez la scène metal bretonne : groupes, festivals, concerts, chroniques et actualités. Le webzine de référence du metal en Bretagne.' 
         },
         { name: 'keywords', content: 'metal, bretagne, musique, festivals, concerts, groupes, chroniques, bzh, breizh' },
-        { name: 'author', content: 'Breizh Metal Magazine' },
-        { property: 'og:site_name', content: 'Breizh Metal Magazine' },
+        { name: 'author', content: 'Breizh Metal' },
+        { property: 'og:site_name', content: 'Breizh Metal' },
         { property: 'og:type', content: 'website' },
         { property: 'og:locale', content: 'fr_FR' },
         { name: 'twitter:card', content: 'summary_large_image' },
