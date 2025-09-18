@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const query = groq`*[_type == "author"] | order(name desc) {
+const query = groq`*[_type == "author"] | order(name asc) {
   _id,
   name,
   "slug": slug.current,
@@ -48,7 +48,7 @@ useHead({
             </p>
           </div>
           <p class="text-gray-700">
-            Ce projet est porté par des passionnés, pour des passionnés. Chaque ligne de code, chaque chronique et chaque photo est le fruit de notre dévotion à cette musique qui nous anime.
+            Ce projet est porté par des passionnés, pour des passionnés. Chaque chronique, chaque photo et chaque ligne de code est le fruit de notre dévotion à cette musique qui nous anime.
           </p>
         </div>
       </div>

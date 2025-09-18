@@ -15,7 +15,7 @@
             <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Informations sur l'éditeur</h2>
             <p class="text-gray-700 leading-relaxed">
               <strong>Nom du site :</strong> Breizh Metal<br>
-              <strong>URL :</strong> {{ $config.public.siteUrl || 'https://bzh-mtl.netlify.app' }}<br>
+              <strong>URL :</strong> {{ $config.public.siteUrl || 'https://breizhmetal.bzh' }}<br>
               <strong>Nature :</strong> Site web d'information culturelle
             </p>
           </div>

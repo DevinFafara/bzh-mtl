@@ -44,4 +44,4 @@ Allow: /
 Crawl-delay: 1
 
 # Référence du sitemap
-Sitemap: https://breizh-metal-mag.bzh/sitemap.xml
+Sitemap: https://breizhmetal.bzh/sitemap.xml

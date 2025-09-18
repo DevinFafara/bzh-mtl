@@ -54,7 +54,7 @@ export default defineNuxtConfig({
   
   // Configuration du sitemap
   site: {
-    url: 'https://breizh-metal-mag.bzh'
+    url: 'https://breizhmetal.bzh'
   },
   
   sitemap: {

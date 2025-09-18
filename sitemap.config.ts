@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   // Configuration par défaut du sitemap
   runtimeConfig: {
     public: {
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://breizh-metal-mag.bzh'
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://breizhmetal.bzh'
     }
   }
 })
