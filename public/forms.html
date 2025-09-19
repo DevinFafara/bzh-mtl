@@ -1,36 +1,21 @@
 <!-- public/forms.html -->
 
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Formulaire de Contact Statique</title>
+  <title>Form Blueprints</title>
 </head>
 <body>
-    <form 
-        name="contact" 
-        method="POST" 
-        data-netlify="true" 
-        data-netlify-honeypot="bot-field"
-        action="/merci"
-    >
-        <input type="hidden" name="form-name" value="contact" />
-        
-        <p>
-            <label>Votre Nom : <input type="text" name="name" /></label>
-        </p>
-        <p>
-            <label>Votre Email : <input type="email" name="email" /></label>
-        </p>
-        <p>
-            <label>Votre Message : <textarea name="message"></textarea></label>
-        </p>
-        <p>
-            <label style="display: none;">Ne pas remplir : <input name="bot-field" /></label>
-        </p>
-        <p>
-            <button type="submit">Envoyer</button>
-        </p>
-    </form>
+
+  <!-- ======================================================= -->
+  <!-- Blueprint pour le formulaire de contact -->
+  <!-- ======================================================= -->
+  <form name="contact" netlify netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="contact" />
+    <input type="text" name="name" />
+    <input type="email" name="email" />
+    <textarea name="message"></textarea>
+    <input name="bot-field" />
+  </form>
 </body>
 </html>

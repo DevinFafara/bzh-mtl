@@ -1,18 +1,47 @@
 <!-- components/ContactForm.vue -->
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from '#app'
+
+const formEl = ref<HTMLFormElement | null>(null)
+const router = useRouter()
+
+const handleSubmit = async (event: Event) => {
+  event.preventDefault()
+
+  if (!formEl.value) return
+
+  const formData = new FormData(formEl.value)
+
+  try {
+    await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(formData as any).toString(),
+    })
+
+    router.push('/merci')
+  } catch (error) {
+    console.error('Erreur lors de la soumission du formulaire :', error)
+  }
+}
+</script>
+
+
 <template>
   <div class="max-w-2xl mx-auto">
     <form 
+      ref="formEl"
       name="contact" 
       method="POST" 
+      data-netlify="true" 
       data-netlify-honeypot="bot-field"
-      data-netlify-recaptcha="true"
-      action="/merci"
+      @submit.prevent="handleSubmit"         
       class="bg-white p-8 rounded-lg shadow-lg border border-gray-200"
-      netlify
     >
       <input type="hidden" name="form-name" value="contact" />
 
-      <!-- Champ honeypot caché -->
       <div class="hidden">
         <label>
           Ne pas remplir si vous êtes humain : <input name="bot-field" />
@@ -56,26 +85,6 @@
           />
         </div>
 
-        <!-- Champ Sujet -->
-        <!-- <div>
-          <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
-            Sujet
-          </label>
-          <select 
-            id="subject" 
-            name="subject"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200"
-          >
-            <option value="">Sélectionnez un sujet</option>
-            <option value="question-generale">Question générale</option>
-            <option value="proposition-groupe">Proposer un groupe</option>
-            <option value="proposition-evenement">Proposer un événement</option>
-            <option value="correction">Signaler une erreur</option>
-            <option value="partenariat">Partenariat</option>
-            <option value="autre">Autre</option>
-          </select>
-        </div> -->
-
         <!-- Champ Message -->
         <div>
           <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
@@ -91,7 +100,6 @@
           ></textarea>
         </div>
 
-        <div data-netlify-recaptcha="true"></div>
         <!-- Bouton d'envoi -->
         <div class="pt-4">
           <button 
