@@ -8,6 +8,7 @@
       data-netlify-honeypot="bot-field"
       action="/merci"
       class="bg-white p-8 rounded-lg shadow-lg border border-gray-200"
+      netlify
     >
       <input type="hidden" name="form-name" value="contact" />
 
