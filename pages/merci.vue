@@ -1,0 +1,7 @@
+<template>
+  <div>
+    <h1>Merci !</h1>
+    <p>Votre message a bien été envoyé. Nous vous répondrons dès que possible.</p>
+    <nuxt-link to="/">Retour à l'accueil</nuxt-link>
+  </div>
+</template>
