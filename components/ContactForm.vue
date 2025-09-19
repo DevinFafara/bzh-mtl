@@ -15,7 +15,7 @@ const handleSubmit = async (event: Event) => {
   const formData = new FormData(formEl.value)
 
   try {
-    await fetch('/', {
+    await fetch('/contact', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams(formData as any).toString(),
