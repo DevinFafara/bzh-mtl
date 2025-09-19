@@ -3,7 +3,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   compatibilityDate: '2025-06-30',
   ssr: true, // Activer le SSR pour que les API routes fonctionnent correctement
-  
+  runtimeConfig: {
+    public: {
+      cloudflareToken: process.env.CLOUDFLARE_TOKEN || '',
+    }
+  },
   // Configuration SEO par défaut
   app: {
     head: {
@@ -29,13 +33,6 @@ export default defineNuxtConfig({
         { rel: 'shortcut icon', href: '/favicon.ico' },
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
         { rel: 'manifest', href: '/site.webmanifest' }
-      ],
-      script: [
-        {
-          defer: true,
-          src: 'https://static.cloudflareinsights.com/beacon.min.js',
-          'data-cf-beacon': '{"token": "${process.env.CLOUDFLARE_TOKEN}"}'
-        }
       ]
     }
   },
