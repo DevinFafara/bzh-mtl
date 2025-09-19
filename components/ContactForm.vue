@@ -5,6 +5,7 @@
       name="contact" 
       method="POST" 
       data-netlify-honeypot="bot-field"
+      data-netlify-recaptcha="true"
       action="/merci"
       class="bg-white p-8 rounded-lg shadow-lg border border-gray-200"
       netlify
@@ -90,6 +91,7 @@
           ></textarea>
         </div>
 
+        <div data-netlify-recaptcha="true"></div>
         <!-- Bouton d'envoi -->
         <div class="pt-4">
           <button 
