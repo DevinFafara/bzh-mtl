@@ -88,6 +88,26 @@ const upcomingEventsQuery = groq`*[_type == "event" && venue.venueReference._ref
   }
 }`;
 
+// Requête pour tous les événements dans cette salle (pas seulement les futurs)
+const allEventsQuery = groq`*[_type == "event" && venue.venueReference._ref == $venueId] | order(dateInfo.singleDate desc, dateInfo.startDate desc, date desc) [0...20] {
+  _id,
+  title,
+  "slug": slug.current,
+  date,
+  dateInfo,
+  poster,
+  status,
+  "eventType": eventType->title,
+  venue {
+    venueType,
+    venueText,
+    "venueDetails": venueReference->{
+      name,
+      city
+    }
+  }
+}`;
+
 const { data: venue } = await useSanityQuery<Venue>(query, { slug: route.params.slug });
 
 // Requête pour les articles connexes (seulement si on a une salle)
@@ -97,6 +117,11 @@ const { data: relatedPosts } = await useSanityQuery<RelatedPost[]>(relatedPostsQ
 
 // Requête pour les prochains événements dans cette salle
 const { data: upcomingEvents } = await useSanityQuery<UpcomingEvent[]>(upcomingEventsQuery, { 
+  venueId: venue.value?._id || '' 
+});
+
+// Requête pour tous les événements dans cette salle
+const { data: allEvents } = await useSanityQuery<UpcomingEvent[]>(allEventsQuery, { 
   venueId: venue.value?._id || '' 
 });
 
@@ -122,6 +147,31 @@ const formatEventDate = (dateString: string) => {
     day: 'numeric',    // '25'
   };
   return new Date(dateString).toLocaleDateString('fr-FR', options);
+};
+
+// Fonction pour formater la date des événements avec la nouvelle structure
+const formatEventDateNew = (event: any) => {
+  let dateToFormat = '';
+  
+  // Gestion de la nouvelle structure dateInfo
+  if (event.dateInfo?.eventDuration === 'single' && event.dateInfo?.singleDate) {
+    dateToFormat = event.dateInfo.singleDate;
+  } else if (event.dateInfo?.eventDuration === 'multiple' && event.dateInfo?.startDate) {
+    dateToFormat = event.dateInfo.startDate;
+  } else if (event.date) {
+    // Fallback pour l'ancienne structure
+    dateToFormat = event.date;
+  }
+  
+  if (!dateToFormat) return 'Date non définie';
+  
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  };
+  return new Date(dateToFormat).toLocaleDateString('fr-FR', options);
 };
 
 // Variable pour détecter l'environnement de développement
@@ -269,6 +319,35 @@ useSeoMeta({
         </div>
 
 
+        <!-- 5. AUTEUR : Bloc réutilisé -->
+        <AuthorSection :author="venue.author" class="mt-8" />
+
+        <!-- Nouvelle section : Tous les événements -->
+        <div v-if="allEvents && Array.isArray(allEvents) && allEvents.length > 0" class="mt-12">
+          <h2 class="text-xl font-bold mb-6">Prochains Événements</h2>
+          <div class="space-y-3">
+            <div v-for="event in allEvents" :key="event._id">
+              <NuxtLink
+                :to="`/evenements/${event.slug}`"
+                class="flex flex-col sm:flex-row sm:items-center gap-x-6 gap-y-1 p-4 bg-white border border-transparent rounded-lg hover:bg-yellow-50 hover:border-yellow-400 transition-all duration-200"
+              >
+                <span class="text-sm font-semibold text-yellow-600 uppercase tracking-wider">
+                  {{ formatEventDateNew(event) }}
+                </span>
+                <span class="text-xl font-bold text-gray-900">
+                  {{ event.title }}
+                </span>
+                <div class="flex flex-wrap gap-2 items-center">
+                  <span v-if="event.eventType" class="inline-block bg-gray-200 text-center text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+                    {{ event.eventType }}
+                  </span>
+                </div>
+              </NuxtLink>
+            </div>
+          </div>
+        </div>
+
+
         <!-- Debug section (temporaire) -->
         <!-- <div v-if="isDevelopment" class="mb-12 p-4 bg-gray-100 rounded-lg">
           <h3 class="font-bold text-lg mb-2">🐛 Debug - Événements</h3>
@@ -280,11 +359,7 @@ useSeoMeta({
           </details>
         </div> -->
 
-        <!-- Séparateur -->
-        <hr class="my-12">
 
-        <!-- 5. AUTEUR : Bloc réutilisé -->
-        <AuthorSection :author="venue.author" class="mt-8" />
 
 
 

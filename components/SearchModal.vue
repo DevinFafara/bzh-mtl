@@ -79,7 +79,7 @@ onUnmounted(() => {
                         name="search" 
                         id="search"
                         class="block w-full rounded-none rounded-l-md border-gray-300 focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm" 
-                        placeholder="Ex: Gojira, Le Ferrailleur..." 
+                        placeholder="Ex: Moundrag, Pit Dog..." 
                       />
                     </div>
                     <button type="submit" class="relative -ml-px inline-flex items-center space-x-2 rounded-r-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">

@@ -55,17 +55,6 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 };
 
-// Écouter les événements clavier
-onMounted(() => {
-  document.addEventListener('keydown', handleKeydown);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown);
-  // S'assurer que le body retrouve son scroll
-  document.body.style.overflow = '';
-});
-
 // Fonction pour appliquer les marques (gras, italique, liens, etc.)
 const applyMarks = (text: string, marks: string[], markDefs: any[]) => {
   let result = text;
@@ -83,8 +72,18 @@ const applyMarks = (text: string, marks: string[], markDefs: any[]) => {
     const markDef = markDefs.find(def => def._key === mark);
     if (markDef && markDef._type === 'link') {
       const href = markDef.href;
-      const target = href.startsWith('http') ? ' target="_blank" rel="noopener noreferrer"' : '';
-      result = `<a href="${href}"${target} class="text-blue-600 hover:text-blue-800 underline">${result}</a>`;
+      
+      // Vérifier si c'est un lien interne
+      const isInternal = href.startsWith('/') || href.includes('breizhmetal.bzh');
+      
+      if (isInternal) {
+        // Lien interne : ajouter une classe spéciale pour l'intercepter
+        const path = href.replace('https://breizhmetal.bzh', '');
+        result = `<a href="${path}" class="internal-link text-blue-600 hover:text-blue-800 underline" data-path="${path}">${result}</a>`;
+      } else {
+        // Lien externe classique
+        result = `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">${result}</a>`;
+      }
     }
   });
   
@@ -190,6 +189,44 @@ const renderBlock = (block: SanityBlock) => {
       return `<p>${content}</p>`;
   }
 };
+
+// Fonction pour intercepter les clics sur les liens internes
+const handleLinkClick = (event: Event) => {
+  const target = event.target as HTMLElement;
+  const link = target.closest('a.internal-link') as HTMLAnchorElement;
+  
+  if (link) {
+    event.preventDefault();
+    const path = link.getAttribute('data-path');
+    if (path) {
+      navigateTo(path);
+    }
+  }
+};
+
+// Écouter les clics sur les liens
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown);
+  document.addEventListener('click', handleLinkClick);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown);
+  document.removeEventListener('click', handleLinkClick);
+  // S'assurer que le body retrouve son scroll
+  document.body.style.overflow = '';
+});
+
+// Écouter les événements clavier
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown);
+  // S'assurer que le body retrouve son scroll
+  document.body.style.overflow = '';
+});
 </script>
 
 <template>

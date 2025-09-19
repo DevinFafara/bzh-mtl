@@ -45,6 +45,10 @@ interface Event {
       name: string;
       city: string;
       slug: string;
+      description?: any;
+      image?: { asset: { _ref: string } };
+      capacity?: number;
+      address?: string;
     };
   };
   lineup?: Array<{
@@ -101,7 +105,7 @@ const query = groq`*[_type == "event" && slug.current == $slug][0] {
     duration,
     website
   },
-  // On récupère l'objet venue en entier
+  // On récupère l'objet venue en entier avec les données complètes
   venue {
     venueType,
     venueText,
@@ -109,7 +113,11 @@ const query = groq`*[_type == "event" && slug.current == $slug][0] {
       _id,
       name,
       city,
-      "slug": slug.current
+      "slug": slug.current,
+      description,
+      image,
+      capacity,
+      address
     }
   },
   // On récupère le line-up, en gérant les nouveaux types
@@ -370,11 +378,21 @@ useSeoMeta({
               </div>
             </div>
 
+            <!-- Section Lieu -->
+            <div v-if="event.venue?.venueType === 'reference' && event.venue.venueDetails" class="">
+              <h3 class="text-xl font-bold mb-4 pb-3">Le lieu</h3>
+              <div class="flex">
+                <div class="w-full max-w-[300px]">
+                  <VenueCard :venue="event.venue.venueDetails" />
+                </div>
+              </div>
+            </div>
+
             <!-- Section Groupes Référencés -->
             <div v-if="event.referencedBands && event.referencedBands.length > 0" class="">
               <h3 class="text-xl font-bold mb-4 pb-3">Groupes à l'affiche</h3>
-              <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                <div v-for="band in event.referencedBands" :key="band._id">
+              <div class="space-y-4">
+                <div v-for="band in event.referencedBands" :key="band._id" class="w-full max-w-[300px]">
                   <BandCard :band="band" />
                 </div>
               </div>

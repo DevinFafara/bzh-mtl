@@ -28,10 +28,10 @@ const chroniquesItems = [
       <!-- 2. Le Menu Desktop (caché sur mobile) -->
       <div class="max-md:hidden md:flex items-center space-x-4">
         <DropdownMenu title="Scène Locale" :items="sceneLocaleItems" />
-        <DropdownMenu title="Chroniques" :items="chroniquesItems" />
-        <!-- <NuxtLink to="/articles"
+        <!-- <DropdownMenu title="Chroniques" :items="chroniquesItems" /> -->
+        <NuxtLink to="/chroniques/news"
             class="relative font-medium text-white px-2 py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full"
-            active-class="after:w-full">Articles</NuxtLink> -->
+            active-class="after:w-full">News</NuxtLink>
         <NuxtLink to="/evenements"
             class="relative font-medium text-white px-2 py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full"
             active-class="after:w-full">Agenda</NuxtLink>

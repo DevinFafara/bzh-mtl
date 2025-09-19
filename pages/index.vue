@@ -131,7 +131,7 @@ onMounted(() => {
       <!-- Nouveau logo en arrière-plan -->
       <div class="flex items-center justify-center opacity-90">
         <img 
-          src="~/assets/img/large-bm-logo.png" 
+          src="~/assets/img/large-bm-logo-with-margin.png" 
           alt="BM Logo Background" 
           class="w-full max-w-[500px] h-auto object-contain"
         />
