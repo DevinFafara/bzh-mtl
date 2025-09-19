@@ -57,7 +57,7 @@
         </div>
 
         <!-- Champ Sujet -->
-        <div>
+        <!-- <div>
           <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
             Sujet
           </label>
@@ -74,7 +74,7 @@
             <option value="partenariat">Partenariat</option>
             <option value="autre">Autre</option>
           </select>
-        </div>
+        </div> -->
 
         <!-- Champ Message -->
         <div>
