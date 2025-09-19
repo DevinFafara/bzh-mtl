@@ -34,7 +34,7 @@ export default defineNuxtConfig({
         {
           defer: true,
           src: 'https://static.cloudflareinsights.com/beacon.min.js',
-          'data-cf-beacon': '{"token": "721ceb8ff5074263be201a7b1e183baf"}'
+          'data-cf-beacon': '{"token": "${process.env.CLOUDFLARE_TOKEN}"}'
         }
       ]
     }
