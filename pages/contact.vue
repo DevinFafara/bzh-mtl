@@ -7,7 +7,7 @@ useHead({
   ]
 });
 
-const contactEmail = 'breizh.webzine@gmail.com';
+const contactEmail = 'contact@breizhmetal.bzh';
 </script>
 
 <template>
@@ -32,7 +32,7 @@ const contactEmail = 'breizh.webzine@gmail.com';
           </p>
         </div>
         
-        <div class="mt-12">
+        <div class="mt-12 mb-12">
           <h3 class="text-lg font-semibold text-gray-500 uppercase tracking-widest">
             Nous écrire
           </h3>
@@ -44,6 +44,7 @@ const contactEmail = 'breizh.webzine@gmail.com';
             <div class="mt-1 h-0.5 bg-yellow-600 w-0 group-hover:w-full transition-all duration-300"></div>
           </a>
         </div>
+        <ContactForm />
 
       </div>
 
