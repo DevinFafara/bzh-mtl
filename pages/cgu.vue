@@ -107,7 +107,7 @@
             <h2 class="text-2xl font-bold text-gray-900 mb-4">12. Contact</h2>
             <p class="text-gray-700 leading-relaxed">
               Pour toute question concernant ces CGU :<br>
-              <strong>Email :</strong> breizh.webzine@gmail.com
+              <strong>Email :</strong> contact@breizhmetal.bzh
             </p>
           </div>
 

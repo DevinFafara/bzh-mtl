@@ -55,7 +55,7 @@
                 <li><strong>Contenus créés par l'éditeur :</strong> Photos de salles et vidéos live - propriété de Bruno Guézennec</li>
               </ul>
               <p class="text-gray-700 leading-relaxed mt-4">
-                <strong>Procédure de retrait :</strong> Contact direct pour toute demande : breizh.webzine@gmail.com
+                <strong>Procédure de retrait :</strong> Contact direct pour toute demande : contact@breizhmetal.bzh
               </p>
             </div>
           </div>
@@ -68,7 +68,7 @@
               de suppression et de portabilité des données vous concernant.
             </p>
             <p class="text-gray-700 leading-relaxed">
-              Pour exercer ces droits, contactez-nous à : breizh.webzine@gmail.com
+              Pour exercer ces droits, contactez-nous à : contact@breizhmetal.bzh
             </p>
           </div>
 
@@ -101,7 +101,7 @@
             <h2 class="text-2xl font-bold text-gray-900 mb-4">10. Contact</h2>
             <p class="text-gray-700 leading-relaxed">
               Pour toute question concernant ces mentions légales :<br>
-              <strong>Email :</strong> breizh.webzine@gmail.com
+              <strong>Email :</strong> contact@breizhmetal.bzh
             </p>
           </div>
 

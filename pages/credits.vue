@@ -90,7 +90,7 @@
           <div class="prose max-w-none">
             <p>
               Pour toute question technique ou suggestion d'amélioration :<br>
-              <strong>Email :</strong> breizh.webzine@gmail.com
+              <strong>Email :</strong> contact@breizhmetal.bzh
             </p>
           </div>
         </div>
