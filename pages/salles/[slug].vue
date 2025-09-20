@@ -88,8 +88,8 @@ const upcomingEventsQuery = groq`*[_type == "event" && venue.venueReference._ref
   }
 }`;
 
-// Requête pour tous les événements dans cette salle (pas seulement les futurs)
-const allEventsQuery = groq`*[_type == "event" && venue.venueReference._ref == $venueId] | order(dateInfo.singleDate desc, dateInfo.startDate desc, date desc) [0...20] {
+// Requête pour tous les événements dans cette salle (du plus récent au plus éloigné)
+const allEventsQuery = groq`*[_type == "event" && venue.venueReference._ref == $venueId] | order(dateInfo.singleDate asc, dateInfo.startDate asc, date asc) [0...20] {
   _id,
   title,
   "slug": slug.current,
