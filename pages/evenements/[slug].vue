@@ -391,8 +391,8 @@ useSeoMeta({
             <!-- Section Groupes Référencés -->
             <div v-if="event.referencedBands && event.referencedBands.length > 0" class="">
               <h3 class="text-xl font-bold mb-4 pb-3">Groupes à l'affiche</h3>
-              <div class="space-y-4">
-                <div v-for="band in event.referencedBands" :key="band._id" class="w-full max-w-[300px]">
+              <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div v-for="band in event.referencedBands" :key="band._id">
                   <BandCard :band="band" />
                 </div>
               </div>
