@@ -70,8 +70,14 @@ const applyMarks = (text: string, marks: string[], markDefs: any[]) => {
   // Gestion des liens
   marks.forEach(mark => {
     const markDef = markDefs.find(def => def._key === mark);
-    if (markDef && markDef._type === 'link') {
+    if (markDef && markDef._type === 'link' && markDef.href) {
       const href = markDef.href;
+      
+      // Protection : vérifier que href est bien une chaîne de caractères
+      if (typeof href !== 'string') {
+        console.warn('Lien avec href invalide:', markDef);
+        return;
+      }
       
       // Vérifier si c'est un lien interne
       const isInternal = href.startsWith('/') || href.includes('breizhmetal.bzh');
