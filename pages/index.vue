@@ -2,9 +2,9 @@
 // Configuration SEO pour la page d'accueil
 useSeoMeta({
   title: 'Breizh Metal',
-  description: 'Découvrez la scène metal bretonne : groupes, festivals, concerts, chroniques et actualités. Suivez l\'actualité du metal en Bretagne et au-delà avec interviews, reviews et agenda.',
+  description: 'Découvrez la scène metal bretonne sur Breizh Metal : actualités, groupes, festivals, concerts, chroniques. Suivez l\'actualité du metal en Bretagne et au-delà avec interviews, reviews et agenda.',
   ogTitle: 'Breizh Metal - Le portail metal de Bretagne',
-  ogDescription: 'Le webzine de référence de la scène metal bretonne. Actualités, groupes, festivals, concerts et chroniques.',
+  ogDescription: 'Breizh Metal, le webzine de référence de la scène metal bretonne. Actualités, groupes, festivals, concerts et chroniques.',
   ogImage: '/bzh-mtl-mgz_logo.png',
   twitterCard: 'summary_large_image',
   twitterTitle: 'Breizh Metal',
@@ -128,24 +128,34 @@ onMounted(() => {
         />
       </div> -->
       
-      <!-- Nouveau logo en arrière-plan -->
-      <div class="flex items-center justify-center opacity-90">
+      <!-- Logo principal en tant que H1 -->
+      <h1 class="flex items-center justify-center opacity-100">
         <img 
           src="~/assets/img/large-bm-logo-with-margin.png" 
-          alt="BM Logo Background" 
+          alt="Breizh Metal - Le portail de la scène metal bretonne" 
           class="w-full max-w-[500px] h-auto object-contain"
         />
-      </div>
+      </h1>
     
     </section>
 
     <!-- Contenu principal -->
     <main class="container mx-auto px-4 py-8 md:py-12">
       
+      <!-- Section d'introduction -->
+            <!-- Section d'introduction -->
+      <section class="mb-12 text-center">
+        <p class="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
+          Bienvenue sur le portail de référence de la scène metal bretonne. <br />
+          Découvrez les groupes locaux, suivez l'actualité des festivals et concerts, <br />
+          Plongez au cœur du metal en Bretagne !
+        </p>
+      </section>
+      
       <!-- Section Dernières Chroniques -->
-      <section class="mb-12">
+      <section class="mb-12" aria-labelledby="derniers-articles">
         <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl md:text-2xl font-bold text-gray-900">
+          <h2 id="derniers-articles" class="text-2xl md:text-2xl font-bold text-gray-900">
             Derniers Articles
           </h2>
           <NuxtLink 
@@ -157,9 +167,9 @@ onMounted(() => {
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="chronique in (chroniques || [])" :key="chronique._id">
+          <article v-for="chronique in (chroniques || [])" :key="chronique._id">
             <PostCard :post="chronique" />
-          </div>
+          </article>
         </div>
         
         <!-- Message si pas de chroniques -->
@@ -169,9 +179,9 @@ onMounted(() => {
       </section>
 
       <!-- Section Groupes à Découvrir -->
-      <section class="mb-12">
+      <section class="mb-12" aria-labelledby="groupes-decouvrir">
         <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl md:text-2xl font-bold text-gray-900">
+          <h2 id="groupes-decouvrir" class="text-2xl md:text-2xl font-bold text-gray-900">
             Groupes à Découvrir
           </h2>
           <NuxtLink 
@@ -183,9 +193,9 @@ onMounted(() => {
         </div>
         
         <div v-if="randomBands && randomBands.length > 0" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <div v-for="band in randomBands" :key="band._id">
+          <article v-for="band in randomBands" :key="band._id">
             <BandCard :band="band" />
-          </div>
+          </article>
         </div>
         
         <!-- Skeleton loading côté client -->
@@ -202,9 +212,9 @@ onMounted(() => {
       </section>
       
       <!-- Section Prochains Événements -->
-      <section class="mb-12">
+      <section class="mb-12" aria-labelledby="prochains-evenements">
         <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl md:text-2xl font-bold text-gray-900">
+          <h2 id="prochains-evenements" class="text-2xl md:text-2xl font-bold text-gray-900">
             Prochains Événements
           </h2>
           <NuxtLink 
@@ -215,11 +225,11 @@ onMounted(() => {
           </NuxtLink>
         </div>
         
-        <ul v-if="events && events.length > 0" class="space-y-2">
-          <li v-for="event in (events || [])" :key="event._id">
+        <div v-if="events && events.length > 0" class="space-y-2">
+          <article v-for="event in (events || [])" :key="event._id">
             <EventCard :event="event" />
-          </li>
-        </ul>
+          </article>
+        </div>
         
         <!-- Message si pas d'événements -->
         <div v-else class="text-center py-8 text-gray-500">
