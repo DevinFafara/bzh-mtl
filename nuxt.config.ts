@@ -64,17 +64,23 @@ export default defineNuxtConfig({
   sitemap: {
     // Génération du sitemap avec les routes dynamiques
     urls: async () => {
-      // Import dynamique pour éviter les problèmes de build
-      const { createClient } = await import('@sanity/client')
-      
-      const client = createClient({
-        projectId: process.env.SANITY_PROJECT_ID,
-        dataset: 'production',
-        useCdn: true,
-        apiVersion: '2024-03-07'
-      })
-      
       try {
+        // Vérification des variables d'environnement
+        if (!process.env.SANITY_PROJECT_ID) {
+          console.warn('SANITY_PROJECT_ID manquant, génération sitemap minimal')
+          return []
+        }
+
+        // Import dynamique pour éviter les problèmes de build
+        const { createClient } = await import('@sanity/client')
+        
+        const client = createClient({
+          projectId: process.env.SANITY_PROJECT_ID,
+          dataset: 'production',
+          useCdn: true,
+          apiVersion: '2024-03-07'
+        })
+        
         // Récupère tous les slugs des différents types de contenu avec leurs images
         const [bands, articles, events, venues, styles, festivals] = await Promise.all([
           client.fetch(`*[_type == "band" && defined(slug.current) && !(_id in path('drafts.**'))]{"slug": slug.current, _updatedAt, "image": pressPhotos[0].asset->url}`),
@@ -118,10 +124,21 @@ export default defineNuxtConfig({
           }))
         ]
         
+        console.log(`Sitemap généré avec ${urls.length} URLs`)
         return urls
+        
       } catch (error) {
         console.error('Erreur lors de la génération du sitemap:', error)
-        return []
+        // Retourne un sitemap minimal plutôt qu'un crash complet
+        return [
+          { loc: '/', lastmod: new Date().toISOString() },
+          { loc: '/articles', lastmod: new Date().toISOString() },
+          { loc: '/groupes', lastmod: new Date().toISOString() },
+          { loc: '/evenements', lastmod: new Date().toISOString() },
+          { loc: '/salles', lastmod: new Date().toISOString() },
+          { loc: '/festivals', lastmod: new Date().toISOString() },
+          { loc: '/contact', lastmod: new Date().toISOString() }
+        ]
       }
     }
   },

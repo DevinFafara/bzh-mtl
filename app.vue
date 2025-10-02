@@ -5,7 +5,8 @@ import { useRuntimeConfig } from '#app'
 
 const config = useRuntimeConfig()
 
-if (config.public.cloudflareToken) {
+// Exécution côté client uniquement pour éviter les problèmes SSR
+if (process.client && config.public.cloudflareToken) {
   useHead({
     script: [
       {
