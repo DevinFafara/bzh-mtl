@@ -271,7 +271,7 @@ useSeoMeta({
     if (band.value?.logoImage?.asset?._ref) {
       return band.value.logoImage.asset._ref;
     }
-    return '/bzh-mtl-mgz_logo.png';
+    return '/main-logo.svg';
   },
   twitterCard: 'summary_large_image'
 });

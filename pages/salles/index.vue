@@ -6,7 +6,7 @@ useSeoMeta({
   description: 'Découvrez toutes les salles de concert de Bretagne qui accueillent des événements metal. Informations, capacités et événements à venir.',
   ogTitle: 'Salles de Concert Metal - Breizh Metal',
   ogDescription: 'Toutes les salles de concert metal en Bretagne. Découvrez les lieux qui font vibrer la scène metal bretonne.',
-  ogImage: '/bzh-mtl-mgz_logo.png',
+  ogImage: '/main-logo.svg',
   twitterCard: 'summary_large_image'
 })
 

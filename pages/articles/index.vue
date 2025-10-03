@@ -5,7 +5,7 @@ useSeoMeta({
   description: 'Découvrez tous nos articles, chroniques, interviews et actualités sur la scène metal bretonne. Reviews d\'albums, portraits de groupes et couverture d\'événements.',
   ogTitle: 'Articles - Breizh Metal',
   ogDescription: 'Tous les articles de Breizh Metal : chroniques, interviews, actualités metal de Bretagne',
-  ogImage: '/bzh-mtl-mgz_logo.png',
+  ogImage: '/main-logo.svg',
   twitterCard: 'summary_large_image'
 })
 

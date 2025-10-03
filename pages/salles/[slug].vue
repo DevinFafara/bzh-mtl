@@ -226,7 +226,7 @@ useSeoMeta({
     if (venue.value?.image?.asset?._ref) {
       return venue.value.image.asset._ref;
     }
-    return '/bzh-mtl-mgz_logo.png';
+    return '/main-logo.svg';
   },
   twitterCard: 'summary_large_image'
 });

@@ -62,7 +62,7 @@ useSeoMeta({
     }
     return 'Groupes par style musical sur Breizh Metal';
   },
-  ogImage: '/logo.png',
+  ogImage: '/main-logo.svg',
   twitterCard: 'summary_large_image'
 });
 </script>

@@ -5,7 +5,7 @@ useSeoMeta({
   description: 'Découvrez tous les événements metal en Bretagne : concerts, festivals, soirées et spectacles. Agenda de la scène metal bretonne.',
   ogTitle: 'Événements Metal - Breizh Metal',
   ogDescription: 'Agenda des événements metal en Bretagne. Concerts, festivals et soirées metal.',
-  ogImage: '/bzh-mtl-mgz_logo.png',
+  ogImage: '/main-logo.svg',
   twitterCard: 'summary_large_image'
 })
 

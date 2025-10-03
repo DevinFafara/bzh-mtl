@@ -5,7 +5,7 @@ useSeoMeta({
   description: 'Découvrez tous les groupes de metal de Bretagne et d\'ailleurs. Biographies, discographies, actualités et concerts des artistes metal bretons.',
   ogTitle: 'Groupes Metal - Breizh Metal',
   ogDescription: 'Tous les groupes de metal référencés sur Breizh Metal. Découvrez la scène metal bretonne.',
-  ogImage: '/bzh-mtl-mgz_logo.png',
+  ogImage: '/main-logo.svg',
   twitterCard: 'summary_large_image'
 })
 

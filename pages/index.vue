@@ -5,7 +5,7 @@ useSeoMeta({
   description: 'Découvrez la scène metal bretonne sur Breizh Metal : actualités, groupes, festivals, concerts, chroniques. Suivez l\'actualité du metal en Bretagne et au-delà avec interviews, reviews et agenda.',
   ogTitle: 'Breizh Metal - Le portail metal de Bretagne',
   ogDescription: 'Breizh Metal, le webzine de référence de la scène metal bretonne. Actualités, groupes, festivals, concerts et chroniques.',
-  ogImage: '/bzh-mtl-mgz_logo.png',
+  ogImage: '/main-logo.svg',
   twitterCard: 'summary_large_image',
   twitterTitle: 'Breizh Metal',
   twitterDescription: 'Le portail de référence de la scène metal bretonne'
@@ -119,21 +119,16 @@ onMounted(() => {
   <div class="min-h-screen bg-gray-50">
     <!-- Bannière avec logo et titre -->
     <section class="relative bg-stone-900 text-white overflow-hidden">
-      <!-- Logo en arrière-plan -->
-      <!-- <div class="absolute inset-0 flex items-center justify-center opacity-90 p-8">
-        <img 
-          src="~/assets/img/bzh-mtl-mgz_logo.png" 
-          alt="BZH-MTL Logo Background" 
-          class="h-48 w-48 md:h-64 md:w-64 lg:h-72 lg:w-72 object-contain"
-        />
-      </div> -->
-      
       <!-- Logo principal en tant que H1 -->
       <h1 class="flex items-center justify-center opacity-100">
-        <img 
-          src="~/assets/img/large-bm-logo-with-margin.png" 
+        <NuxtImg 
+          src="/main-logo.svg" 
           alt="Breizh Metal - Le portail de la scène metal bretonne" 
           class="w-full max-w-[500px] h-auto object-contain"
+          width="500"
+          height="auto"
+          loading="eager"
+          preload
         />
       </h1>
     

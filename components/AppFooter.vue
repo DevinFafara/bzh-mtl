@@ -29,7 +29,7 @@ const legalItems = [
         
         <div class="w-full md:w-1/3 lg:w-1/2">
           <NuxtLink to="/" class="inline-flex items-center space-x-2 mb-4">
-            <img class="h-10 w-auto" src="~/assets/img/menu-bar-bm-logo.png" alt="Logo Breizh Metal" />
+            <NuxtImg class="h-10 w-auto" src="/menu-logo.svg" alt="Logo Breizh Metal" width="40" height="40" loading="lazy" />
             <span class="font-bold text-white text-lg">Breizh Metal</span>
           </NuxtLink>
           <p class="text-sm max-w-sm">
