@@ -121,14 +121,13 @@ onMounted(() => {
     <section class="relative bg-stone-900 text-white overflow-hidden">
       <!-- Logo principal en tant que H1 -->
       <h1 class="flex items-center justify-center opacity-100">
-        <NuxtImg 
+        <img 
           src="/main-logo.svg" 
           alt="Breizh Metal - Le portail de la scène metal bretonne" 
           class="w-full max-w-[500px] h-auto object-contain"
           width="500"
-          height="auto"
-          loading="eager"
-          preload
+          height="200"
+          fetchpriority="high"
         />
       </h1>
     
