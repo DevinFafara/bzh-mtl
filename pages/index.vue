@@ -6,6 +6,7 @@ useSeoMeta({
   ogTitle: 'Breizh Metal - Le portail metal de Bretagne',
   ogDescription: 'Breizh Metal, le webzine de référence de la scène metal bretonne. Actualités, groupes, festivals, concerts et chroniques.',
   ogImage: 'https://breizhmetal.bzh/BM-logo-large.png',
+  ogUrl: 'https://breizhmetal.bzh/',
   twitterCard: 'summary_large_image',
   twitterTitle: 'Breizh Metal',
   twitterDescription: 'Le portail de référence de la scène metal bretonne'

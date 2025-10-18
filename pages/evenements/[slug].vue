@@ -255,6 +255,7 @@ useSeoMeta({
     }
     return 'https://breizhmetal.bzh/BM-logo-large.png';
   },
+  ogUrl: () => `https://breizhmetal.bzh/evenements/${route.params.slug}`,
   twitterCard: 'summary_large_image'
 });
 </script>

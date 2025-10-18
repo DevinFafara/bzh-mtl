@@ -6,6 +6,7 @@ useSeoMeta({
   ogTitle: 'Groupes Metal - Breizh Metal',
   ogDescription: 'Tous les groupes de metal référencés sur Breizh Metal. Découvrez la scène metal bretonne.',
   ogImage: 'https://breizhmetal.bzh/BM-logo-large.png',
+  ogUrl: 'https://breizhmetal.bzh/groupes',
   twitterCard: 'summary_large_image'
 })
 

@@ -155,6 +155,7 @@ useSeoMeta({
     return 'Découvrez cet article sur la scène metal bretonne';
   },
   ogImage: () => post.value?.mainImage?.asset?._ref ? post.value.mainImage.asset._ref : 'https://breizhmetal.bzh/BM-logo-large.png',
+  ogUrl: () => `https://breizhmetal.bzh/articles/${route.params.slug}`,
   articlePublishedTime: () => post.value?.publishedAt,
   twitterCard: 'summary_large_image'
 });

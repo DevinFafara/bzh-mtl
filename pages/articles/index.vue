@@ -6,6 +6,7 @@ useSeoMeta({
   ogTitle: 'Articles - Breizh Metal',
   ogDescription: 'Tous les articles de Breizh Metal : chroniques, interviews, actualités metal de Bretagne',
   ogImage: 'https://breizhmetal.bzh/BM-logo-large.png',
+  ogUrl: 'https://breizhmetal.bzh/articles',
   twitterCard: 'summary_large_image'
 })
 

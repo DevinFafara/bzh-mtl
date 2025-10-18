@@ -6,6 +6,7 @@ useSeoMeta({
   ogTitle: 'Événements Metal - Breizh Metal',
   ogDescription: 'Agenda des événements metal en Bretagne. Concerts, festivals et soirées metal.',
   ogImage: 'https://breizhmetal.bzh/BM-logo-large.png',
+  ogUrl: 'https://breizhmetal.bzh/evenements',
   twitterCard: 'summary_large_image'
 })
 

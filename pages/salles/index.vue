@@ -7,6 +7,7 @@ useSeoMeta({
   ogTitle: 'Salles de Concert Metal - Breizh Metal',
   ogDescription: 'Toutes les salles de concert metal en Bretagne. Découvrez les lieux qui font vibrer la scène metal bretonne.',
   ogImage: 'https://breizhmetal.bzh/BM-logo-large.png',
+  ogUrl: 'https://breizhmetal.bzh/salles',
   twitterCard: 'summary_large_image'
 })
 
