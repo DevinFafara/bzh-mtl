@@ -271,7 +271,7 @@ useSeoMeta({
     if (band.value?.logoImage?.asset?._ref) {
       return band.value.logoImage.asset._ref;
     }
-    return '/BM-logo-large.png';
+    return 'https://breizhmetal.bzh/BM-logo-large.png';
   },
   twitterCard: 'summary_large_image'
 });

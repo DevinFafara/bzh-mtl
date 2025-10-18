@@ -253,7 +253,7 @@ useSeoMeta({
     if (event.value?.festival?.mainImage?.asset?._ref) {
       return event.value.festival.mainImage.asset._ref;
     }
-    return '/BM-logo-large.png';
+    return 'https://breizhmetal.bzh/BM-logo-large.png';
   },
   twitterCard: 'summary_large_image'
 });
