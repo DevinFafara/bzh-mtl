@@ -271,7 +271,7 @@ useSeoMeta({
     if (band.value?.logoImage?.asset?._ref) {
       return band.value.logoImage.asset._ref;
     }
-    return '/main-logo.svg';
+    return '/BM-logo-large.png';
   },
   twitterCard: 'summary_large_image'
 });

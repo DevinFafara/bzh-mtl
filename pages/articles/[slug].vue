@@ -154,7 +154,7 @@ useSeoMeta({
     }
     return 'Découvrez cet article sur la scène metal bretonne';
   },
-  ogImage: () => post.value?.mainImage?.asset?._ref ? post.value.mainImage.asset._ref : '/main-logo.svg',
+  ogImage: () => post.value?.mainImage?.asset?._ref ? post.value.mainImage.asset._ref : '/BM-logo-large.png',
   articlePublishedTime: () => post.value?.publishedAt,
   twitterCard: 'summary_large_image'
 });

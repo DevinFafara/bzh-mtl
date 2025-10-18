@@ -5,7 +5,7 @@ useSeoMeta({
   description: 'Découvrez la scène metal bretonne sur Breizh Metal : actualités, groupes, festivals, concerts, chroniques. Suivez l\'actualité du metal en Bretagne et au-delà avec interviews, reviews et agenda.',
   ogTitle: 'Breizh Metal - Le portail metal de Bretagne',
   ogDescription: 'Breizh Metal, le webzine de référence de la scène metal bretonne. Actualités, groupes, festivals, concerts et chroniques.',
-  ogImage: '/main-logo.svg',
+  ogImage: '/BM-logo-large.png',
   twitterCard: 'summary_large_image',
   twitterTitle: 'Breizh Metal',
   twitterDescription: 'Le portail de référence de la scène metal bretonne'
