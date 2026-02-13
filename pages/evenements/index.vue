@@ -63,6 +63,37 @@ type Event = {
 };
 const { data: events, error } = await useSanityQuery<Event[]>(query, { today });
 
+// Configuration du filtrage par département
+const departmentFilters = [
+  { label: 'Tous', value: 'all', locationLabel: 'en Bretagne' },
+  { label: 'Côtes-d\'Armor (22)', value: '22', locationLabel: 'en Côtes-d\'Armor' },
+  { label: 'Finistère (29)', value: '29', locationLabel: 'dans le Finistère' },
+  { label: 'Ille-et-Vilaine (35)', value: '35', locationLabel: 'en Ille-et-Vilaine' },
+  { label: 'Loire-Atlantique (44)', value: '44', locationLabel: 'en Loire-Atlantique' },
+  { label: 'Morbihan (56)', value: '56', locationLabel: 'dans le Morbihan' },
+];
+
+const currentDepartment = ref('all');
+
+// Extraire le code département depuis le titre de l'événement (ex: "Mass Hysteria à Rennes (35)")
+const extractDepartment = (title: string): string | null => {
+  const match = title.match(/\((22|29|35|44|56)\)/);
+  return match ? match[1] : null;
+};
+
+// Libellé de localisation dynamique
+const locationLabel = computed(() => {
+  const filter = departmentFilters.find(f => f.value === currentDepartment.value);
+  return filter?.locationLabel ?? 'en Bretagne';
+});
+
+// Filtrer les événements par département
+const filteredEvents = computed(() => {
+  if (!events.value) return [];
+  if (currentDepartment.value === 'all') return events.value;
+  return events.value.filter(e => extractDepartment(e.title) === currentDepartment.value);
+});
+
 // Fonction pour formater la date en français (nouvelle structure)
 const formatDate = (event: Event) => {
   const options: Intl.DateTimeFormatOptions = {
@@ -131,10 +162,10 @@ const formatMonthYear = (monthKey: string) => {
   });
 };
 
-// Grouper les événements par mois
+// Grouper les événements filtrés par mois
 const eventsByMonth = computed(() => {
-  if (!events.value) return {};
-  return groupEventsByMonth(events.value);
+  if (!filteredEvents.value) return {};
+  return groupEventsByMonth(filteredEvents.value);
 });
 
 // Obtenir les mois dans l'ordre chronologique
@@ -146,10 +177,27 @@ const sortedMonths = computed(() => {
 <template>
   <div class="container mx-auto p-4 md:p-8">
     <h1 class="text-2xl md:text-4xl font-extrabold border-b pb-4">Agenda</h1>
-    <p v-if="events && events.length > 0" class="mt-2 mb-8 text-gray-500">
-      {{ events.length }} événement{{ events.length > 1 ? 's' : '' }} à venir en Bretagne
+    <p v-if="filteredEvents && filteredEvents.length > 0" class="mt-2 mb-4 text-gray-500">
+      {{ filteredEvents.length }} événement{{ filteredEvents.length > 1 ? 's' : '' }} à venir {{ locationLabel }}
     </p>
-    <div v-else class="mb-8"></div>
+    <div v-else class="mb-4"></div>
+
+    <!-- Filtres par département -->
+    <div v-if="events && events.length > 0" class="flex flex-wrap gap-2 mb-8">
+      <button
+        v-for="filter in departmentFilters"
+        :key="filter.value"
+        @click="currentDepartment = filter.value"
+        :class="[
+          'px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 cursor-pointer',
+          currentDepartment === filter.value
+            ? 'bg-yellow-500 text-white'
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+        ]"
+      >
+        {{ filter.label }}
+      </button>
+    </div>
 
     <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
       <strong class="font-bold">Erreur !</strong>
@@ -157,7 +205,7 @@ const sortedMonths = computed(() => {
     </div>
 
     <!-- STRUCTURE GROUPÉE PAR MOIS -->
-    <div v-else-if="events && events.length > 0" class="space-y-8 mb-20">
+    <div v-else-if="filteredEvents && filteredEvents.length > 0" class="space-y-8 mb-20">
       <!-- Boucle sur chaque mois -->
       <section v-for="monthKey in sortedMonths" :key="monthKey" class="space-y-4">
         <!-- Séparateur avec titre du mois intégré -->
@@ -202,6 +250,12 @@ const sortedMonths = computed(() => {
       </section>
     </div>
 
+    <div v-else-if="currentDepartment !== 'all'" class="text-center py-16">
+      <p class="text-xl text-gray-500">Aucun événement à venir dans ce département.</p>
+      <button @click="currentDepartment = 'all'" class="mt-4 text-yellow-600 hover:text-yellow-700 font-medium cursor-pointer">
+        ← Voir tous les événements
+      </button>
+    </div>
     <div v-else class="text-center py-16">
       <p class="text-xl text-gray-500">Aucun événement à venir pour le moment.</p>
       <p class="mt-2 text-gray-400">Revenez bientôt !</p>

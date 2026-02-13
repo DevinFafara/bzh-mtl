@@ -38,6 +38,9 @@ const chroniquesItems = [
         <NuxtLink to="/a-propos"
             class="relative font-medium text-white px-2 py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full"
             active-class="after:w-full">À Propos</NuxtLink>
+        <NuxtLink to="/contact"
+            class="relative font-medium text-white px-2 py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+            active-class="after:w-full">Contact</NuxtLink>
         <button @click="isSearchModalOpen = true" class="hover:text-gray-300 text-white p-2">
           <Icon name="heroicons:magnifying-glass" class="h-6 w-6" />
         </button>
@@ -86,7 +89,10 @@ const chroniquesItems = [
                   class="text-white hover:text-gray-300 py-2 border-b border-gray-700">Agenda</NuxtLink>
         <NuxtLink to="/a-propos" 
                   @click="isMobileMenuOpen = false"
-                  class="text-white hover:text-gray-300 py-2">À Propos</NuxtLink>
+                  class="text-white hover:text-gray-300 py-2 border-b border-gray-700">À Propos</NuxtLink>
+        <NuxtLink to="/contact" 
+                  @click="isMobileMenuOpen = false"
+                  class="text-white hover:text-gray-300 py-2">Contact</NuxtLink>
       </div>
         <button @click="isSearchModalOpen = true" class="hover:text-gray-300 text-white p-2">
           <Icon name="heroicons:magnifying-glass" class="h-6 w-6" />
