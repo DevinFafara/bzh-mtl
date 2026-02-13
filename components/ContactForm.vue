@@ -130,7 +130,7 @@ const handleSubmit = async () => {
       payload.bandLink = formData.value.bandLink
     }
 
-    await fetch('/', {
+    await fetch('/forms.html', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: encode(payload),
