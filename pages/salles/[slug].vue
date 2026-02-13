@@ -10,6 +10,7 @@ interface Venue {
   description?: any
   city?: string
   department?: string
+  address?: string
   website?: string
   author?: {
     name: string
@@ -52,6 +53,7 @@ const query = groq`*[_type == "venue" && slug.current == $slug][0] {
   description,
   city,
   department,
+  address,
   website,
   "author": author->{ name, "slug": slug.current, image, citation }
 }`;
@@ -164,6 +166,19 @@ const formatEventDate = (event: VenueEvent) => {
   return 'Date non définie';
 };
 
+// Google Maps embed
+const mapQuery = computed(() => {
+  if (!venue.value) return '';
+  const parts = [venue.value.name, venue.value.address, venue.value.city].filter(Boolean);
+  return parts.join(' ');
+});
+
+const mapEmbedUrl = computed(() => {
+  if (!mapQuery.value) return '';
+  const encoded = encodeURIComponent(mapQuery.value);
+  return `https://maps.google.com/maps?q=${encoded}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+});
+
 // Variable pour détecter l'environnement de développement
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -261,6 +276,26 @@ useSeoMeta({
             <Icon name="heroicons:link-20-solid" class="h-5 w-5" />
             Visiter le site web
           </a>
+        </div>
+
+        <!-- Google Maps -->
+        <div v-if="mapEmbedUrl" class="mt-8">
+          <h2 class="text-xl font-bold mb-4">Localisation</h2>
+          <div class="w-full rounded-lg overflow-hidden shadow-md">
+            <iframe
+              :src="mapEmbedUrl"
+              width="100%"
+              height="350"
+              style="border:0"
+              allowfullscreen
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              :title="`Carte de ${venue.name}`"
+            ></iframe>
+          </div>
+          <p v-if="venue.address" class="mt-2 text-sm text-gray-500">
+            {{ venue.address }}<span v-if="venue.city">, {{ venue.city }}</span>
+          </p>
         </div>
 
         <!-- Événements de cette salle -->

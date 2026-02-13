@@ -228,6 +228,29 @@ const formattedEventDate = computed(() => {
   return 'Date non définie';
 });
 
+// Google Maps embed URL basée sur les infos du lieu
+const mapQuery = computed(() => {
+  if (!event.value?.venue) return '';
+  
+  if (event.value.venue.venueType === 'reference' && event.value.venue.venueDetails) {
+    const v = event.value.venue.venueDetails;
+    // On combine nom + adresse + ville pour une recherche précise
+    const parts = [v.name, v.address, v.city].filter(Boolean);
+    return parts.join(', ');
+  }
+  
+  if (event.value.venue.venueType === 'text' && event.value.venue.venueText) {
+    return event.value.venue.venueText;
+  }
+  
+  return '';
+});
+
+const mapEmbedUrl = computed(() => {
+  if (!mapQuery.value) return '';
+  return `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery.value)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+});
+
 // Configuration SEO dynamique pour l'événement
 const extractEventDescription = (description: any[]): string => {
   if (!description || !Array.isArray(description)) return '';
@@ -336,7 +359,83 @@ useSeoMeta({
       </div>
     </div>
 
-    <!-- 4. CORPS DE LA PAGE (Layout à 2 colonnes) -->
+    <!-- 4. INFORMATIONS PRATIQUES (pleine largeur pour permettre 2 colonnes) -->
+    <div class="container mx-auto px-4 mt-8 md:mt-12">
+      <div class="bg-gray-50 p-6 rounded-lg shadow-lg">
+        <h3 class="text-xl font-bold mb-4 border-b pb-3">Informations Pratiques</h3>
+        
+        <div class="flex flex-col md:flex-row md:gap-8">
+          <!-- Colonne gauche : infos textuelles -->
+          <div class="flex-1">
+            <!-- Date de l'événement -->
+            <div class="mb-6">
+              <div class="flex items-start gap-3">
+                <Icon name="heroicons:calendar-days" class="h-6 w-6 text-gray-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 class="font-semibold text-gray-700 mb-1">Date</h4>
+                  <p class="text-lg text-black">{{ formattedEventDate }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lieu de l'événement -->
+            <div class="mb-6">
+              <div class="flex items-start gap-3">
+                <Icon name="heroicons:map-pin" class="h-6 w-6 text-gray-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 class="font-semibold text-gray-700 mb-1">Lieu</h4>
+                  <!-- Cas 1 : Lieu référencé -->
+                  <NuxtLink 
+                    v-if="event.venue?.venueType === 'reference' && event.venue.venueDetails" 
+                    :to="`/salles/${event.venue.venueDetails.slug}`" 
+                    class="block group"
+                  >
+                    <p class="text-lg text-black group-hover:text-yellow-600 transition-colors">{{ event.venue.venueDetails.name }}</p>
+                    <p class="text-sm text-gray-500">{{ event.venue.venueDetails.city }}</p>
+                  </NuxtLink>
+                  <!-- Cas 2 : Lieu en texte simple -->
+                  <p v-else-if="event.venue?.venueType === 'text'" class="text-lg text-black">
+                    {{ event.venue.venueText }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Billetterie -->
+            <div v-if="event.ticketUrl">
+              <a 
+                :href="event.ticketUrl" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-yellow-600 text-white font-semibold rounded-lg hover:bg-yellow-700 transition-colors shadow-lg"
+              >
+                <Icon name="heroicons:ticket" class="h-5 w-5" />
+                Billetterie
+              </a>
+            </div>
+          </div>
+
+          <!-- Colonne droite : carte Google Maps -->
+          <div v-if="mapEmbedUrl" class="flex-1 mt-6 md:mt-0">
+            <h4 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <Icon name="heroicons:map" class="h-5 w-5 text-gray-400" />
+              Localisation
+            </h4>
+            <iframe
+              :src="mapEmbedUrl"
+              width="100%"
+              height="280"
+              style="border:0; border-radius: 8px;"
+              allowfullscreen
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. CORPS DE LA PAGE (Layout à 2 colonnes) -->
     <div class="container mx-auto px-4 mt-8 md:mt-12">
       <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
         
@@ -352,60 +451,9 @@ useSeoMeta({
           </div>
         </div>
         
-        <!-- Colonne Latérale (Infos pratiques) -->
+        <!-- Colonne Latérale -->
         <aside class="w-full lg:w-1/3 lg:sticky lg:top-28 self-start">
           <div class="space-y-16">
-            <!-- Informations Pratiques -->
-            <div class="bg-gray-50 p-6 rounded-lg shadow-lg">
-              <h3 class="text-xl font-bold mb-4 border-b pb-3">Informations Pratiques</h3>
-              
-              <!-- Date de l'événement -->
-              <div class="mb-6">
-                <div class="flex items-start gap-3">
-                  <Icon name="heroicons:calendar-days" class="h-6 w-6 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 class="font-semibold text-gray-700 mb-1">Date</h4>
-                    <p class="text-lg text-black">{{ formattedEventDate }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Lieu de l'événement -->
-              <div class="mb-6">
-                <div class="flex items-start gap-3">
-                  <Icon name="heroicons:map-pin" class="h-6 w-6 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 class="font-semibold text-gray-700 mb-1">Lieu</h4>
-                    <!-- Cas 1 : Lieu référencé -->
-                    <NuxtLink 
-                      v-if="event.venue?.venueType === 'reference' && event.venue.venueDetails" 
-                      :to="`/salles/${event.venue.venueDetails.slug}`" 
-                      class="block group"
-                    >
-                      <p class="text-lg text-black group-hover:text-yellow-600 transition-colors">{{ event.venue.venueDetails.name }}</p>
-                      <p class="text-sm text-gray-500">{{ event.venue.venueDetails.city }}</p>
-                    </NuxtLink>
-                    <!-- Cas 2 : Lieu en texte simple -->
-                    <p v-else-if="event.venue?.venueType === 'text'" class="text-lg text-black">
-                      {{ event.venue.venueText }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Billetterie -->
-              <div v-if="event.ticketUrl" class="mb-6">
-                <a 
-                  :href="event.ticketUrl" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-yellow-600 text-white font-semibold rounded-lg hover:bg-yellow-700 transition-colors shadow-lg"
-                >
-                  <Icon name="heroicons:ticket" class="h-5 w-5" />
-                  Billetterie
-                </a>
-              </div>
-            </div>
 
             <!-- Section Festival -->
             <div v-if="event.festival" class="">
