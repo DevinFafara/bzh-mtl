@@ -145,7 +145,11 @@ const sortedMonths = computed(() => {
 
 <template>
   <div class="container mx-auto p-4 md:p-8">
-    <h1 class="text-2xl md:text-4xl font-extrabold mb-8 border-b pb-4">Agenda</h1>
+    <h1 class="text-2xl md:text-4xl font-extrabold border-b pb-4">Agenda</h1>
+    <p v-if="events && events.length > 0" class="mt-2 mb-8 text-gray-500">
+      {{ events.length }} événement{{ events.length > 1 ? 's' : '' }} à venir en Bretagne
+    </p>
+    <div v-else class="mb-8"></div>
 
     <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
       <strong class="font-bold">Erreur !</strong>
