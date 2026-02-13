@@ -60,6 +60,7 @@ const departmentFilters = [
   { label: 'Ille-et-Vilaine (35)', value: 'Ille-et-Vilaine (35)' },
   { label: 'Loire-Atlantique (44)', value: 'Loire-Atlantique (44)' },
   { label: 'Morbihan (56)', value: 'Morbihan (56)' },
+  { label: 'Non renseigné', value: 'unknown' },
 ];
 
 // 7. État des filtres et recherche
@@ -110,6 +111,9 @@ const matchesSearch = (bandName: string, query: string): boolean => {
 // 9. Fonction pour vérifier si un groupe correspond au filtre département
 const matchesDepartment = (band: any, department: string): boolean => {
   if (department === 'all') return true;
+  if (department === 'unknown') {
+    return !band.departmentOfOrigin || !Array.isArray(band.departmentOfOrigin) || band.departmentOfOrigin.length === 0;
+  }
   if (!band.departmentOfOrigin || !Array.isArray(band.departmentOfOrigin)) return false;
   return band.departmentOfOrigin.includes(department);
 };
