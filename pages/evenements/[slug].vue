@@ -82,6 +82,17 @@ interface Event {
   }>;
 }
 
+interface NavigationEvent {
+  _id: string
+  title: string
+  slug: string
+}
+
+interface Navigation {
+  previous?: NavigationEvent
+  next?: NavigationEvent
+}
+
 // La requête GROQ pour UN seul événement, avec toutes ses données liées
 const query = groq`*[_type == "event" && slug.current == $slug][0] {
   title,
@@ -158,8 +169,35 @@ const query = groq`*[_type == "event" && slug.current == $slug][0] {
   }
 }`;
 
+// Requête pour navigation (événement précédent et suivant par date)
+const navigationQuery = groq`{
+  "previous": *[_type == "event" && (
+    (dateInfo.eventDuration == "single" && dateInfo.singleDate < $currentDate) ||
+    (dateInfo.eventDuration == "multiple" && dateInfo.startDate < $currentDate) ||
+    date < $currentDate
+  )] | order(coalesce(dateInfo.singleDate, dateInfo.startDate, date) desc) [0] {
+    _id,
+    title,
+    "slug": slug.current
+  },
+  "next": *[_type == "event" && (
+    (dateInfo.eventDuration == "single" && dateInfo.singleDate > $currentDate) ||
+    (dateInfo.eventDuration == "multiple" && dateInfo.startDate > $currentDate) ||
+    date > $currentDate
+  )] | order(coalesce(dateInfo.singleDate, dateInfo.startDate, date) asc) [0] {
+    _id,
+    title,
+    "slug": slug.current
+  }
+}`;
+
 // On exécute la requête
 const { data: event, pending, error } = await useSanityQuery<Event>(query, { slug: route.params.slug });
+
+// Requête pour la navigation (événements précédent et suivant)
+const { data: navigation } = await useSanityQuery<Navigation>(navigationQuery, {
+  currentDate: event.value?.dateInfo?.singleDate || event.value?.dateInfo?.startDate || event.value?.date || ''
+});
 
 // Propriété calculée pour formater la date (nouvelle structure)
 const formattedEventDate = computed(() => {
@@ -399,6 +437,43 @@ useSeoMeta({
               </div>
             </div>
           </div>
+
+      <!-- Navigation entre événements -->
+      <div v-if="navigation?.previous || navigation?.next" class="mt-12 py-8 border-t border-gray-200">
+        <div class="grid grid-cols-2 w-full border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+          <!-- Moitié gauche : Événement précédent -->
+          <NuxtLink 
+            v-if="navigation.previous" 
+            :to="`/evenements/${navigation.previous.slug}`"
+            class="flex flex-col items-center justify-center p-6 bg-white hover:bg-gray-50 transition-colors border-r border-gray-300 text-center group"
+          >
+            <div class="flex items-center mb-2">
+              <Icon name="heroicons:chevron-left" class="h-5 w-5 text-gray-400 mr-2 group-hover:text-yellow-600 transition-colors" />
+              <span class="text-gray-500 text-sm font-medium uppercase tracking-wider">Événement précédent</span>
+            </div>
+            <span class="text-gray-900 font-bold text-lg px-2">{{ navigation.previous.title }}</span>
+          </NuxtLink>
+          <div v-else class="flex flex-col items-center justify-center p-6 bg-gray-50 border-r border-gray-300 text-center">
+            <span class="text-gray-400 font-medium">Pas d'événement précédent</span>
+          </div>
+          
+          <!-- Moitié droite : Événement suivant -->
+          <NuxtLink 
+            v-if="navigation.next" 
+            :to="`/evenements/${navigation.next.slug}`"
+            class="flex flex-col items-center justify-center p-6 bg-white hover:bg-gray-50 transition-colors text-center group"
+          >
+            <div class="flex items-center mb-2">
+              <span class="text-gray-500 text-sm font-medium uppercase tracking-wider">Événement suivant</span>
+              <Icon name="heroicons:chevron-right" class="h-5 w-5 text-gray-400 ml-2 group-hover:text-yellow-600 transition-colors" />
+            </div>
+            <span class="text-gray-900 font-bold text-lg px-2">{{ navigation.next.title }}</span>
+          </NuxtLink>
+          <div v-else class="flex flex-col items-center justify-center p-6 bg-gray-50 text-center">
+            <span class="text-gray-400 font-medium">Pas d'événement suivant</span>
+          </div>
+        </div>
+      </div>
         </aside>
 
       </div>

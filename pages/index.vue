@@ -65,11 +65,14 @@ const chroniquesQuery = groq`*[_type == "post"] | order(publishedAt desc) [0...3
   mainImage
 }`;
 
+// Date du jour au format YYYY-MM-DD pour comparaison (les événements du jour restent affichés)
+const today = new Date().toISOString().split('T')[0];
+
 // Requête pour les 3 prochains événements
 const eventsQuery = groq`*[_type == "event" && (
-  (dateInfo.eventDuration == "single" && dateInfo.singleDate >= now()) ||
-  (dateInfo.eventDuration == "multiple" && dateInfo.endDate >= now()) ||
-  date >= now()
+  (dateInfo.eventDuration == "single" && dateInfo.singleDate >= $today) ||
+  (dateInfo.eventDuration == "multiple" && dateInfo.endDate >= $today) ||
+  date >= $today
 )] | order(
   coalesce(dateInfo.singleDate, dateInfo.startDate, date) asc
 ) [0...3] {
@@ -101,7 +104,7 @@ const bandsQuery = groq`*[_type == "band"] {
 
 // Exécution des requêtes
 const { data: chroniques } = await useSanityQuery<Post[]>(chroniquesQuery);
-const { data: events } = await useSanityQuery<Event[]>(eventsQuery);
+const { data: events } = await useSanityQuery<Event[]>(eventsQuery, { today });
 const { data: allBands } = await useSanityQuery<Band[]>(bandsQuery);
 
 // Sélection de 3 groupes aléatoires côté client uniquement

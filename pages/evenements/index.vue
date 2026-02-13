@@ -10,12 +10,15 @@ useSeoMeta({
   twitterCard: 'summary_large_image'
 })
 
+// Date du jour au format YYYY-MM-DD pour comparaison (les événements du jour restent affichés)
+const today = new Date().toISOString().split('T')[0];
+
 // On définit la requête GROQ pour récupérer les événements futurs.
 const query = groq`
   *[_type == "event" && (
-    (dateInfo.eventDuration == "single" && dateInfo.singleDate > now()) ||
-    (dateInfo.eventDuration == "multiple" && dateInfo.endDate > now()) ||
-    date > now()
+    (dateInfo.eventDuration == "single" && dateInfo.singleDate >= $today) ||
+    (dateInfo.eventDuration == "multiple" && dateInfo.endDate >= $today) ||
+    date >= $today
   )] | order(
     coalesce(dateInfo.singleDate, dateInfo.startDate, date) asc
   ) {
@@ -58,7 +61,7 @@ type Event = {
     };
   };
 };
-const { data: events, error } = await useSanityQuery<Event[]>(query);
+const { data: events, error } = await useSanityQuery<Event[]>(query, { today });
 
 // Fonction pour formater la date en français (nouvelle structure)
 const formatDate = (event: Event) => {
