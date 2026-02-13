@@ -2,12 +2,31 @@
 <!DOCTYPE html>
 <html>
 <body>
+  <!-- Formulaire caché pour la détection Netlify Forms au build -->
   <form name="contact" netlify netlify-honeypot="bot-field" hidden>
     <input type="hidden" name="form-name" value="contact" />
+    <input type="hidden" name="subject" />
+    <input name="bot-field" />
+    <!-- Champs communs -->
+    <input type="text" name="requestType" />
     <input type="text" name="name" />
     <input type="email" name="email" />
     <textarea name="message"></textarea>
-    <input name="bot-field" />
+    <!-- Champs événement -->
+    <input type="text" name="eventName" />
+    <input type="text" name="eventDate" />
+    <input type="text" name="eventVenue" />
+    <input type="text" name="eventLink" />
+    <!-- Champs salle -->
+    <input type="text" name="venueName" />
+    <input type="text" name="venueCity" />
+    <input type="text" name="venueDepartment" />
+    <input type="text" name="venueWebsite" />
+    <!-- Champs groupe -->
+    <input type="text" name="bandName" />
+    <input type="text" name="bandDepartment" />
+    <input type="text" name="bandStyle" />
+    <input type="text" name="bandLink" />
   </form>
 </body>
 </html>

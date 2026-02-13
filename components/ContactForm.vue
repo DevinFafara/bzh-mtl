@@ -4,13 +4,12 @@
 import { ref, computed } from 'vue'
 import { useRouter } from '#app'
 
-// Types de demande disponibles
+// Types de demande disponibles (cartes visuelles)
 const requestTypes = [
-  { value: '', label: 'Choisissez un motif…' },
-  { value: 'event', label: '📅 Communiquer sur un événement' },
-  { value: 'venue', label: '🏠 Mettre en lumière un établissement' },
-  { value: 'band', label: '🎸 Créer une fiche groupe' },
-  { value: 'other', label: '💬 Autre / Message libre' },
+  { value: 'event', label: 'Événement', description: 'Communiquer sur un concert ou festival à venir', icon: '📅' },
+  { value: 'venue', label: 'Établissement', description: 'Mettre en lumière un bar ou une salle de concerts', icon: '🏠' },
+  { value: 'band', label: 'Groupe', description: 'Demander la création d\'une fiche groupe', icon: '🎸' },
+  { value: 'other', label: 'Autre', description: 'Question, suggestion ou message libre', icon: '💬' },
 ]
 
 // Départements bretons
@@ -45,6 +44,9 @@ const formData = ref({
   bandLink: '',
 })
 
+// Honeypot anti-spam
+const botField = ref('')
+
 // État du formulaire
 const isSubmitting = ref(false)
 const submissionError = ref<string | null>(null)
@@ -70,23 +72,69 @@ const messageLabel = computed(() => {
   }
 })
 
-// Soumission du formulaire
+// Objet dynamique pour l'email Netlify
+const emailSubject = computed(() => {
+  const subjects: Record<string, string> = {
+    event: `[BM] Événement — ${formData.value.eventName || 'Sans nom'}`,
+    venue: `[BM] Établissement — ${formData.value.venueName || 'Sans nom'}`,
+    band: `[BM] Groupe — ${formData.value.bandName || 'Sans nom'}`,
+    other: `[BM] Message de ${formData.value.name || 'Anonyme'}`,
+  }
+  return subjects[formData.value.requestType] || '[BM] Nouveau message'
+})
+
+// Encoder les données pour Netlify Forms (URL-encoded)
+const encode = (data: Record<string, string>) => {
+  return Object.keys(data)
+    .filter(key => data[key] !== '') // Ne pas envoyer les champs vides
+    .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
+    .join('&')
+}
+
+// Soumission du formulaire via Netlify Forms
 const handleSubmit = async () => {
+  if (!formData.value.requestType) {
+    submissionError.value = 'Veuillez sélectionner un motif.'
+    return
+  }
+
   isSubmitting.value = true
   submissionError.value = null
 
   try {
-    const response = await fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData.value),
-    })
-
-    const result = await response.json()
-
-    if (!result.success) {
-      throw new Error(result.error || 'Une erreur inconnue est survenue.')
+    const payload: Record<string, string> = {
+      'form-name': 'contact',
+      'bot-field': botField.value,
+      'subject': emailSubject.value,
+      'requestType': formData.value.requestType,
+      'name': formData.value.name,
+      'email': formData.value.email,
+      'message': formData.value.message,
     }
+
+    // Ajouter les champs spécifiques au type
+    if (formData.value.requestType === 'event') {
+      payload.eventName = formData.value.eventName
+      payload.eventDate = formData.value.eventDate
+      payload.eventVenue = formData.value.eventVenue
+      payload.eventLink = formData.value.eventLink
+    } else if (formData.value.requestType === 'venue') {
+      payload.venueName = formData.value.venueName
+      payload.venueCity = formData.value.venueCity
+      payload.venueDepartment = formData.value.venueDepartment
+      payload.venueWebsite = formData.value.venueWebsite
+    } else if (formData.value.requestType === 'band') {
+      payload.bandName = formData.value.bandName
+      payload.bandDepartment = formData.value.bandDepartment
+      payload.bandStyle = formData.value.bandStyle
+      payload.bandLink = formData.value.bandLink
+    }
+
+    await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: encode(payload),
+    })
 
     router.push('/merci')
   } catch (error: any) {
@@ -103,6 +151,9 @@ const handleSubmit = async () => {
   <div class="max-w-2xl mx-auto">
     <form @submit.prevent="handleSubmit" class="bg-white p-8 rounded-lg shadow-lg border border-gray-200">
       
+      <!-- Honeypot anti-spam (invisible) -->
+      <input v-model="botField" name="bot-field" class="hidden" />
+
       <!-- Titre du formulaire -->
       <div class="mb-8 text-center">
         <h2 class="text-2xl font-bold text-gray-900 mb-2">Contactez-nous</h2>
@@ -111,21 +162,40 @@ const handleSubmit = async () => {
 
       <div class="space-y-6">
 
-        <!-- Sélecteur de type de demande -->
+        <!-- Sélecteur de type de demande (cartes) -->
         <div>
-          <label for="requestType" class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-gray-700 mb-3">
             Motif de votre message <span class="text-red-500">*</span>
           </label>
-          <select
-            v-model="formData.requestType"
-            id="requestType"
-            required
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 bg-white"
-          >
-            <option v-for="type in requestTypes" :key="type.value" :value="type.value" :disabled="type.value === ''">
-              {{ type.label }}
-            </option>
-          </select>
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              v-for="type in requestTypes"
+              :key="type.value"
+              type="button"
+              @click="formData.requestType = type.value"
+              :class="[
+                'relative flex flex-col items-center text-center p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer',
+                formData.requestType === type.value
+                  ? 'border-yellow-500 bg-yellow-50 shadow-md ring-1 ring-yellow-500'
+                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+              ]"
+            >
+              <span class="text-2xl mb-2">{{ type.icon }}</span>
+              <span class="text-sm font-semibold" :class="formData.requestType === type.value ? 'text-yellow-800' : 'text-gray-900'">
+                {{ type.label }}
+              </span>
+              <span class="text-xs mt-1 leading-tight" :class="formData.requestType === type.value ? 'text-yellow-700' : 'text-gray-500'">
+                {{ type.description }}
+              </span>
+              <!-- Indicateur de sélection -->
+              <div
+                v-if="formData.requestType === type.value"
+                class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center"
+              >
+                <Icon name="heroicons:check-16-solid" class="h-3 w-3 text-white" />
+              </div>
+            </button>
+          </div>
         </div>
 
         <!-- Champ Nom -->
@@ -137,6 +207,7 @@ const handleSubmit = async () => {
             v-model="formData.name"
             type="text" 
             id="name" 
+            name="name"
             required 
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400"
             placeholder="Votre nom complet"
@@ -152,6 +223,7 @@ const handleSubmit = async () => {
             v-model="formData.email"
             type="email" 
             id="email" 
+            name="email"
             required 
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400"
             placeholder="votre.email@exemple.com"
@@ -172,7 +244,8 @@ const handleSubmit = async () => {
               <input 
                 v-model="formData.eventName"
                 type="text" 
-                id="eventName" 
+                id="eventName"
+                name="eventName"
                 required
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400"
                 placeholder="Ex : Metal Fest Rennes 2026"
@@ -188,6 +261,7 @@ const handleSubmit = async () => {
                   v-model="formData.eventDate"
                   type="date" 
                   id="eventDate"
+                  name="eventDate"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200"
                 />
               </div>
@@ -199,6 +273,7 @@ const handleSubmit = async () => {
                   v-model="formData.eventVenue"
                   type="text" 
                   id="eventVenue"
+                  name="eventVenue"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400"
                   placeholder="Ex : Le Liberté, Rennes"
                 />
@@ -213,6 +288,7 @@ const handleSubmit = async () => {
                 v-model="formData.eventLink"
                 type="url" 
                 id="eventLink"
+                name="eventLink"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400"
                 placeholder="https://..."
               />
@@ -234,7 +310,8 @@ const handleSubmit = async () => {
               <input 
                 v-model="formData.venueName"
                 type="text" 
-                id="venueName" 
+                id="venueName"
+                name="venueName"
                 required
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400"
                 placeholder="Ex : Le Norulingus"
@@ -250,6 +327,7 @@ const handleSubmit = async () => {
                   v-model="formData.venueCity"
                   type="text" 
                   id="venueCity"
+                  name="venueCity"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400"
                   placeholder="Ex : Brest"
                 />
@@ -261,6 +339,7 @@ const handleSubmit = async () => {
                 <select
                   v-model="formData.venueDepartment"
                   id="venueDepartment"
+                  name="venueDepartment"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 bg-white"
                 >
                   <option value="">— Sélectionner —</option>
@@ -277,6 +356,7 @@ const handleSubmit = async () => {
                 v-model="formData.venueWebsite"
                 type="url" 
                 id="venueWebsite"
+                name="venueWebsite"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400"
                 placeholder="https://..."
               />
@@ -298,7 +378,8 @@ const handleSubmit = async () => {
               <input 
                 v-model="formData.bandName"
                 type="text" 
-                id="bandName" 
+                id="bandName"
+                name="bandName"
                 required
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400"
                 placeholder="Ex : Ar Braz"
@@ -313,6 +394,7 @@ const handleSubmit = async () => {
                 <select
                   v-model="formData.bandDepartment"
                   id="bandDepartment"
+                  name="bandDepartment"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 bg-white"
                 >
                   <option value="">— Sélectionner —</option>
@@ -327,6 +409,7 @@ const handleSubmit = async () => {
                   v-model="formData.bandStyle"
                   type="text" 
                   id="bandStyle"
+                  name="bandStyle"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400"
                   placeholder="Ex : Death Metal, Black Metal"
                 />
@@ -341,6 +424,7 @@ const handleSubmit = async () => {
                 v-model="formData.bandLink"
                 type="url" 
                 id="bandLink"
+                name="bandLink"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400"
                 placeholder="https://..."
               />
@@ -355,7 +439,8 @@ const handleSubmit = async () => {
           </label>
           <textarea 
             v-model="formData.message"
-            id="message" 
+            id="message"
+            name="message"
             required 
             rows="6"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-200 placeholder-gray-400 resize-vertical"
@@ -372,7 +457,7 @@ const handleSubmit = async () => {
         <div class="pt-4">
           <button 
             type="submit"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting || !formData.requestType"
             class="w-full bg-yellow-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             <Icon v-if="!isSubmitting" name="heroicons:paper-airplane" class="h-5 w-5" />
