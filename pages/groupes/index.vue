@@ -17,6 +17,7 @@ const query = groq`*[_type == "band"] {
   name,
   "slug": slug.current,
   pressPhoto,
+  departmentOfOrigin,
   // On récupère le tableau complet des styles liés
   // et pour chaque style, on prend son titre.
   "styles": styles[]->{title}
@@ -51,8 +52,19 @@ const alphabetFilters = [
   { label: '0 - 9', range: '0-9' }
 ];
 
-// 6. État du filtre actuel et recherche
+// 6. Configuration du filtrage par département
+const departmentFilters = [
+  { label: 'Tous', value: 'all' },
+  { label: 'Côtes-d\'Armor (22)', value: 'Côtes-d\'Armor (22)' },
+  { label: 'Finistère (29)', value: 'Finistère (29)' },
+  { label: 'Ille-et-Vilaine (35)', value: 'Ille-et-Vilaine (35)' },
+  { label: 'Loire-Atlantique (44)', value: 'Loire-Atlantique (44)' },
+  { label: 'Morbihan (56)', value: 'Morbihan (56)' },
+];
+
+// 7. État des filtres et recherche
 const currentFilter = ref('all');
+const currentDepartment = ref('all');
 const searchQuery = ref('');
 
 // 7. Fonction pour vérifier si un groupe correspond au filtre alphabétique
@@ -95,22 +107,42 @@ const matchesSearch = (bandName: string, query: string): boolean => {
   return normalizedBandName.includes(normalizedQuery);
 };
 
-// 9. Groupes filtrés (computed) - combine filtre alphabétique et recherche
+// 9. Fonction pour vérifier si un groupe correspond au filtre département
+const matchesDepartment = (band: any, department: string): boolean => {
+  if (department === 'all') return true;
+  if (!band.departmentOfOrigin || !Array.isArray(band.departmentOfOrigin)) return false;
+  return band.departmentOfOrigin.includes(department);
+};
+
+// 10. Groupes filtrés (computed) - combine filtre alphabétique, département et recherche
 const filteredBands = computed(() => {
   if (!bands.value) return [];
   return bands.value.filter(band => 
     matchesFilter(band.name, currentFilter.value) && 
+    matchesDepartment(band, currentDepartment.value) &&
     matchesSearch(band.name, searchQuery.value)
   );
 });
 
-// 10. Fonction pour changer le filtre alphabétique
+// 11. Fonction pour changer le filtre alphabétique
 const setFilter = (filterRange: string) => {
   currentFilter.value = filterRange;
 };
 
-// 11. Fonction pour réinitialiser la recherche
+// 12. Fonction pour changer le filtre département
+const setDepartment = (department: string) => {
+  currentDepartment.value = department;
+};
+
+// 13. Fonction pour réinitialiser la recherche
 const clearSearch = () => {
+  searchQuery.value = '';
+};
+
+// 14. Fonction pour réinitialiser tous les filtres
+const clearAllFilters = () => {
+  currentFilter.value = 'all';
+  currentDepartment.value = 'all';
   searchQuery.value = '';
 };
 </script>
@@ -166,8 +198,29 @@ const clearSearch = () => {
       </div>
     </div>
 
+    <!-- Barre de filtrage par département -->
+    <div class="mb-6">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Filtrer par département</h3>
+      <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
+        <button
+          v-for="dept in departmentFilters"
+          :key="dept.value"
+          @click="setDepartment(dept.value)"
+          :class="[
+            'px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm',
+            currentDepartment === dept.value
+              ? 'bg-yellow-500 text-white shadow-md'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-sm'
+          ]"
+        >
+          {{ dept.label }}
+        </button>
+      </div>
+    </div>
+
     <!-- Barre de filtrage alphabétique -->
     <div class="mb-8">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Filtrer par lettre</h3>
       <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
         <button
           v-for="filter in alphabetFilters"
@@ -186,27 +239,11 @@ const clearSearch = () => {
       
       <!-- Compteur de résultats -->
       <div class="mt-4 text-sm text-gray-600">
-        <span v-if="searchQuery && currentFilter === 'all'">
-          {{ filteredBands.length }} groupe{{ filteredBands.length > 1 ? 's' : '' }} trouvé{{ filteredBands.length > 1 ? 's' : '' }}
-        </span>
-        <span v-else-if="searchQuery">
-          {{ filteredBands.length }} groupe{{ filteredBands.length > 1 ? 's' : '' }} trouvé{{ filteredBands.length > 1 ? 's' : '' }}
-          {{ currentFilter === 'a-c' ? ' (A à C)' : '' }}
-          {{ currentFilter === 'd-h' ? ' (D à H)' : '' }}
-          {{ currentFilter === 'i-p' ? ' (I à P)' : '' }}
-          {{ currentFilter === 'q-z' ? ' (Q à Z)' : '' }}
-          {{ currentFilter === '0-9' ? ' (chiffres)' : '' }}
-        </span>
-        <span v-else-if="currentFilter === 'all'">
+        <span v-if="currentFilter === 'all' && currentDepartment === 'all' && !searchQuery">
           {{ bands?.length || 0 }} groupe{{ (bands?.length || 0) > 1 ? 's' : '' }} au total
         </span>
         <span v-else>
-          {{ filteredBands.length }} groupe{{ filteredBands.length > 1 ? 's' : '' }} 
-          {{ currentFilter === 'a-c' ? 'de A à C' : '' }}
-          {{ currentFilter === 'd-h' ? 'de D à H' : '' }}
-          {{ currentFilter === 'i-p' ? 'de I à P' : '' }}
-          {{ currentFilter === 'q-z' ? 'de Q à Z' : '' }}
-          {{ currentFilter === '0-9' ? 'commençant par un chiffre' : '' }}
+          {{ filteredBands.length }} groupe{{ filteredBands.length > 1 ? 's' : '' }} trouvé{{ filteredBands.length > 1 ? 's' : '' }}
         </span>
       </div>
     </div>
@@ -221,25 +258,17 @@ const clearSearch = () => {
     </div>
     
     <!-- Message si aucun groupe dans le filtre/recherche -->
-    <div v-else-if="searchQuery || currentFilter !== 'all'" class="text-center py-12">
+    <div v-else-if="searchQuery || currentFilter !== 'all' || currentDepartment !== 'all'" class="text-center py-12">
       <p class="text-gray-500 text-lg">
         <span v-if="searchQuery">Aucun groupe trouvé pour "{{ searchQuery }}"</span>
-        <span v-else>Aucun groupe trouvé pour cette sélection alphabétique.</span>
+        <span v-else>Aucun groupe trouvé pour cette sélection.</span>
       </p>
       <div class="mt-4 space-x-4">
         <button 
-          v-if="searchQuery"
-          @click="clearSearch"
+          @click="clearAllFilters"
           class="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
         >
-          Effacer la recherche
-        </button>
-        <button 
-          v-if="currentFilter !== 'all'"
-          @click="setFilter('all')"
-          class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-        >
-          Voir tous les groupes
+          Réinitialiser les filtres
         </button>
       </div>
     </div>

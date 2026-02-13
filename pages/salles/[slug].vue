@@ -29,22 +29,20 @@ interface RelatedPost {
   author: string
 }
 
-interface UpcomingEvent {
+interface VenueEvent {
   _id: string
   title: string
   slug: string
-  date: string
+  date?: string
+  dateInfo?: {
+    eventDuration: 'single' | 'multiple'
+    singleDate?: string
+    startDate?: string
+    endDate?: string
+  }
   poster?: { asset: { _ref: string } }
   status?: string
   eventType?: string
-  venue?: {
-    venueType: string
-    venueText?: string
-    venueDetails?: {
-      name: string
-      city: string
-    }
-  }
 }
 
 const query = groq`*[_type == "venue" && slug.current == $slug][0] {
@@ -69,27 +67,8 @@ const relatedPostsQuery = groq`*[_type == "post" && relatedVenue._ref == $venueI
   "author": author->name
 }`;
 
-// Requête pour les prochains événements dans cette salle
-const upcomingEventsQuery = groq`*[_type == "event" && venue.venueReference._ref == $venueId && date >= now()] | order(date asc) [0...6] {
-  _id,
-  title,
-  "slug": slug.current,
-  date,
-  poster,
-  status,
-  "eventType": eventType->title,
-  venue {
-    venueType,
-    venueText,
-    "venueDetails": venueReference->{
-      name,
-      city
-    }
-  }
-}`;
-
-// Requête pour tous les événements dans cette salle (du plus récent au plus éloigné)
-const allEventsQuery = groq`*[_type == "event" && venue.venueReference._ref == $venueId] | order(dateInfo.singleDate asc, dateInfo.startDate asc, date asc) [0...20] {
+// Requête unique pour tous les événements dans cette salle (avec support dateInfo)
+const venueEventsQuery = groq`*[_type == "event" && venue.venueReference._ref == $venueId] | order(coalesce(dateInfo.singleDate, dateInfo.startDate, date) asc) {
   _id,
   title,
   "slug": slug.current,
@@ -97,15 +76,7 @@ const allEventsQuery = groq`*[_type == "event" && venue.venueReference._ref == $
   dateInfo,
   poster,
   status,
-  "eventType": eventType->title,
-  venue {
-    venueType,
-    venueText,
-    "venueDetails": venueReference->{
-      name,
-      city
-    }
-  }
+  "eventType": eventType->title
 }`;
 
 const { data: venue } = await useSanityQuery<Venue>(query, { slug: route.params.slug });
@@ -115,14 +86,46 @@ const { data: relatedPosts } = await useSanityQuery<RelatedPost[]>(relatedPostsQ
   venueId: venue.value?._id || '' 
 });
 
-// Requête pour les prochains événements dans cette salle
-const { data: upcomingEvents } = await useSanityQuery<UpcomingEvent[]>(upcomingEventsQuery, { 
+// Requête pour tous les événements dans cette salle
+const { data: venueEvents } = await useSanityQuery<VenueEvent[]>(venueEventsQuery, { 
   venueId: venue.value?._id || '' 
 });
 
-// Requête pour tous les événements dans cette salle
-const { data: allEvents } = await useSanityQuery<UpcomingEvent[]>(allEventsQuery, { 
-  venueId: venue.value?._id || '' 
+// Date du jour pour séparer futurs / passés
+const today = new Date().toISOString().split('T')[0];
+
+// Helper : extraire la date comparable d'un événement
+const getEventDate = (event: VenueEvent): string => {
+  if (event.dateInfo?.eventDuration === 'single' && event.dateInfo?.singleDate) {
+    return event.dateInfo.singleDate.split('T')[0];
+  }
+  if (event.dateInfo?.eventDuration === 'multiple' && event.dateInfo?.endDate) {
+    return event.dateInfo.endDate;
+  }
+  if (event.date) {
+    return event.date.split('T')[0];
+  }
+  return '';
+};
+
+// Événements à venir (date >= aujourd'hui)
+const upcomingEvents = computed(() => {
+  if (!venueEvents.value) return [];
+  return venueEvents.value.filter(e => getEventDate(e) >= today);
+});
+
+// Événements passés (date < aujourd'hui), du plus récent au plus ancien
+const pastEvents = computed(() => {
+  if (!venueEvents.value) return [];
+  return venueEvents.value.filter(e => getEventDate(e) < today).reverse();
+});
+
+// Toggle pour afficher passé / futur
+const showPastEvents = ref(false);
+
+// Liste affichée selon le toggle
+const displayedEvents = computed(() => {
+  return showPastEvents.value ? pastEvents.value : upcomingEvents.value;
 });
 
 // Une fonction pour formater le nom du département (pour l'affichage)
@@ -138,40 +141,27 @@ const departmentName = computed(() => {
   return departments[venue.value.department] || '';
 });
 
-// Fonction pour formater la date des événements (même format que dans /evenements/index.vue)
-const formatEventDate = (dateString: string) => {
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: 'long', // 'samedi'
-    year: 'numeric', // '2025'
-    month: 'long',   // 'décembre'
-    day: 'numeric',    // '25'
-  };
-  return new Date(dateString).toLocaleDateString('fr-FR', options);
-};
-
-// Fonction pour formater la date des événements avec la nouvelle structure
-const formatEventDateNew = (event: any) => {
-  let dateToFormat = '';
-  
-  // Gestion de la nouvelle structure dateInfo
-  if (event.dateInfo?.eventDuration === 'single' && event.dateInfo?.singleDate) {
-    dateToFormat = event.dateInfo.singleDate;
-  } else if (event.dateInfo?.eventDuration === 'multiple' && event.dateInfo?.startDate) {
-    dateToFormat = event.dateInfo.startDate;
-  } else if (event.date) {
-    // Fallback pour l'ancienne structure
-    dateToFormat = event.date;
-  }
-  
-  if (!dateToFormat) return 'Date non définie';
-  
+// Fonction pour formater la date des événements (gère dateInfo + ancien format)
+const formatEventDate = (event: VenueEvent) => {
   const options: Intl.DateTimeFormatOptions = {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   };
-  return new Date(dateToFormat).toLocaleDateString('fr-FR', options);
+  
+  if (event.dateInfo?.eventDuration === 'single' && event.dateInfo?.singleDate) {
+    return new Date(event.dateInfo.singleDate).toLocaleDateString('fr-FR', options);
+  }
+  if (event.dateInfo?.eventDuration === 'multiple' && event.dateInfo?.startDate && event.dateInfo?.endDate) {
+    const start = new Date(event.dateInfo.startDate).toLocaleDateString('fr-FR', options);
+    const end = new Date(event.dateInfo.endDate).toLocaleDateString('fr-FR', options);
+    return `${start} - ${end}`;
+  }
+  if (event.date) {
+    return new Date(event.date).toLocaleDateString('fr-FR', options);
+  }
+  return 'Date non définie';
 };
 
 // Variable pour détecter l'environnement de développement
@@ -273,17 +263,48 @@ useSeoMeta({
           </a>
         </div>
 
-        <!-- Prochains événements -->
-        <div v-if="upcomingEvents && Array.isArray(upcomingEvents) && upcomingEvents.length > 0" class="mt-12">
-          <h2 class="text-xl font-bold mb-6">Prochains événements</h2>
-          <ul class="space-y-2">
-            <li v-for="event in upcomingEvents" :key="event._id">
+        <!-- Événements de cette salle -->
+        <div v-if="venueEvents && venueEvents.length > 0" class="mt-12">
+          <!-- Titre + Toggle -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h2 class="text-xl font-bold">
+              {{ showPastEvents ? 'Événements passés' : 'Prochains événements' }}
+            </h2>
+            <div class="flex gap-2">
+              <button
+                @click="showPastEvents = false"
+                :class="[
+                  'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                  !showPastEvents
+                    ? 'bg-yellow-500 text-white shadow-md'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ]"
+              >
+                À venir ({{ upcomingEvents.length }})
+              </button>
+              <button
+                @click="showPastEvents = true"
+                :class="[
+                  'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                  showPastEvents
+                    ? 'bg-yellow-500 text-white shadow-md'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ]"
+              >
+                Passés ({{ pastEvents.length }})
+              </button>
+            </div>
+          </div>
+
+          <!-- Liste des événements -->
+          <ul v-if="displayedEvents.length > 0" class="space-y-2">
+            <li v-for="event in displayedEvents" :key="event._id">
               <NuxtLink
                 :to="`/evenements/${event.slug}`"
                 class="flex flex-col sm:flex-row sm:items-center gap-x-6 gap-y-1 p-4 bg-white border border-transparent rounded-lg hover:bg-yellow-50 hover:border-yellow-400 transition-all duration-200"
               >
                 <span class="text-sm font-semibold text-yellow-600 uppercase tracking-wider">
-                  {{ formatEventDate(event.date) }}
+                  {{ formatEventDate(event) }}
                 </span>
                 <span class="text-xl font-bold text-gray-900">
                   {{ event.title }}
@@ -292,19 +313,13 @@ useSeoMeta({
                   <span v-if="event.eventType" class="inline-block bg-gray-200 text-center text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
                     {{ event.eventType }}
                   </span>
-                  <span v-if="event.venue" class="text-sm text-gray-600 flex items-center">
-                    <Icon name="heroicons:map-pin" class="h-4 w-4 inline mr-1" />
-                    <span v-if="event.venue.venueType === 'reference' && event.venue.venueDetails">
-                      {{ event.venue.venueDetails.name }}, {{ event.venue.venueDetails.city }}
-                    </span>
-                    <span v-else-if="event.venue.venueType === 'text'">
-                      {{ event.venue.venueText }}
-                    </span>
-                  </span>
                 </div>
               </NuxtLink>
             </li>
           </ul>
+          <p v-else class="text-gray-500 py-4">
+            {{ showPastEvents ? 'Aucun événement passé.' : 'Aucun événement à venir pour le moment.' }}
+          </p>
         </div>
 
         <!-- Articles connexes -->
@@ -323,42 +338,7 @@ useSeoMeta({
         <!-- 5. AUTEUR : Bloc réutilisé -->
         <AuthorSection :author="venue.author" class="mt-8" />
 
-        <!-- Nouvelle section : Tous les événements -->
-        <div v-if="allEvents && Array.isArray(allEvents) && allEvents.length > 0" class="mt-12">
-          <h2 class="text-xl font-bold mb-6">Prochains Événements</h2>
-          <div class="space-y-3">
-            <div v-for="event in allEvents" :key="event._id">
-              <NuxtLink
-                :to="`/evenements/${event.slug}`"
-                class="flex flex-col sm:flex-row sm:items-center gap-x-6 gap-y-1 p-4 bg-white border border-transparent rounded-lg hover:bg-yellow-50 hover:border-yellow-400 transition-all duration-200"
-              >
-                <span class="text-sm font-semibold text-yellow-600 uppercase tracking-wider">
-                  {{ formatEventDateNew(event) }}
-                </span>
-                <span class="text-xl font-bold text-gray-900">
-                  {{ event.title }}
-                </span>
-                <div class="flex flex-wrap gap-2 items-center">
-                  <span v-if="event.eventType" class="inline-block bg-gray-200 text-center text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
-                    {{ event.eventType }}
-                  </span>
-                </div>
-              </NuxtLink>
-            </div>
-          </div>
-        </div>
 
-
-        <!-- Debug section (temporaire) -->
-        <!-- <div v-if="isDevelopment" class="mb-12 p-4 bg-gray-100 rounded-lg">
-          <h3 class="font-bold text-lg mb-2">🐛 Debug - Événements</h3>
-          <p class="text-sm text-gray-600 mb-2">Venue ID: {{ venue._id }}</p>
-          <p class="text-sm text-gray-600 mb-2">Événements pour cette salle: {{ upcomingEvents?.length || 0 }}</p>
-          <details v-if="upcomingEvents && upcomingEvents.length > 0" class="mt-2">
-            <summary class="text-sm text-green-600 cursor-pointer">Voir les événements</summary>
-            <pre class="text-xs mt-2 p-2 bg-white overflow-auto max-h-64">{{ JSON.stringify(upcomingEvents, null, 2) }}</pre>
-          </details>
-        </div> -->
 
 
 
