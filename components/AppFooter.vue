@@ -4,15 +4,11 @@ const sceneLocaleItems = [
   { label: 'Salles', to: '/salles' },
   { label: 'Festivals', to: '/festivals' }
 ];
-const chroniquesItems = [
-  { label: 'News', to: '/chroniques/news' },
-  { label: 'Live Report', to: '/chroniques/live-report' },
-  { label: 'Interviews', to: '/chroniques/interviews' }
-];
 const autresItems = [
   { label: 'Agenda', to: '/evenements' },
   { label: 'À Propos', to: '/a-propos' },
-  { label: 'Contact', to: '/contact' }
+  { label: 'Contact', to: '/contact' },
+  { label: 'News', to: '/chroniques/news' }
 ];
 const legalItems = [
   { label: 'Mentions Légales', to: '/mentions-legales' },
@@ -33,7 +29,7 @@ const legalItems = [
             <span class="font-bold text-white text-lg">Breizh Metal</span>
           </NuxtLink>
           <p class="text-sm max-w-sm">
-            Le portail de la scène metal en Bretagne. Chroniques, interviews, agenda des concerts et fiches des groupes et salles locales.
+            Le portail de la scène metal en Bretagne. Agenda des concerts, news, et fiches des groupes et salles locales.
           </p>
         </div>
 
@@ -44,15 +40,6 @@ const legalItems = [
               <h3 class="font-semibold text-white tracking-wider uppercase mb-4 text-sm">Scène Locale</h3>
               <ul class="space-y-2">
                 <li v-for="item in sceneLocaleItems" :key="item.label">
-                  <NuxtLink :to="item.to" class="hover:text-white transition-colors text-sm">{{ item.label }}</NuxtLink>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 class="font-semibold text-white tracking-wider uppercase mb-4 text-sm">Chroniques</h3>
-              <ul class="space-y-2">
-                <li v-for="item in chroniquesItems" :key="item.label">
                   <NuxtLink :to="item.to" class="hover:text-white transition-colors text-sm">{{ item.label }}</NuxtLink>
                 </li>
               </ul>

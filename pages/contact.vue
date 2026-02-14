@@ -27,24 +27,23 @@ const contactEmail = 'contact@breizhmetal.bzh';
           <p>
             Avant de nous contacter, sachez que nous lisons attentivement chaque message. Nous sommes une petite équipe de passionnés, alors un peu de patience est parfois nécessaire, mais chaque mail reçoit une réponse.
           </p>
-          <p>
-            Que ce soit pour partager une découverte, annoncer un concert, suggérer une interview ou simplement échanger, n'hésitez pas. Toutes les contributions sont les bienvenues.
-          </p>
         </div>
         
         <div class="mt-12 mb-12">
           <h3 class="text-lg font-semibold text-gray-500 uppercase tracking-widest">
-            Nous écrire
+            Organisateurs de concerts
           </h3>
+          <p class="mt-4 text-gray-700">
+            Si vous souhaitez nous prévenir d’une date dont nous ne serions pas au courant, merci de nous écrire à l’adresse ci-dessous. Veuillez noter qu’il est impératif qu’au moins un groupe breton soit à l’affiche.
+          </p>
           <a 
             :href="`mailto:${contactEmail}`" 
-            class="mt-2 inline-block text-2xl md:text-3xl font-bold text-yellow-600 hover:text-yellow-700 transition-colors duration-300 group"
+            class="mt-4 inline-block text-2xl md:text-3xl font-bold text-yellow-600 hover:text-yellow-700 transition-colors duration-300 group"
           >
             <span>{{ contactEmail }}</span>
             <div class="mt-1 h-0.5 bg-yellow-600 w-0 group-hover:w-full transition-all duration-300"></div>
           </a>
         </div>
-        <ContactForm />
 
       </div>
 

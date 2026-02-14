@@ -66,6 +66,12 @@ const applyMarks = (text: string, marks: string[], markDefs: any[]) => {
   if (marks.includes('em')) {
     result = `<em>${result}</em>`;
   }
+  if (marks.includes('underline')) {
+    result = `<u>${result}</u>`;
+  }
+  if (marks.includes('strike-through')) {
+    result = `<s>${result}</s>`;
+  }
   
   // Gestion des liens
   marks.forEach(mark => {
