@@ -107,7 +107,20 @@ const { data: festivalEvents } = await useSanityQuery<FestivalEvent[]>(
 // Configuration SEO dynamique
 useSeoMeta({
   title: () => festival.value ? `${festival.value.name} - Festivals - Breizh Metal` : 'Festival - Breizh Metal',
-  description: () => festival.value?.description || 'Découvrez ce festival de metal'
+  description: () => sanityBlockToText(festival.value?.description) || 'Découvrez ce festival de metal sur Breizh Metal',
+  ogTitle: () => festival.value?.name || 'Festival - Breizh Metal',
+  ogDescription: () => sanityBlockToText(festival.value?.description) || 'Découvrez ce festival de metal sur Breizh Metal',
+  ogImage: () => {
+    if (festival.value?.mainImage?.asset?._ref) {
+      return sanityImageUrl(festival.value.mainImage.asset._ref);
+    }
+    if (festival.value?.logo?.asset?._ref) {
+      return sanityImageUrl(festival.value.logo.asset._ref);
+    }
+    return 'https://breizhmetal.bzh/BM-logo-large.png';
+  },
+  ogUrl: () => `https://breizhmetal.bzh/festivals/${route.params.slug}`,
+  twitterCard: 'summary_large_image'
 });
 
 // Fonctions utilitaires

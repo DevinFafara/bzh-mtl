@@ -309,10 +309,10 @@ useSeoMeta({
   },
   ogImage: () => {
     if (event.value?.poster?.asset?._ref) {
-      return event.value.poster.asset._ref;
+      return sanityImageUrl(event.value.poster.asset._ref);
     }
     if (event.value?.festival?.mainImage?.asset?._ref) {
-      return event.value.festival.mainImage.asset._ref;
+      return sanityImageUrl(event.value.festival.mainImage.asset._ref);
     }
     return 'https://breizhmetal.bzh/BM-logo-large.png';
   },

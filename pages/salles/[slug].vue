@@ -229,7 +229,7 @@ useSeoMeta({
   },
   ogImage: () => {
     if (venue.value?.image?.asset?._ref) {
-      return venue.value.image.asset._ref;
+      return sanityImageUrl(venue.value.image.asset._ref);
     }
     return 'https://breizhmetal.bzh/BM-logo-large.png';
   },

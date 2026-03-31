@@ -266,10 +266,10 @@ useSeoMeta({
   },
   ogImage: () => {
     if (band.value?.pressPhoto?.asset?._ref) {
-      return band.value.pressPhoto.asset._ref;
+      return sanityImageUrl(band.value.pressPhoto.asset._ref);
     }
     if (band.value?.logoImage?.asset?._ref) {
-      return band.value.logoImage.asset._ref;
+      return sanityImageUrl(band.value.logoImage.asset._ref);
     }
     return 'https://breizhmetal.bzh/BM-logo-large.png';
   },
