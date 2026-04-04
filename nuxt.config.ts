@@ -37,14 +37,14 @@ export default defineNuxtConfig({
     }
   },
   
-  // Configuration Nitro pour Netlify avec fonctions personnalisées
+  // Configuration Nitro pour Netlify
   nitro: {
     preset: 'netlify',
     experimental: {
       wasm: false
     },
     prerender: {
-      crawlLinks: true,
+      crawlLinks: false,
       routes: [
         '/',
         '/a-propos',
@@ -54,18 +54,31 @@ export default defineNuxtConfig({
         '/contact',
         '/scene-locale',
         '/merci',
-        '/recherche',
-        '/articles',
-        '/groupes',
-        '/evenements',
-        '/festivals',
-        '/salles',
         '/chroniques/album-review',
         '/chroniques/interviews',
         '/chroniques/live-report',
         '/chroniques/news',
       ]
     }
+  },
+
+  // Pages dynamiques Sanity : SWR (cache 10 min, rafraîchi en arrière-plan)
+  // La première visite génère la page, les suivantes reçoivent le cache.
+  // Le contenu publié dans Sanity apparaît automatiquement après 10 minutes max.
+  routeRules: {
+    '/articles/**': { swr: 600 },
+    '/groupes/**': { swr: 600 },
+    '/evenements/**': { swr: 600 },
+    '/festivals/**': { swr: 600 },
+    '/salles/**': { swr: 600 },
+    '/styles/**': { swr: 600 },
+    '/auteurs/**': { swr: 600 },
+    '/articles': { swr: 600 },
+    '/groupes': { swr: 600 },
+    '/evenements': { swr: 600 },
+    '/festivals': { swr: 600 },
+    '/salles': { swr: 600 },
+    '/recherche': { swr: 60 },
   },
   
   modules: [
@@ -177,50 +190,4 @@ export default defineNuxtConfig({
     }
   },
 
-  hooks: {
-    async 'nitro:config'(nitroConfig) {
-      if (nitroConfig.dev) return
-
-      if (!process.env.SANITY_PROJECT_ID) {
-        console.warn('[prerender] SANITY_PROJECT_ID manquant, routes dynamiques non générées')
-        return
-      }
-
-      const { createClient } = await import('@sanity/client')
-      const client = createClient({
-        projectId: process.env.SANITY_PROJECT_ID,
-        dataset: 'production',
-        useCdn: true,
-        apiVersion: '2024-03-07'
-      })
-
-      const [bands, articles, events, venues, styles, festivals, authors] = await Promise.all([
-        client.fetch(`*[_type == "band" && defined(slug.current) && !(_id in path('drafts.**'))].slug.current`),
-        client.fetch(`*[_type == "post" && defined(slug.current) && !(_id in path('drafts.**'))].slug.current`),
-        client.fetch(`*[_type == "event" && defined(slug.current) && !(_id in path('drafts.**'))].slug.current`),
-        client.fetch(`*[_type == "venue" && defined(slug.current) && !(_id in path('drafts.**'))].slug.current`),
-        client.fetch(`*[_type == "style" && defined(slug.current) && !(_id in path('drafts.**'))].slug.current`),
-        client.fetch(`*[_type == "festival" && defined(slug.current) && !(_id in path('drafts.**'))].slug.current`),
-        client.fetch(`*[_type == "author" && defined(slug.current) && !(_id in path('drafts.**'))].slug.current`)
-      ])
-
-      const dynamicRoutes = [
-        ...bands.map((slug: string) => `/groupes/${slug}`),
-        ...articles.map((slug: string) => `/articles/${slug}`),
-        ...events.map((slug: string) => `/evenements/${slug}`),
-        ...venues.map((slug: string) => `/salles/${slug}`),
-        ...styles.map((slug: string) => `/styles/${slug}`),
-        ...festivals.map((slug: string) => `/festivals/${slug}`),
-        ...authors.map((slug: string) => `/auteurs/${slug}`)
-      ]
-
-      nitroConfig.prerender = nitroConfig.prerender || {}
-      nitroConfig.prerender.routes = [
-        ...(nitroConfig.prerender.routes as string[] || []),
-        ...dynamicRoutes
-      ]
-
-      console.log(`[prerender] ${dynamicRoutes.length} routes Sanity ajoutées au prerender`)
-    }
-  }
 })
