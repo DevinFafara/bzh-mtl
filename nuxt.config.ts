@@ -46,18 +46,12 @@ export default defineNuxtConfig({
     prerender: {
       crawlLinks: false,
       routes: [
-        '/',
         '/a-propos',
         '/cgu',
         '/mentions-legales',
         '/credits',
         '/contact',
-        '/scene-locale',
         '/merci',
-        '/chroniques/album-review',
-        '/chroniques/interviews',
-        '/chroniques/live-report',
-        '/chroniques/news',
       ]
     }
   },
@@ -66,6 +60,12 @@ export default defineNuxtConfig({
   // La première visite génère la page, les suivantes reçoivent le cache.
   // Le contenu publié dans Sanity apparaît automatiquement après 10 minutes max.
   routeRules: {
+    '/': { swr: 600 },
+    '/scene-locale': { swr: 600 },
+    '/chroniques/album-review': { swr: 600 },
+    '/chroniques/interviews': { swr: 600 },
+    '/chroniques/live-report': { swr: 600 },
+    '/chroniques/news': { swr: 600 },
     '/articles/**': { swr: 600 },
     '/groupes/**': { swr: 600 },
     '/evenements/**': { swr: 600 },
