@@ -105,6 +105,11 @@ const nextPage = () => {
 
 <template>
   <div class="container mx-auto p-4 md:p-8">
+    <!-- Bannière partenaire -->
+    <div class="mb-8">
+      <PromoBanner />
+    </div>
+
     <h1 class="text-2xl md:text-4xl font-bold mb-8">News</h1>
     <p class="text-lg text-gray-600 mb-12">Dernières nouvelles de la scène Metal / Punk / Hardcore.</p>
 
