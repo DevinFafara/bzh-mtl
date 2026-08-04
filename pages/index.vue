@@ -125,21 +125,26 @@ onMounted(() => {
     <section class="relative bg-stone-900 text-white overflow-hidden">
       <!-- Logo principal en tant que H1 -->
       <h1 class="flex items-center justify-center opacity-100">
-        <img 
-          src="/main-logo.svg" 
-          alt="Breizh Metal - Le portail de la scène metal bretonne" 
+        <img
+          src="/main-logo.svg"
+          alt="Breizh Metal - Le portail de la scène metal bretonne"
           class="w-full max-w-[500px] h-auto object-contain"
           width="500"
           height="200"
           fetchpriority="high"
         />
       </h1>
-    
+
     </section>
+
+    <!-- Bannière partenaire -->
+    <div class="bg-white p-4 md:p-6 mb-6">
+      <PromoBanner />
+    </div>
 
     <!-- Contenu principal -->
     <main class="container mx-auto px-4 py-8 md:py-12">
-      
+
       <!-- Section d'introduction -->
             <!-- Section d'introduction -->
       <section class="mb-12 text-center">

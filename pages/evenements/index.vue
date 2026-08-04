@@ -176,6 +176,11 @@ const sortedMonths = computed(() => {
 
 <template>
   <div class="container mx-auto p-4 md:p-8">
+    <!-- Bannière partenaire -->
+    <div class="mb-8">
+      <PromoBanner />
+    </div>
+
     <h1 class="text-2xl md:text-4xl font-extrabold border-b pb-4">Agenda</h1>
     <p v-if="filteredEvents && filteredEvents.length > 0" class="mt-2 mb-4 text-gray-500">
       {{ filteredEvents.length }} événement{{ filteredEvents.length > 1 ? 's' : '' }} à venir {{ locationLabel }}
