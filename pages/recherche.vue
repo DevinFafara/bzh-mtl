@@ -40,12 +40,28 @@ const errorDetails = ref<ErrorDetails | null>(null);
 // On utilise watchEffect pour réagir aux changements de l'URL
 const searchTerm = ref<string>((route.query.q as string) || '');
 
-// La requête GROQ pour la recherche multi-types avec champs spécifiques
-const query = groq`
-  *[_type in ["post", "band", "event", "venue"] && (
-    title match "*" + $term + "*" || 
-    name match "*" + $term + "*"
-  )] | order(_createdAt desc) [0...20] {
+// Retire les accents/diacritiques et met en minuscule, pour que "Otztal" trouve "Ötztal" et inversement
+// (l'opérateur GROQ "match" ne fait pas cette équivalence).
+const normalizeForSearch = (value: string): string => {
+  return (value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+};
+
+// 1er temps : liste légère (juste le texte à comparer) de tous les documents cherchables
+const candidatesQuery = groq`
+  *[_type in ["post", "band", "event", "venue"]] {
+    _type,
+    _id,
+    _createdAt,
+    "searchText": coalesce(title, name)
+  }
+`;
+
+// 2e temps : détails complets, uniquement pour les documents retenus après comparaison en JS
+const detailsQuery = groq`
+  *[_id in $ids] | order(_createdAt desc) {
     _type,
     _id,
     "title": coalesce(title, name),
@@ -78,10 +94,7 @@ const query = groq`
       date,
       "image": coalesce(image, mainImage),
       "venue": venue->{name}
-    },
-    // Debug info
-    "rawTitle": title,
-    "rawName": name
+    }
   }
 `;
 
@@ -90,7 +103,7 @@ const performSearch = async (): Promise<SearchResult[]> => {
   try {
     debugInfo.value = {
       searchTerm: searchTerm.value,
-      queryExecuted: query,
+      queryExecuted: candidatesQuery,
       timestamp: new Date().toISOString()
     };
 
@@ -99,8 +112,20 @@ const performSearch = async (): Promise<SearchResult[]> => {
     }
 
     const sanity = useSanity();
-    const results = await sanity.fetch<SearchResult[]>(query, { term: searchTerm.value.trim() });
-    
+    const termNormalized = normalizeForSearch(searchTerm.value.trim());
+
+    const candidates = await sanity.fetch<Array<{ _type: string; _id: string; _createdAt: string; searchText?: string }>>(candidatesQuery);
+
+    const matchedIds = (candidates || [])
+      .filter((c) => normalizeForSearch(c.searchText || '').includes(termNormalized))
+      .sort((a, b) => new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime())
+      .slice(0, 20)
+      .map((c) => c._id);
+
+    const results = matchedIds.length
+      ? await sanity.fetch<SearchResult[]>(detailsQuery, { ids: matchedIds })
+      : [];
+
     debugInfo.value = {
       ...debugInfo.value,
       resultsCount: results?.length || 0,
@@ -113,7 +138,7 @@ const performSearch = async (): Promise<SearchResult[]> => {
     errorDetails.value = {
       message: err?.message || 'Erreur inconnue',
       stack: err?.stack,
-      query: query,
+      query: candidatesQuery,
       searchTerm: searchTerm.value
     };
     
