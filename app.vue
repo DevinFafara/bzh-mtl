@@ -23,7 +23,21 @@ if (process.client && config.public.cloudflareToken) {
     <AppHeader />
 
     <main class="relative">
-      <PartnerSideRails />
+      <!-- Suspense explicite : évite un flash à l'hydratation le temps que le
+           composant (async, données Sanity) se résolve côté client.
+           Transition en fondu pour lisser l'apparition une fois résolu. -->
+      <Suspense>
+        <template #default>
+          <Transition
+            enter-active-class="transition-opacity duration-500"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+          >
+            <PartnerSideRails />
+          </Transition>
+        </template>
+        <template #fallback><span /></template>
+      </Suspense>
       <div class="max-w-5xl mx-auto bg-white shadow-lg pb-20">
         <NuxtPage />
       </div>
