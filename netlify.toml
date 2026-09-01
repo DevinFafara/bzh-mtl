@@ -30,6 +30,42 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/blog/*"
+  to = "/favicon.ico"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/wp-admin/*"
+  to = "/favicon.ico"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/wp-login.php"
+  to = "/favicon.ico"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/wp-content/*"
+  to = "/favicon.ico"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/wp-json/*"
+  to = "/favicon.ico"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/xmlrpc.php"
+  to = "/favicon.ico"
+  status = 404
+  force = true
+
 # Note: 
 # - Les fonctions personnalisées sont dans netlify/functions/ (configuré ci-dessus)
 # - Avec preset netlify, Nuxt génère automatiquement les redirections nécessaires
