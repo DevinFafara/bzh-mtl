@@ -1,3 +1,11 @@
+// Vidéos à exclure manuellement : cas d'homonymie détectés (groupe différent du même nom
+// filmé par Bruno Guézennec, non lié au groupe de la fiche Sanity correspondante)
+const EXCLUDED_VIDEOS: { bandName: string; videoId: string }[] = [
+  // "Unsafe : titres en description [Live Heavy Metal Breizh Festival (56) - samedi 15 février 2025]"
+  // -> autre groupe "Unsafe", sans rapport avec le groupe hardcore/Nantes de la fiche du site
+  { bandName: 'unsafe', videoId: 'DeWvtnwJXUM' },
+]
+
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const bandName = query.band as string
@@ -143,7 +151,15 @@ export default defineEventHandler(async (event) => {
           matches = isValidMatch(titleLower, bandWithDashes)
         }
         
-        return matches
+        if (!matches) return false
+
+        // Exclure les vidéos identifiées comme homonymes
+        const isExcluded = EXCLUDED_VIDEOS.some(
+          (excluded) => excluded.bandName === bandNameLower && excluded.videoId === video.videoId
+        )
+        if (isExcluded) return false
+
+        return true
       })
       .map((video: any) => ({
         id: video.videoId,
